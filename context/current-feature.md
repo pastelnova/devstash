@@ -1,27 +1,32 @@
 # Current Feature
 
-Dashboard UI Phase 3
+<!-- Feature Name -->
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
 
-- 4 stats cards at the top (total items, collections, favorite items, favorite collections)
-- Recent collections section
-- Pinned items section
-- 10 recent items section
-- Use mock data from `src/lib/mock-data.js` directly
+<!-- Goals & requirements -->
 
 ## Notes
 
-- Reference screenshot: `context/screenshots/dashboard-ui-main.png`
-- Full spec: `context/features/dashboard-phase-3-spec.md`
+<!-- Any extra notes -->
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+### 2026-03-30 — Dashboard UI Phase 3
+
+- Added 4 stats cards (`src/components/dashboard/StatsCards.tsx`) for total items, collections, favorite items, and favorite collections
+- Built collections grid (`src/components/dashboard/CollectionsSection.tsx`) with 3-column layout, star badge, item count, description, and type icons
+- Created reusable `ItemRow.tsx` with colored type icon circle, title, description, tags, and date
+- Added pinned items section (`src/components/dashboard/PinnedItems.tsx`) using `isPinned` flag
+- Added recent items section (`src/components/dashboard/RecentItems.tsx`) sorted by date, capped at 10
+- Updated `page.tsx` with full dashboard layout: heading, stats, collections, pinned, recent
+- All data sourced from `src/lib/mock-data.ts`
 
 ### 2026-03-30 — Dashboard UI Phase 2
 
