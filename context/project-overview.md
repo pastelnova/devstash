@@ -9,16 +9,16 @@
 
 Developers scatter their essentials across too many places:
 
-| Where it lives | What's stored |
-|---|---|
-| VS Code / Notion | Code snippets |
-| AI chat history | Prompts & workflows |
-| Project folders | Context files |
-| Browser bookmarks | Useful links |
-| Random folders | Docs & references |
-| `.txt` files | Terminal commands |
-| GitHub Gists | Project templates |
-| Bash history | One-off commands |
+| Where it lives    | What's stored       |
+| ----------------- | ------------------- |
+| VS Code / Notion  | Code snippets       |
+| AI chat history   | Prompts & workflows |
+| Project folders   | Context files       |
+| Browser bookmarks | Useful links        |
+| Random folders    | Docs & references   |
+| `.txt` files      | Terminal commands   |
+| GitHub Gists      | Project templates   |
+| Bash history      | One-off commands    |
 
 **Result:** Context switching, lost knowledge, and inconsistent workflows.
 
@@ -28,12 +28,12 @@ Developers scatter their essentials across too many places:
 
 ## 👥 Target Users
 
-| Persona | Core Need |
-|---|---|
-| 🧑‍💻 Everyday Developer | Quick access to snippets, commands, and links |
-| 🤖 AI-First Developer | Store prompts, workflows, and context files |
-| 🎓 Content Creator / Educator | Save course notes and reusable code examples |
-| 🏗️ Full-Stack Builder | Patterns, boilerplates, and API references |
+| Persona                       | Core Need                                     |
+| ----------------------------- | --------------------------------------------- |
+| 🧑‍💻 Everyday Developer         | Quick access to snippets, commands, and links |
+| 🤖 AI-First Developer         | Store prompts, workflows, and context files   |
+| 🎓 Content Creator / Educator | Save course notes and reusable code examples  |
+| 🏗️ Full-Stack Builder         | Patterns, boilerplates, and API references    |
 
 ---
 
@@ -43,15 +43,15 @@ Developers scatter their essentials across too many places:
 
 Items are the core unit of DevStash. Each item has a built-in system type:
 
-| Type | Description |
-|---|---|
+| Type      | Description                                   |
+| --------- | --------------------------------------------- |
 | `Snippet` | Reusable code blocks with syntax highlighting |
-| `Prompt` | AI prompt templates and workflows |
-| `Note` | Markdown-formatted free-text notes |
-| `Command` | Terminal / CLI commands |
-| `File` | Uploaded files (templates, configs, etc.) |
-| `Image` | Screenshots, diagrams, reference images |
-| `URL` | Saved links with metadata |
+| `Prompt`  | AI prompt templates and workflows             |
+| `Note`    | Markdown-formatted free-text notes            |
+| `Command` | Terminal / CLI commands                       |
+| `File`    | Uploaded files (templates, configs, etc.)     |
+| `Image`   | Screenshots, diagrams, reference images       |
+| `URL`     | Saved links with metadata                     |
 
 > 💡 **Pro users** can create custom item types.
 
@@ -83,14 +83,14 @@ Full-text search across content, tags, titles, and types. All items are immediat
 - 📤 Export (JSON / ZIP)
 - 🌑 Dark mode (default)
 
-### F) AI Superpowers *(Pro)*
+### F) AI Superpowers _(Pro)_
 
-| Feature | Description |
-|---|---|
-| 🏷️ Auto-tagging | Suggests relevant tags based on content |
-| 📝 AI Summary | One-liner summary for any item |
-| 💡 Explain Code | Plain-English code explanations |
-| ✨ Prompt Optimization | Refines and improves AI prompts |
+| Feature                | Description                             |
+| ---------------------- | --------------------------------------- |
+| 🏷️ Auto-tagging        | Suggests relevant tags based on content |
+| 📝 AI Summary          | One-liner summary for any item          |
+| 💡 Explain Code        | Plain-English code explanations         |
+| ✨ Prompt Optimization | Refines and improves AI prompts         |
 
 > Powered by **OpenAI `gpt-4o-mini`** (fast, cost-effective)
 
@@ -98,10 +98,10 @@ Full-text search across content, tags, titles, and types. All items are immediat
 
 ## 💰 Monetization
 
-| Plan | Price | Item Limit | Collections | Features |
-|---|---|---|---|---|
-| **Free** | $0 | 50 items | 3 | Basic search, image uploads, no AI |
-| **Pro** | $8/mo or $72/yr | Unlimited | Unlimited | File uploads, custom types, AI features, export |
+| Plan     | Price           | Item Limit | Collections | Features                                        |
+| -------- | --------------- | ---------- | ----------- | ----------------------------------------------- |
+| **Free** | $0              | 50 items   | 3           | Basic search, image uploads, no AI              |
+| **Pro**  | $8/mo or $72/yr | Unlimited  | Unlimited   | File uploads, custom types, AI features, export |
 
 > Billing via **Stripe** — subscriptions + webhooks for real-time plan sync.
 
@@ -205,19 +205,19 @@ model ItemTag {
 
 ## 🧱 Tech Stack
 
-| Category | Choice | Notes |
-|---|---|---|
-| Framework | [Next.js](https://nextjs.org/) (React 19) | App Router, Server Components |
-| Language | TypeScript | Strict mode recommended |
-| Database | [Neon PostgreSQL](https://neon.tech/) + [Prisma ORM](https://www.prisma.io/) | Serverless-friendly Postgres |
-| Caching | [Redis](https://redis.io/) | Optional — rate limiting, sessions |
-| File Storage | [Cloudflare R2](https://developers.cloudflare.com/r2/) | S3-compatible, no egress fees |
-| CSS / UI | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) | Dark mode default |
-| Auth | [NextAuth v5](https://authjs.dev/) | Email + GitHub OAuth |
-| AI | [OpenAI API](https://platform.openai.com/) | `gpt-4o-mini` |
-| Payments | [Stripe](https://stripe.com/) | Subscriptions + webhooks |
-| Deployment | [Vercel](https://vercel.com/) | Edge-ready, CI/CD built-in |
-| Monitoring | [Sentry](https://sentry.io/) | Runtime errors (Phase 2) |
+| Category     | Choice                                                                            | Notes                              |
+| ------------ | --------------------------------------------------------------------------------- | ---------------------------------- |
+| Framework    | [Next.js](https://nextjs.org/) (React 19)                                         | App Router, Server Components      |
+| Language     | TypeScript                                                                        | Strict mode recommended            |
+| Database     | [Neon PostgreSQL](https://neon.tech/) + [Prisma ORM](https://www.prisma.io/)      | Serverless-friendly Postgres       |
+| Caching      | [Redis](https://redis.io/)                                                        | Optional — rate limiting, sessions |
+| File Storage | [Cloudflare R2](https://developers.cloudflare.com/r2/)                            | S3-compatible, no egress fees      |
+| CSS / UI     | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) | Dark mode default                  |
+| Auth         | [NextAuth v5](https://authjs.dev/)                                                | Email + GitHub OAuth               |
+| AI           | [OpenAI API](https://platform.openai.com/)                                        | `gpt-4o-mini`                      |
+| Payments     | [Stripe](https://stripe.com/)                                                     | Subscriptions + webhooks           |
+| Deployment   | [Vercel](https://vercel.com/)                                                     | Edge-ready, CI/CD built-in         |
+| Monitoring   | [Sentry](https://sentry.io/)                                                      | Runtime errors (Phase 2)           |
 
 ---
 
@@ -282,12 +282,20 @@ OpenAI gpt-4o-mini
 
 **Design philosophy:** Dark-first, minimal, developer-focused. Inspired by [Notion](https://notion.so), [Linear](https://linear.app), and [Raycast](https://raycast.com).
 
+### Screenshots
+
+Refer to the screenshots below as a base for the dashboard UI.
+It is not have to be exact. Use it as a reference.
+
+- @context/screenshots/dashboard-ui-main.png
+- @context/screenshots/dashboard-ui-drawer.png
+
 ### Layout
 
 - **Collapsible sidebar** — filters, collections, item types
 - **Main workspace** — grid or list view with sorting/filtering
 - **Full-screen editor** — for creating and editing items
-- **Command palette** *(stretch)* — keyboard-first quick access
+- **Command palette** _(stretch)_ — keyboard-first quick access
 
 ### Code Display
 
@@ -324,6 +332,7 @@ git switch -c lesson-04-items-crud
 ## 🧭 Roadmap
 
 ### Phase 1 — MVP (Free Tier)
+
 - [ ] Project setup & environment
 - [ ] Auth (email + GitHub)
 - [ ] Items CRUD (text types)
@@ -334,6 +343,7 @@ git switch -c lesson-04-items-crud
 - [ ] Dark mode UI
 
 ### Phase 2 — Pro Tier
+
 - [ ] Stripe billing + upgrade flow
 - [ ] AI features (auto-tag, summary, explain, optimize)
 - [ ] Custom item types
@@ -342,6 +352,7 @@ git switch -c lesson-04-items-crud
 - [ ] Sentry monitoring
 
 ### Phase 3 — Future
+
 - [ ] Shared collections
 - [ ] Team / Org plans
 - [ ] VS Code extension
@@ -389,4 +400,4 @@ devstash/
 
 ---
 
-*DevStash — Store Smarter. Build Faster.*
+_DevStash — Store Smarter. Build Faster._
