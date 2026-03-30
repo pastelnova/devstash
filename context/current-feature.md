@@ -20,6 +20,18 @@ Not Started
 
 <!-- Keep this updated. Earliest to latest -->
 
+### 2026-03-30 — Dashboard UI Phase 2
+
+- Built collapsible sidebar (`src/components/dashboard/Sidebar.tsx`) with desktop toggle (PanelLeft icon) and mobile X close button
+- Sidebar collapses to icon-only strip (`w-14`) on desktop
+- Item types linked to `/items/[slug]` with colored icons and counts
+- Favorite collections section (starred) and All Collections section in sidebar
+- User avatar, name, email, and settings icon at the bottom of the sidebar
+- Mobile view always uses a drawer overlay (backdrop + fixed panel)
+- Hamburger button in header opens the mobile drawer
+- Extracted `DashboardShell.tsx` as client component managing sidebar state
+- `page.tsx` remains a server component
+
 ### 2026-03-30 — Dashboard UI Phase 1
 
 - Initialized ShadCN UI (Tailwind v4 detected automatically)
