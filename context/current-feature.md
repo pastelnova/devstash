@@ -18,6 +18,17 @@
 
 <!-- Keep this updated. Earliest to latest -->
 
+### 2026-04-01 — Seed Data
+
+- Installed `bcryptjs` (+ `@types/bcryptjs`)
+- Rewrote `prisma/seed.ts` with full demo dataset per spec
+- Seeded 7 system item types with correct names, icons, and colors
+- Created demo user `demo@devstash.io` with bcrypt-hashed password (12 rounds)
+- Created 17 tags and 5 collections: React Patterns, AI Workflows, DevOps, Terminal Commands, Design Resources
+- 18 items total: 5 snippets, 3 prompts, 5 commands, 5 links — with tags, favorites, and pins
+- Seed is idempotent (upsert on stable IDs)
+- Build passes
+
 ### 2026-04-01 — Prisma + Neon PostgreSQL Setup
 
 - Installed Prisma 7, `@prisma/adapter-pg`, `pg`, and `dotenv`
