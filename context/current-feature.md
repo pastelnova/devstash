@@ -109,3 +109,10 @@
 - Updated `DashboardShell.tsx` to accept and forward `itemTypes` and `sidebarCollections` props to `Sidebar`
 - Updated `Sidebar.tsx` to replace all mock data with props; recents show a colored circle based on dominant item type color; favorites keep star icon; added "View all collections →" link to `/collections`
 - Build passes
+
+### 2026-04-02 — Pro Badge in Sidebar
+
+- Installed shadcn `Badge` component
+- Added subtle `PRO` outline badge inline next to the **file** and **image** type names in the sidebar
+- Badge hidden when sidebar is collapsed; count stays pinned to the right
+- Build passes
