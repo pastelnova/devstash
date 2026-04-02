@@ -16,6 +16,7 @@ import {
   Settings,
   X,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
@@ -114,7 +115,14 @@ export function Sidebar({
                       <Icon className="h-4 w-4 shrink-0" style={{ color: type.color ?? undefined }} />
                       {!collapsed && (
                         <>
-                          <span className="flex-1">{type.name}</span>
+                          <span className="flex-1 flex items-center gap-1.5">
+                            {type.name}
+                            {(type.name === 'file' || type.name === 'image') && (
+                              <Badge variant="outline" className="h-4 px-1 text-[10px] font-semibold text-muted-foreground border-muted-foreground/30">
+                                PRO
+                              </Badge>
+                            )}
+                          </span>
                           <span className="text-xs tabular-nums">{type.count}</span>
                         </>
                       )}
