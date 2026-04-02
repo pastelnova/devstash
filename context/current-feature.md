@@ -18,6 +18,15 @@
 
 <!-- Keep this updated. Earliest to latest -->
 
+### 2026-04-01 — Dashboard Collections — Real DB Data
+
+- Created `src/lib/db/collections.ts` with `getCollections(userId)` — fetches collections with nested items and types via Prisma
+- Dominant border color derived from most-used item type per collection
+- Type icons sorted by usage frequency (most common first)
+- Updated `CollectionsSection.tsx` to accept `CollectionWithMeta[]` props; icon map updated for DB icon names (`Code`, `Sparkles`, `Terminal`, `StickyNote`, `File`, `Image`, `Link`)
+- Updated `dashboard/page.tsx` to look up demo user and fetch real collections; has TODO to swap in session user once auth is in place
+- Build passes
+
 ### 2026-04-01 — Seed Data
 
 - Installed `bcryptjs` (+ `@types/bcryptjs`)

@@ -1,18 +1,23 @@
 import Link from 'next/link'
-import { Star, MoreHorizontal, Code2, Sparkles, Terminal, FileText, File, Image, Link as LinkIcon } from 'lucide-react'
-import { mockCollections } from '@/lib/mock-data'
+import { Star, MoreHorizontal, Code2, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon } from 'lucide-react'
+import type { CollectionWithMeta } from '@/lib/db/collections'
 
+// Maps DB icon names (from seed) to Lucide components
 const typeIconMap: Record<string, React.ElementType> = {
-  code: Code2,
-  sparkles: Sparkles,
-  terminal: Terminal,
-  'file-text': FileText,
-  file: File,
-  image: Image,
-  link: LinkIcon,
+  Code: Code2,
+  Sparkles: Sparkles,
+  Terminal: Terminal,
+  StickyNote: StickyNote,
+  File: File,
+  Image: Image,
+  Link: LinkIcon,
 }
 
-export function CollectionsSection() {
+interface Props {
+  collections: CollectionWithMeta[]
+}
+
+export function CollectionsSection({ collections }: Props) {
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
@@ -25,10 +30,11 @@ export function CollectionsSection() {
         </Link>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {mockCollections.map((col) => (
+        {collections.map((col) => (
           <div
             key={col.id}
-            className="rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors"
+            className="rounded-lg border bg-card p-4 hover:bg-muted/30 transition-colors"
+            style={{ borderColor: col.dominantColor ?? undefined }}
           >
             <div className="flex items-start justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0">
@@ -44,7 +50,7 @@ export function CollectionsSection() {
             <p className="text-xs text-muted-foreground mb-2">{col.itemCount} items</p>
             <p className="text-xs text-muted-foreground/70 mb-4 line-clamp-2">{col.description}</p>
             <div className="flex items-center gap-1.5">
-              {col.icons.map((iconKey, i) => {
+              {col.typeIcons.map((iconKey, i) => {
                 const Icon = typeIconMap[iconKey] ?? File
                 return <Icon key={i} className="h-3.5 w-3.5 text-muted-foreground/50" />
               })}
