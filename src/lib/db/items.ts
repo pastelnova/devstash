@@ -60,6 +60,31 @@ export async function getRecentItems(userId: string): Promise<ItemWithMeta[]> {
   }))
 }
 
+export type SystemItemType = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+  count: number
+}
+
+export async function getSystemItemTypes(userId: string): Promise<SystemItemType[]> {
+  const types = await prisma.itemType.findMany({
+    where: { isSystem: true },
+    include: {
+      _count: { select: { items: { where: { userId } } } },
+    },
+  })
+
+  return types.map((t) => ({
+    id: t.id,
+    name: t.name,
+    icon: t.icon,
+    color: t.color,
+    count: t._count.items,
+  }))
+}
+
 export async function getItemStats(userId: string): Promise<ItemStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

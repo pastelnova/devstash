@@ -16,17 +16,18 @@ import {
   Settings,
   X,
 } from 'lucide-react'
-import { mockUser, mockItemTypes, mockCollections } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
+import type { SystemItemType } from '@/lib/db/items'
+import type { SidebarCollection } from '@/lib/db/collections'
 
 const typeIconMap: Record<string, React.ElementType> = {
-  code: Code2,
-  sparkles: Sparkles,
-  terminal: Terminal,
-  'file-text': FileText,
-  file: File,
-  image: Image,
-  link: LinkIcon,
+  Code: Code2,
+  Sparkles: Sparkles,
+  Terminal: Terminal,
+  StickyNote: FileText,
+  File: File,
+  Image: Image,
+  Link: LinkIcon,
 }
 
 interface SidebarProps {
@@ -34,14 +35,23 @@ interface SidebarProps {
   onToggle: () => void
   mobileOpen: boolean
   onMobileClose: () => void
+  itemTypes: SystemItemType[]
+  sidebarCollections: SidebarCollection[]
 }
 
-export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+export function Sidebar({
+  collapsed,
+  onToggle,
+  mobileOpen,
+  onMobileClose,
+  itemTypes,
+  sidebarCollections,
+}: SidebarProps) {
   const [typesExpanded, setTypesExpanded] = useState(true)
   const [collectionsExpanded, setCollectionsExpanded] = useState(true)
 
-  const favoriteCollections = mockCollections.filter((c) => c.isFavorite)
-  const recentCollections = mockCollections.filter((c) => !c.isFavorite)
+  const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite)
+  const recentCollections = sidebarCollections.filter((c) => !c.isFavorite)
 
   const renderContent = (isMobileDrawer: boolean) => (
     <div className="flex flex-col h-full">
@@ -88,8 +98,8 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
           )}
           {(typesExpanded || collapsed) && (
             <ul className="space-y-0.5">
-              {mockItemTypes.map((type) => {
-                const Icon = typeIconMap[type.icon] ?? File
+              {itemTypes.map((type) => {
+                const Icon = typeIconMap[type.icon ?? ''] ?? File
                 const slug = type.name.toLowerCase()
                 return (
                   <li key={type.id}>
@@ -101,7 +111,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
                       )}
                       title={collapsed ? type.name : undefined}
                     >
-                      <Icon className="h-4 w-4 shrink-0" style={{ color: type.color }} />
+                      <Icon className="h-4 w-4 shrink-0" style={{ color: type.color ?? undefined }} />
                       {!collapsed && (
                         <>
                           <span className="flex-1">{type.name}</span>
@@ -149,23 +159,34 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
                   ))}
                 </ul>
 
-                {/* All Collections */}
+                {/* Recents */}
                 <p className="px-2 mb-1 text-xs text-muted-foreground/60 uppercase tracking-wider">
-                  All Collections
+                  Recent
                 </p>
-                <ul className="space-y-0.5">
+                <ul className="space-y-0.5 mb-2">
                   {recentCollections.map((col) => (
                     <li key={col.id}>
                       <Link
                         href={`/collections/${col.id}`}
                         className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
-                        <span className="flex-1 truncate">{col.name}</span>
-                        <span className="text-xs tabular-nums">{col.itemCount}</span>
+                        <span
+                          className="h-3.5 w-3.5 rounded-full shrink-0"
+                          style={{ backgroundColor: col.dominantColor ?? '#6b7280' }}
+                        />
+                        <span className="truncate flex-1">{col.name}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
+
+                {/* View all collections */}
+                <Link
+                  href="/collections"
+                  className="flex items-center px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  View all collections →
+                </Link>
               </>
             )}
           </div>
@@ -180,13 +201,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
         )}
       >
         <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold shrink-0">
-          {mockUser.name[0]}
+          D
         </div>
         {!collapsed && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium leading-tight truncate">{mockUser.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{mockUser.email}</p>
+              <p className="text-sm font-medium leading-tight truncate">Demo User</p>
+              <p className="text-xs text-muted-foreground truncate">demo@devstash.io</p>
             </div>
             <button
               className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"

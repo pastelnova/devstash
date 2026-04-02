@@ -10,6 +10,37 @@ export type CollectionWithMeta = {
   dominantColor: string | null
 }
 
+export type SidebarCollection = {
+  id: string
+  name: string
+  isFavorite: boolean
+  dominantColor: string | null
+}
+
+export async function getSidebarCollections(userId: string): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    include: {
+      items: {
+        include: { type: { select: { color: true } } },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return collections.map((col) => {
+    const colorCounts: Record<string, number> = {}
+    for (const item of col.items) {
+      const color = item.type.color
+      if (color) colorCounts[color] = (colorCounts[color] ?? 0) + 1
+    }
+    const dominantColor =
+      Object.entries(colorCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+
+    return { id: col.id, name: col.name, isFavorite: col.isFavorite, dominantColor }
+  })
+}
+
 export async function getCollections(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
