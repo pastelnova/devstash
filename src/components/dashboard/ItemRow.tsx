@@ -1,29 +1,19 @@
 import { Code2, Sparkles, Terminal, FileText, File, Image, Link as LinkIcon } from 'lucide-react'
-import { mockItemTypes } from '@/lib/mock-data'
+import type { ItemWithMeta } from '@/lib/db/items'
 
 const typeIconMap: Record<string, React.ElementType> = {
-  code: Code2,
-  sparkles: Sparkles,
-  terminal: Terminal,
-  'file-text': FileText,
-  file: File,
-  image: Image,
-  link: LinkIcon,
+  Code: Code2,
+  Sparkles: Sparkles,
+  Terminal: Terminal,
+  StickyNote: FileText,
+  File: File,
+  Image: Image,
+  Link: LinkIcon,
 }
 
-interface Item {
-  id: string
-  title: string
-  description?: string | null
-  typeId: string
-  tags: string[]
-  createdAt: string
-}
-
-export function ItemRow({ item }: { item: Item }) {
-  const type = mockItemTypes.find((t) => t.id === item.typeId)
-  const Icon = type ? (typeIconMap[type.icon] ?? File) : File
-  const iconColor = type?.color ?? '#94a3b8'
+export function ItemRow({ item }: { item: ItemWithMeta }) {
+  const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
+  const iconColor = item.type.color ?? '#94a3b8'
 
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',

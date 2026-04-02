@@ -1,11 +1,9 @@
 import { Pin } from 'lucide-react'
-import { mockItems } from '@/lib/mock-data'
+import type { ItemWithMeta } from '@/lib/db/items'
 import { ItemRow } from './ItemRow'
 
-export function PinnedItems() {
-  const pinned = mockItems.filter((i) => i.isPinned)
-
-  if (pinned.length === 0) return null
+export function PinnedItems({ items }: { items: ItemWithMeta[] }) {
+  if (items.length === 0) return null
 
   return (
     <section>
@@ -14,7 +12,7 @@ export function PinnedItems() {
         <h2 className="text-base font-semibold">Pinned</h2>
       </div>
       <div className="rounded-lg border border-border bg-card px-4">
-        {pinned.map((item) => (
+        {items.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}
       </div>

@@ -1,22 +1,17 @@
-import { mockCollections, mockItems, mockItemTypes } from '@/lib/mock-data'
 import { Package, FolderOpen, Star, Bookmark } from 'lucide-react'
+import type { ItemStats } from '@/lib/db/items'
 
-const totalItems = mockItemTypes.reduce((sum, t) => sum + t.count, 0)
-const totalCollections = mockCollections.length
-const favoriteItems = mockItems.filter((i) => i.isFavorite).length
-const favoriteCollections = mockCollections.filter((c) => c.isFavorite).length
+export function StatsCards({ stats }: { stats: ItemStats }) {
+  const cards = [
+    { label: 'Items', value: stats.totalItems, icon: Package },
+    { label: 'Collections', value: stats.totalCollections, icon: FolderOpen },
+    { label: 'Favorite Items', value: stats.favoriteItems, icon: Star },
+    { label: 'Favorite Collections', value: stats.favoriteCollections, icon: Bookmark },
+  ]
 
-const stats = [
-  { label: 'Items', value: totalItems, icon: Package },
-  { label: 'Collections', value: totalCollections, icon: FolderOpen },
-  { label: 'Favorite Items', value: favoriteItems, icon: Star },
-  { label: 'Favorite Collections', value: favoriteCollections, icon: Bookmark },
-]
-
-export function StatsCards() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {stats.map(({ label, value, icon: Icon }) => (
+      {cards.map(({ label, value, icon: Icon }) => (
         <div key={label} className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">{label}</span>

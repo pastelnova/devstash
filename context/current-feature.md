@@ -18,6 +18,16 @@
 
 <!-- Keep this updated. Earliest to latest -->
 
+### 2026-04-02 — Dashboard Items — Real DB Data
+
+- Created `src/lib/db/items.ts` with `getPinnedItems(userId)`, `getRecentItems(userId)`, and `getItemStats(userId)`
+- `ItemRow.tsx` updated to use `ItemWithMeta` type; icon resolved from item's nested type relation (no mock lookup)
+- `PinnedItems.tsx` now accepts `items: ItemWithMeta[]` as prop; hides section when empty
+- `RecentItems.tsx` now accepts `items: ItemWithMeta[]` as prop
+- `StatsCards.tsx` now accepts `stats: ItemStats` as prop; counts fetched from DB
+- `dashboard/page.tsx` fetches all 4 data sources in parallel with `Promise.all` and passes as props
+- Build passes
+
 ### 2026-04-01 — Dashboard Collections — Real DB Data
 
 - Created `src/lib/db/collections.ts` with `getCollections(userId)` — fetches collections with nested items and types via Prisma
