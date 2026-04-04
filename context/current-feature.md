@@ -1,32 +1,18 @@
 # Current Feature
 
-Code Scanner Quick Wins
+<!-- Feature Name -->
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
 
-Address low-risk findings from the code-scanner audit. No auth, no migrations, no architectural changes.
-
-1. **Extract shared `typeIconMap`** — duplicated in `Sidebar.tsx`, `CollectionsSection.tsx`, and `ItemRow.tsx` with a live icon discrepancy (`StickyNote` renders differently across files). Extract to `src/lib/item-type-icons.ts` and fix the discrepancy.
-
-2. **`DATABASE_URL` startup guard** — replace `process.env.DATABASE_URL!` in `src/lib/prisma.ts` with an explicit check that throws a clear error if the var is missing.
-
-3. **`RecentItems` empty-state guard** — add `if (items.length === 0) return null` to match the existing guard in `PinnedItems.tsx`.
-
-4. **Fix array index as React `key`** — in `CollectionsSection.tsx` type icon map, use `iconKey` string as the key instead of the array index `i`.
-
-5. **Rename "Recent" collections label** — `recentCollections` is just `!isFavorite`, not sorted by recency. Rename variable to `otherCollections` and the UI label to "All".
-
-6. **Add `take` limit on nested items in collection queries** — `getSidebarCollections` and `getCollections` in `src/lib/db/collections.ts` load all items per collection unboundedly. Add `take: 20` to the nested `items` include since only enough rows are needed to determine dominant type.
+<!-- Goals & requirements -->
 
 ## Notes
 
-- Skip #1 (auth guard) and #3 (extra DB query) — both resolve naturally when NextAuth is implemented
-- Skip `contentType` enum migration — save for when item-creation code is being built
-- Skip sidebar dual-DOM desync (#12) — cosmetic, low value now
+<!-- Any extra notes -->
 
 ## History
 
@@ -129,4 +115,14 @@ Address low-risk findings from the code-scanner audit. No auth, no migrations, n
 - Installed shadcn `Badge` component
 - Added subtle `PRO` outline badge inline next to the **file** and **image** type names in the sidebar
 - Badge hidden when sidebar is collapsed; count stays pinned to the right
+- Build passes
+
+### 2026-04-04 — Code Scanner Quick Wins
+
+- Extracted shared `typeIconMap` to `src/lib/item-type-icons.ts`; fixed `StickyNote` icon discrepancy (was `FileText` in `Sidebar` and `ItemRow`, now `StickyNote` everywhere)
+- Added `DATABASE_URL` startup guard in `src/lib/prisma.ts` — throws clear error instead of silent crash
+- Added empty-state guard to `RecentItems.tsx` (`return null` when empty, matching `PinnedItems`)
+- Fixed array index used as React `key` in `CollectionsSection.tsx` type icons — now uses `iconKey` string
+- Renamed `recentCollections` → `otherCollections`; sidebar label "Recent" → "All"
+- Added `take: 20` on nested items in both collection queries; `itemCount` now uses `_count.items` for accuracy
 - Build passes
