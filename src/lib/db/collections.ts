@@ -23,6 +23,7 @@ export async function getSidebarCollections(userId: string): Promise<SidebarColl
     include: {
       items: {
         include: { type: { select: { color: true } } },
+        take: 20,
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -45,10 +46,10 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
   const collections = await prisma.collection.findMany({
     where: { userId },
     include: {
+      _count: { select: { items: true } },
       items: {
-        include: {
-          type: true,
-        },
+        include: { type: true },
+        take: 20,
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -76,7 +77,7 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
       name: col.name,
       description: col.description,
       isFavorite: col.isFavorite,
-      itemCount: col.items.length,
+      itemCount: col._count.items,
       typeIcons,
       dominantColor,
     }

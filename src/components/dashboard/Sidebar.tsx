@@ -3,13 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  Code2,
-  Sparkles,
-  Terminal,
-  FileText,
   File,
-  Image,
-  Link as LinkIcon,
   Star,
   ChevronRight,
   PanelLeft,
@@ -18,18 +12,9 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { typeIconMap } from '@/lib/item-type-icons'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
-
-const typeIconMap: Record<string, React.ElementType> = {
-  Code: Code2,
-  Sparkles: Sparkles,
-  Terminal: Terminal,
-  StickyNote: FileText,
-  File: File,
-  Image: Image,
-  Link: LinkIcon,
-}
 
 interface SidebarProps {
   collapsed: boolean
@@ -52,7 +37,7 @@ export function Sidebar({
   const [collectionsExpanded, setCollectionsExpanded] = useState(true)
 
   const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite)
-  const recentCollections = sidebarCollections.filter((c) => !c.isFavorite)
+  const otherCollections = sidebarCollections.filter((c) => !c.isFavorite)
 
   const renderContent = (isMobileDrawer: boolean) => (
     <div className="flex flex-col h-full">
@@ -167,12 +152,12 @@ export function Sidebar({
                   ))}
                 </ul>
 
-                {/* Recents */}
+                {/* All collections */}
                 <p className="px-2 mb-1 text-xs text-muted-foreground/60 uppercase tracking-wider">
-                  Recent
+                  All
                 </p>
                 <ul className="space-y-0.5 mb-2">
-                  {recentCollections.map((col) => (
+                  {otherCollections.map((col) => (
                     <li key={col.id}>
                       <Link
                         href={`/collections/${col.id}`}

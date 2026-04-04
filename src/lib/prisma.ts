@@ -5,7 +5,10 @@ import { PrismaClient } from "../../generated/prisma/client"
 // PrismaPg wraps the pg connection and must be passed to PrismaClient.
 // Next.js loads env vars automatically; dotenv is not needed here.
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) throw new Error('DATABASE_URL environment variable is not set')
+
+const adapter = new PrismaPg({ connectionString })
 
 // Prevent multiple PrismaClient instances in development (hot reload creates new modules).
 // In production, always create a single instance.

@@ -1,15 +1,6 @@
-import { Code2, Sparkles, Terminal, FileText, File, Image, Link as LinkIcon } from 'lucide-react'
+import { File } from 'lucide-react'
+import { typeIconMap } from '@/lib/item-type-icons'
 import type { ItemWithMeta } from '@/lib/db/items'
-
-const typeIconMap: Record<string, React.ElementType> = {
-  Code: Code2,
-  Sparkles: Sparkles,
-  Terminal: Terminal,
-  StickyNote: FileText,
-  File: File,
-  Image: Image,
-  Link: LinkIcon,
-}
 
 export function ItemRow({ item }: { item: ItemWithMeta }) {
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File

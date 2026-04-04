@@ -2,6 +2,8 @@ import type { ItemWithMeta } from '@/lib/db/items'
 import { ItemRow } from './ItemRow'
 
 export function RecentItems({ items }: { items: ItemWithMeta[] }) {
+  if (items.length === 0) return null
+
   return (
     <section>
       <h2 className="text-base font-semibold mb-3">Recent Items</h2>

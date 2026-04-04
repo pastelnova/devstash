@@ -1,17 +1,7 @@
 import Link from 'next/link'
-import { Star, MoreHorizontal, Code2, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon } from 'lucide-react'
+import { Star, MoreHorizontal, File } from 'lucide-react'
+import { typeIconMap } from '@/lib/item-type-icons'
 import type { CollectionWithMeta } from '@/lib/db/collections'
-
-// Maps DB icon names (from seed) to Lucide components
-const typeIconMap: Record<string, React.ElementType> = {
-  Code: Code2,
-  Sparkles: Sparkles,
-  Terminal: Terminal,
-  StickyNote: StickyNote,
-  File: File,
-  Image: Image,
-  Link: LinkIcon,
-}
 
 interface Props {
   collections: CollectionWithMeta[]
@@ -50,9 +40,9 @@ export function CollectionsSection({ collections }: Props) {
             <p className="text-xs text-muted-foreground mb-2">{col.itemCount} items</p>
             <p className="text-xs text-muted-foreground/70 mb-4 line-clamp-2">{col.description}</p>
             <div className="flex items-center gap-1.5">
-              {col.typeIcons.map((iconKey, i) => {
+              {col.typeIcons.map((iconKey) => {
                 const Icon = typeIconMap[iconKey] ?? File
-                return <Icon key={i} className="h-3.5 w-3.5 text-muted-foreground/50" />
+                return <Icon key={iconKey} className="h-3.5 w-3.5 text-muted-foreground/50" />
               })}
             </div>
           </div>
