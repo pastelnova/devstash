@@ -20,3 +20,9 @@ npm run lint     # run ESLint
 ```
 
 IMPORTANT: Do not add Claude to any commit messages
+
+## Neon MCP
+
+- Project ID: `nameless-union-54973290`
+- **Always use the `development` branch** (ID: `br-twilight-sound-ab75qld1`) for all Neon MCP queries and operations
+- **Never use the `production` branch** (`br-ancient-meadow-ab0qrmp9`) unless I explicitly say so
