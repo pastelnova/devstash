@@ -1,18 +1,10 @@
 # Current Feature
 
-<!-- Feature Name -->
-
 ## Status
-
-<!-- Not Started|In Progress|Completed -->
 
 ## Goals
 
-<!-- Goals & requirements -->
-
 ## Notes
-
-<!-- Any extra notes -->
 
 ## History
 
@@ -125,4 +117,15 @@
 - Fixed array index used as React `key` in `CollectionsSection.tsx` type icons — now uses `iconKey` string
 - Renamed `recentCollections` → `otherCollections`; sidebar label "Recent" → "All"
 - Added `take: 20` on nested items in both collection queries; `itemCount` now uses `_count.items` for accuracy
+- Build passes
+
+### 2026-04-06 — Auth Setup — NextAuth + GitHub Provider
+
+- Installed `next-auth@beta` and `@auth/prisma-adapter`
+- Created split auth config: `src/auth.config.ts` (edge-safe, GitHub provider only) + `src/auth.ts` (full config with PrismaAdapter)
+- JWT session strategy with `user.id` injected via `jwt` and `session` callbacks
+- Created API route handler at `src/app/api/auth/[...nextauth]/route.ts`
+- Created `src/proxy.ts` protecting `/dashboard/*` routes — redirects unauthenticated users to NextAuth sign-in
+- Extended Session type with `user.id` in `src/types/next-auth.d.ts`
+- Added auth feature specs to `context/features/`
 - Build passes
