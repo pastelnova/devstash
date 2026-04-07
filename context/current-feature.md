@@ -1,21 +1,13 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Create profile page at `/profile` route (protected)
-- Display user info: email, name, avatar (GitHub or initials), account creation date
-- Show usage stats: total items, total collections, breakdown by item type
-- Change password action (email/password users only, not GitHub OAuth)
-- Delete account with confirmation dialog
+<!-- What does "done" look like? -->
 
 ## Notes
-- Avatar: use GitHub avatar from OAuth if available, otherwise initials from name/email (reuse `UserAvatar` component)
-- Change password button hidden for OAuth-only users (no `password` field)
-- Delete account needs confirmation dialog to prevent accidental deletion
-- Item type breakdown: counts for each type (snippets, prompts, notes, commands, links, files, images)
-- Follow existing data fetching patterns (server component + Prisma queries in `src/lib/db/`)
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -202,4 +194,17 @@ In Progress
 - Handles missing token (server page), expired token, invalid token, and user-not-found edge cases
 - Added "Forgot password?" link to `SignInForm` next to password label
 - Fixed `baseUrl` operator precedence bug in both `verification.ts` and `password-reset.ts`
+- Build passes
+
+### 2026-04-07 — Profile Page
+
+- Created `/profile` route as protected server component with DashboardShell
+- User info card with avatar (lg size added to `UserAvatar`), name, email, and join date
+- Usage stats card: total items, total collections, per-type breakdown with colored icons
+- Change password form (`ChangePasswordSection`) — only shown for email/password users
+- Change password API route (`POST /api/auth/change-password`) with current password validation
+- Delete account with confirmation dialog (`DeleteAccountSection`) using shadcn dialog (base-ui)
+- Delete account API route (`DELETE /api/auth/delete-account`) with cascading delete + sign out
+- Created `src/lib/db/profile.ts` with `getProfileStats()` and `hasPassword()` queries
+- Installed shadcn `dialog` component
 - Build passes
