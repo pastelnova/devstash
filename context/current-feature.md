@@ -1,21 +1,13 @@
-# Current Feature: Toggle Email Verification
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Add a way to disable email verification so users can register and sign in without verifying
-- When disabled: registration skips sending email, sign-in doesn't check `emailVerified`
-- When enabled: current flow works as-is (send email, must verify before sign-in)
-- Simple to toggle — env variable (`REQUIRE_EMAIL_VERIFICATION=true/false`) is the cleanest option
+<!-- What does "done" look like? -->
 
 ## Notes
-- No Resend domain linked yet — only the Resend test email can receive verification emails
-- This means real users can't register with verification enabled
-- Env variable approach: `REQUIRE_EMAIL_VERIFICATION` defaults to `false` for now, flip to `true` once a domain is linked
-- Touch points: register route (skip token + email), credentials authorize (skip `emailVerified` check)
-- Keep all verification code in place — this is just a bypass flag, not a removal
-
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -180,4 +172,13 @@ In Progress
 - `SignInForm` shows distinct error message for unverified vs invalid credentials
 - Created reusable `ButtonLink` client component for server-compatible button-styled links
 - Added `db:cleanup` script (`scripts/cleanup-users.ts`) and `npm run db:cleanup` command
+- Build passes
+
+### 2026-04-07 — Toggle Email Verification
+
+- Added `REQUIRE_EMAIL_VERIFICATION` env var (defaults to `false`)
+- When disabled: new users are pre-verified (`emailVerified` set on creation), verification email skipped
+- When enabled: existing flow unchanged (token generated, email sent, must verify before sign-in)
+- Updated register route, credentials authorize, and RegisterForm redirect logic
+- Added env var to `.env` with descriptive comment
 - Build passes
