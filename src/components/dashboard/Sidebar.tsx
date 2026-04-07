@@ -2,19 +2,34 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 import {
   File,
   Star,
   ChevronRight,
   PanelLeft,
-  Settings,
+  LogOut,
+  User,
   X,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { UserAvatar } from '@/components/UserAvatar'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
+
+export interface SidebarUser {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
 
 interface SidebarProps {
   collapsed: boolean
@@ -23,6 +38,7 @@ interface SidebarProps {
   onMobileClose: () => void
   itemTypes: SystemItemType[]
   sidebarCollections: SidebarCollection[]
+  user?: SidebarUser | null
 }
 
 export function Sidebar({
@@ -32,6 +48,7 @@ export function Sidebar({
   onMobileClose,
   itemTypes,
   sidebarCollections,
+  user,
 }: SidebarProps) {
   const [typesExpanded, setTypesExpanded] = useState(true)
   const [collectionsExpanded, setCollectionsExpanded] = useState(true)
@@ -193,23 +210,30 @@ export function Sidebar({
           collapsed ? 'flex justify-center' : 'flex items-center gap-2'
         )}
       >
-        <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold shrink-0">
-          D
-        </div>
-        {!collapsed && (
-          <>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium leading-tight truncate">Demo User</p>
-              <p className="text-xs text-muted-foreground truncate">demo@devstash.io</p>
-            </div>
-            <button
-              className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
-              aria-label="Settings"
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-2 rounded-md hover:bg-muted transition-colors p-1 -m-1 min-w-0">
+            <UserAvatar name={user?.name} image={user?.image} />
+            {!collapsed && (
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium leading-tight truncate">{user?.name ?? 'User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-48">
+            <DropdownMenuItem onClick={() => window.location.href = '/profile'} className="gap-2">
+              <User className="h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2"
+              onClick={() => signOut({ callbackUrl: '/sign-in' })}
             >
-              <Settings className="h-3.5 w-3.5" />
-            </button>
-          </>
-        )}
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )

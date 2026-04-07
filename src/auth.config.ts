@@ -7,6 +7,9 @@ import GitHub from "next-auth/providers/github"
 // Credentials authorize is a placeholder — overridden in auth.ts with bcrypt validation.
 
 export default {
+  pages: {
+    signIn: "/sign-in",
+  },
   providers: [
     GitHub,
     Credentials({

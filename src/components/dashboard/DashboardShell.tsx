@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Plus, FolderPlus, Menu } from 'lucide-react'
-import { Sidebar } from './Sidebar'
+import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
 
@@ -12,9 +12,10 @@ interface DashboardShellProps {
   children: React.ReactNode
   itemTypes: SystemItemType[]
   sidebarCollections: SidebarCollection[]
+  user?: SidebarUser | null
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -78,6 +79,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections }: Dash
           onMobileClose={() => setMobileOpen(false)}
           itemTypes={itemTypes}
           sidebarCollections={sidebarCollections}
+          user={user}
         />
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>

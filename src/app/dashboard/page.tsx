@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { getCollections, getSidebarCollections } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats, getSystemItemTypes } from '@/lib/db/items'
@@ -8,22 +10,26 @@ import { PinnedItems } from '@/components/dashboard/PinnedItems'
 import { RecentItems } from '@/components/dashboard/RecentItems'
 
 export default async function DashboardPage() {
-  // TODO: replace with session user once auth is in place
-  const user = await prisma.user.findUnique({ where: { email: 'demo@devstash.io' } })
+  const session = await auth()
+  if (!session?.user?.id) redirect('/sign-in')
 
-  const [collections, pinnedItems, recentItems, stats, itemTypes, sidebarCollections] = user
-    ? await Promise.all([
-        getCollections(user.id),
-        getPinnedItems(user.id),
-        getRecentItems(user.id),
-        getItemStats(user.id),
-        getSystemItemTypes(user.id),
-        getSidebarCollections(user.id),
-      ])
-    : [[], [], [], { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 }, [], []]
+  const userId = session.user.id
+
+  // Ensure user exists in DB (handles OAuth users on first visit)
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) redirect('/sign-in')
+
+  const [collections, pinnedItems, recentItems, stats, itemTypes, sidebarCollections] = await Promise.all([
+    getCollections(userId),
+    getPinnedItems(userId),
+    getRecentItems(userId),
+    getItemStats(userId),
+    getSystemItemTypes(userId),
+    getSidebarCollections(userId),
+  ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={session.user}>
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
