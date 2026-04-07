@@ -47,7 +47,7 @@ export function RegisterForm() {
       return
     }
 
-    router.push('/sign-in?registered=true')
+    router.push('/check-email')
   }
 
   return (
