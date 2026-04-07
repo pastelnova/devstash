@@ -1,24 +1,14 @@
-# Current Feature: Email Verification on Register
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- After registration, send a verification email via Resend with a unique token/link
-- User must click the verification link to activate their account
-- Unverified users cannot sign in (show clear error message)
-- Verification tokens expire after a reasonable time (e.g., 24 hours)
-- Handle edge cases: expired token, already verified, invalid token
-- Success page after clicking verification link
+<!-- What does "done" look like? -->
 
 ## Notes
-- Using **Resend** for email delivery — `RESEND_API_KEY` is already in `.env`
-- Requires a `VerificationToken` model (already exists in Prisma schema for NextAuth)
-- May need an `emailVerified` field on the User model (NextAuth standard field — check if it exists)
-- Registration flow changes: register → email sent → user clicks link → account verified → can sign in
-- Update the `/api/auth/register` route to generate token + send email
-- Create a `/verify-email` route to handle the token validation
-- Update credentials `authorize` to reject unverified users
+<!-- Constraints, context, or implementation details -->
+
 
 ## History
 
@@ -165,4 +155,22 @@ In Progress
 - Dashboard page now uses `auth()` session instead of hardcoded demo user lookup
 - Added `avatars.githubusercontent.com` to `next.config.ts` remote image patterns
 - Installed shadcn components: card, label, dropdown-menu, sonner
+- Build passes
+
+### 2026-04-07 — Email Verification on Register
+
+- Installed `resend` package for email delivery
+- Created `src/lib/resend.ts` — Resend client singleton with `RESEND_API_KEY` env guard
+- Created `src/lib/auth/verification.ts` with `generateVerificationToken()`, `sendVerificationEmail()`, and `verifyToken()` helpers
+- Tokens stored in existing `VerificationToken` model; 24-hour expiry; old tokens cleaned on new generation
+- Updated `/api/auth/register` to generate token and send verification email after user creation
+- Registration now redirects to `/check-email` page instead of sign-in
+- Created `/check-email` page with inbox prompt and 24h expiry notice
+- Created `/verify-email` server page — validates token, sets `emailVerified` on User, deletes used token
+- Handles edge cases: missing token, expired token, invalid token — with "Register again" link
+- Success state shows checkmark and "Sign in" link
+- Added `EmailNotVerifiedError` (extends `CredentialsSignin`) in `src/auth.ts` — unverified users rejected at sign-in
+- `SignInForm` shows distinct error message for unverified vs invalid credentials
+- Created reusable `ButtonLink` client component for server-compatible button-styled links
+- Added `db:cleanup` script (`scripts/cleanup-users.ts`) and `npm run db:cleanup` command
 - Build passes
