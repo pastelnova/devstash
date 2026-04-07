@@ -1,21 +1,10 @@
-# Current Feature: Auth UI — Sign In, Register & Sign Out
+# Current Feature
 
 ## Status
-In Progress
 
 ## Goals
-- Custom Sign In page (`/sign-in`) with email/password fields, GitHub OAuth button, and link to register
-- Custom Register page (`/register`) with name, email, password, confirm password fields and validation
-- Update sidebar bottom: show user avatar (GitHub image or initials fallback), name, dropdown with sign out
-- Avatar click navigates to `/profile`
-- Reusable avatar component handling GitHub image vs initials
 
 ## Notes
-- Replace NextAuth default pages with custom UI
-- Register form submits to existing `/api/auth/register` endpoint
-- Redirect to sign-in on successful registration
-- Initials derived from name (e.g., "Brad Traversy" → "BT")
-- Testing: verify both GitHub and credentials sign-in flows, avatar display, dropdown sign out, register → redirect
 
 ## History
 
@@ -148,4 +137,18 @@ In Progress
 - Created `POST /api/auth/register` route with input validation, duplicate check (409), password hashing (bcrypt 12 rounds)
 - No migration needed — `password` field already existed on User model
 - GitHub OAuth preserved alongside credentials
+- Build passes
+
+### 2026-04-07 — Auth UI — Sign In, Register & Sign Out
+
+- Custom sign-in page (`/sign-in`) with email/password form and GitHub OAuth button; server component with client `SignInForm`
+- Custom register page (`/register`) with name, email, password, confirm password validation; server component with client `RegisterForm`
+- Registration redirects to `/sign-in?registered=true` with success toast via sonner
+- Configured `pages: { signIn: "/sign-in" }` in `auth.config.ts`
+- Created reusable `UserAvatar` component (`src/components/UserAvatar.tsx`) — GitHub image via `next/image` or initials fallback
+- Updated sidebar user area with `UserAvatar` and dropdown menu (Profile link → `/profile`, Sign out)
+- `DashboardShell` accepts and forwards `user` prop to `Sidebar`
+- Dashboard page now uses `auth()` session instead of hardcoded demo user lookup
+- Added `avatars.githubusercontent.com` to `next.config.ts` remote image patterns
+- Installed shadcn components: card, label, dropdown-menu, sonner
 - Build passes
