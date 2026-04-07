@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Toggle Email Verification
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Add a way to disable email verification so users can register and sign in without verifying
+- When disabled: registration skips sending email, sign-in doesn't check `emailVerified`
+- When enabled: current flow works as-is (send email, must verify before sign-in)
+- Simple to toggle — env variable (`REQUIRE_EMAIL_VERIFICATION=true/false`) is the cleanest option
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- No Resend domain linked yet — only the Resend test email can receive verification emails
+- This means real users can't register with verification enabled
+- Env variable approach: `REQUIRE_EMAIL_VERIFICATION` defaults to `false` for now, flip to `true` once a domain is linked
+- Touch points: register route (skip token + email), credentials authorize (skip `emailVerified` check)
+- Keep all verification code in place — this is just a bypass flag, not a removal
 
 
 ## History

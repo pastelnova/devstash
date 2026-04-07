@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { generateVerificationToken, sendVerificationEmail } from "@/lib/auth/verification"
 
+const requireEmailVerification =
+  process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+
 export async function POST(req: Request) {
   const body = await req.json()
   const { name, email, password, confirmPassword } = body as {
@@ -44,14 +47,26 @@ export async function POST(req: Request) {
   const hashedPassword = await bcrypt.hash(password, 12)
 
   await prisma.user.create({
-    data: { name, email, password: hashedPassword },
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      emailVerified: requireEmailVerification ? null : new Date(),
+    },
   })
 
-  const token = await generateVerificationToken(email)
-  await sendVerificationEmail(email, token)
+  if (requireEmailVerification) {
+    const token = await generateVerificationToken(email)
+    await sendVerificationEmail(email, token)
+  }
 
   return NextResponse.json(
-    { success: true, message: "Verification email sent" },
+    {
+      success: true,
+      message: requireEmailVerification
+        ? "Verification email sent"
+        : "Account created",
+    },
     { status: 201 }
   )
 }

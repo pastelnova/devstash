@@ -47,7 +47,11 @@ export function RegisterForm() {
       return
     }
 
-    router.push('/check-email')
+    if (data.message === 'Verification email sent') {
+      router.push('/check-email')
+    } else {
+      router.push('/sign-in?registered=true')
+    }
   }
 
   return (
