@@ -1,24 +1,13 @@
-# Current Feature: Forgot Password
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- "Forgot password?" link on the sign-in page
-- `/forgot-password` page with email input — sends a password reset email
-- `/reset-password` page that validates the token and lets the user set a new password
-- Reuse the existing `VerificationToken` model for reset tokens (no migration needed)
-- Add `generatePasswordResetToken()`, `sendPasswordResetEmail()`, and `resetPassword()` helpers in `src/lib/auth/`
-- Handle edge cases: expired token, invalid token, user not found
-- Build passes
+<!-- What does "done" look like? -->
 
 ## Notes
-- Reuse `VerificationToken` model — store reset tokens with `identifier` = email, same as email verification
-- Existing `verification.ts` pattern can be followed (generate token, send email, verify & act)
-- Password reset token should have a shorter expiry (1 hour) vs email verification (24 hours)
-- Only allow reset for users who have a password (credentials users), not OAuth-only users
-- Hash new password with bcrypt (12 rounds), matching existing registration flow
-- Resend SDK already configured in `src/lib/resend.ts`
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -192,4 +181,17 @@ In Progress
 - When enabled: existing flow unchanged (token generated, email sent, must verify before sign-in)
 - Updated register route, credentials authorize, and RegisterForm redirect logic
 - Added env var to `.env` with descriptive comment
+- Build passes
+
+### 2026-04-07 — Forgot Password
+
+- Created `src/lib/auth/password-reset.ts` with `generatePasswordResetToken()`, `sendPasswordResetEmail()`, and `resetPassword()` helpers
+- Tokens reuse existing `VerificationToken` model; 1-hour expiry (shorter than email verification's 24h)
+- Created `POST /api/auth/forgot-password` route — prevents email enumeration, skips OAuth-only users
+- Created `POST /api/auth/reset-password` route — validates token, hashes new password (bcrypt 12 rounds)
+- Created `/forgot-password` page with `ForgotPasswordForm` client component — email input with "check your email" success state
+- Created `/reset-password` server page with `ResetPasswordForm` client component — new password + confirm, success state with sign-in link
+- Handles missing token (server page), expired token, invalid token, and user-not-found edge cases
+- Added "Forgot password?" link to `SignInForm` next to password label
+- Fixed `baseUrl` operator precedence bug in both `verification.ts` and `password-reset.ts`
 - Build passes
