@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { signIn } from 'next-auth/react'
+import { signInWithGitHub } from '@/actions/auth'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -75,14 +76,16 @@ export function SignInForm({ callbackUrl, registered }: SignInFormProps) {
         <CardDescription>Enter your credentials to continue</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button
-          variant="outline"
-          className="w-full gap-2"
-          onClick={() => signIn('github', { callbackUrl })}
-        >
-          <GitHubIcon className="h-4 w-4" />
-          Sign in with GitHub
-        </Button>
+        <form action={signInWithGitHub}>
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            type="submit"
+          >
+            <GitHubIcon className="h-4 w-4" />
+            Sign in with GitHub
+          </Button>
+        </form>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

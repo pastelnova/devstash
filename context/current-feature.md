@@ -220,3 +220,11 @@
 - All rate limiters fail open (allow request) if Upstash is unavailable — 3s timeout
 - Updated all four auth frontend forms to display rate limit errors inline
 - Build passes
+
+### 2026-04-08 — Fix GitHub OAuth Redirect
+
+- Created `src/actions/auth.ts` with `signInWithGitHub` server action using `signIn` from `@/auth`
+- Updated `SignInForm.tsx` — GitHub button now uses `<form action={signInWithGitHub}>` instead of client-side `onClick` with `signIn` from `next-auth/react`
+- Uses `redirectTo: "/dashboard"` (NextAuth v5 pattern) for server-side redirect
+- Credentials login unchanged (still client-side `signIn` with `redirect: false`)
+- Build passes
