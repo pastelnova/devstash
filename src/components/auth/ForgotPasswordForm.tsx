@@ -27,7 +27,8 @@ export function ForgotPasswordForm() {
     setLoading(false)
 
     if (!res.ok) {
-      setError("Something went wrong. Please try again.")
+      const data = await res.json().catch(() => null)
+      setError(data?.error ?? (res.status === 429 ? "Too many attempts. Please try again later." : "Something went wrong. Please try again."))
       return
     }
 

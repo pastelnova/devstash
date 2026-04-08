@@ -43,7 +43,7 @@ export function RegisterForm() {
     setLoading(false)
 
     if (!res.ok) {
-      setError(data.error ?? 'Something went wrong')
+      setError(data.error ?? (res.status === 429 ? 'Too many attempts. Please try again later.' : 'Something went wrong'))
       return
     }
 

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server"
 import { resetPassword } from "@/lib/auth/password-reset"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
+  const ip = await getClientIp()
+  const rateLimited = await checkRateLimit("resetPassword", ip)
+  if (rateLimited) return rateLimited
+
   const { token, password } = await req.json()
 
   if (!token || typeof token !== "string") {

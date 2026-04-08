@@ -2,11 +2,16 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { generateVerificationToken, sendVerificationEmail } from "@/lib/auth/verification"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 const requireEmailVerification =
   process.env.REQUIRE_EMAIL_VERIFICATION === "true"
 
 export async function POST(req: Request) {
+  const ip = await getClientIp()
+  const rateLimited = await checkRateLimit("register", ip)
+  if (rateLimited) return rateLimited
+
   const body = await req.json()
   const { name, email, password, confirmPassword } = body as {
     name?: string

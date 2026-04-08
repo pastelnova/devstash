@@ -51,7 +51,9 @@ export function SignInForm({ callbackUrl, registered }: SignInFormProps) {
     setLoading(false)
 
     if (result?.error) {
-      if (result.code === 'EMAIL_NOT_VERIFIED') {
+      if (result.code === 'RATE_LIMITED') {
+        setError('Too many sign-in attempts. Please try again later.')
+      } else if (result.code === 'EMAIL_NOT_VERIFIED') {
         setError('Please verify your email before signing in. Check your inbox.')
       } else {
         setError('Invalid email or password')

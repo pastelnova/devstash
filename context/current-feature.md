@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: Rate Limiting for Auth
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Install `@upstash/ratelimit` and `@upstash/redis` packages
+- Create reusable `src/lib/rate-limit.ts` utility with Upstash Redis sliding window
+- Rate limit login (5/15min by IP+email), register (3/1hr by IP), forgot-password (3/1hr by IP), reset-password (5/15min by IP)
+- Return 429 with `Retry-After` header and user-friendly error message
+- Update frontend forms to display rate limit errors via toast
+- Fail open if Upstash is unavailable (allow request through)
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- Uses Upstash Redis (serverless-compatible) — free tier allows 10k requests/day
+- Env vars needed: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+- Login rate limiting with NextAuth credentials may need custom sign-in handler since NextAuth handles `/api/auth/callback/credentials` internally
+- IP extracted from `x-forwarded-for` header (Vercel) or fallback
+- Sliding window algorithm for smooth rate limiting
 
 ## History
 
