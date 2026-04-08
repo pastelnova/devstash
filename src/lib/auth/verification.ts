@@ -8,14 +8,16 @@ export async function generateVerificationToken(email: string) {
   const token = crypto.randomBytes(32).toString("hex")
   const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
 
-  // Delete any existing tokens for this email
+  const identifier = `verify:${email}`
+
+  // Delete any existing verification tokens for this email
   await prisma.verificationToken.deleteMany({
-    where: { identifier: email },
+    where: { identifier },
   })
 
   await prisma.verificationToken.create({
     data: {
-      identifier: email,
+      identifier,
       token,
       expires,
     },
@@ -71,9 +73,12 @@ export async function verifyToken(token: string) {
     return { error: "Verification link has expired. Please register again." }
   }
 
+  // Extract email from namespaced identifier
+  const email = record.identifier.replace("verify:", "")
+
   // Mark user as verified
   await prisma.user.update({
-    where: { email: record.identifier },
+    where: { email },
     data: { emailVerified: new Date() },
   })
 
@@ -82,5 +87,5 @@ export async function verifyToken(token: string) {
     where: { token },
   })
 
-  return { success: true, email: record.identifier }
+  return { success: true, email }
 }

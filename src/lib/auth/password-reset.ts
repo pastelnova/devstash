@@ -9,14 +9,16 @@ export async function generatePasswordResetToken(email: string) {
   const token = crypto.randomBytes(32).toString("hex")
   const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
 
+  const identifier = `reset:${email}`
+
   // Delete any existing reset tokens for this email
   await prisma.verificationToken.deleteMany({
-    where: { identifier: email },
+    where: { identifier },
   })
 
   await prisma.verificationToken.create({
     data: {
-      identifier: email,
+      identifier,
       token,
       expires,
     },
@@ -72,8 +74,11 @@ export async function resetPassword(token: string, newPassword: string) {
     return { error: "Reset link has expired. Please request a new one." }
   }
 
+  // Extract email from namespaced identifier
+  const email = record.identifier.replace("reset:", "")
+
   const user = await prisma.user.findUnique({
-    where: { email: record.identifier },
+    where: { email },
   })
 
   if (!user) {
@@ -83,7 +88,7 @@ export async function resetPassword(token: string, newPassword: string) {
   const hashedPassword = await bcrypt.hash(newPassword, 12)
 
   await prisma.user.update({
-    where: { email: record.identifier },
+    where: { email },
     data: { password: hashedPassword },
   })
 
@@ -91,5 +96,5 @@ export async function resetPassword(token: string, newPassword: string) {
     where: { token },
   })
 
-  return { success: true, email: record.identifier }
+  return { success: true, email }
 }
