@@ -1,22 +1,13 @@
-# Current Feature: Rate Limiting for Auth
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Install `@upstash/ratelimit` and `@upstash/redis` packages
-- Create reusable `src/lib/rate-limit.ts` utility with Upstash Redis sliding window
-- Rate limit login (5/15min by IP+email), register (3/1hr by IP), forgot-password (3/1hr by IP), reset-password (5/15min by IP)
-- Return 429 with `Retry-After` header and user-friendly error message
-- Update frontend forms to display rate limit errors via toast
-- Fail open if Upstash is unavailable (allow request through)
+<!-- What does "done" look like? -->
 
 ## Notes
-- Uses Upstash Redis (serverless-compatible) — free tier allows 10k requests/day
-- Env vars needed: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- Login rate limiting with NextAuth credentials may need custom sign-in handler since NextAuth handles `/api/auth/callback/credentials` internally
-- IP extracted from `x-forwarded-for` header (Vercel) or fallback
-- Sliding window algorithm for smooth rate limiting
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -216,4 +207,16 @@ In Progress
 - Delete account API route (`DELETE /api/auth/delete-account`) with cascading delete + sign out
 - Created `src/lib/db/profile.ts` with `getProfileStats()` and `hasPassword()` queries
 - Installed shadcn `dialog` component
+- Build passes
+
+### 2026-04-08 — Rate Limiting for Auth
+
+- Installed `@upstash/ratelimit` and `@upstash/redis` packages
+- Created `src/lib/rate-limit.ts` with reusable `checkRateLimit()` utility using Upstash Redis sliding window
+- Pre-configured rate limiters: login (5/15min by IP+email), register (3/1hr by IP), forgot-password (3/1hr by IP), reset-password (5/15min by IP)
+- Added rate limiting to `authorize` callback in `src/auth.ts` via `RateLimitError` (extends `CredentialsSignin`)
+- Added rate limiting to register, forgot-password, and reset-password API routes
+- Returns 429 with `Retry-After` header and human-readable error message
+- All rate limiters fail open (allow request) if Upstash is unavailable — 3s timeout
+- Updated all four auth frontend forms to display rate limit errors inline
 - Build passes
