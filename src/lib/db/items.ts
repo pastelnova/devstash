@@ -85,6 +85,49 @@ export async function getSystemItemTypes(userId: string): Promise<SystemItemType
   }))
 }
 
+export type ItemTypeInfo = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+}
+
+/**
+ * Resolve a URL slug (e.g. "snippets" or "snippet") to a system item type.
+ * System type names are stored singular & lowercase ("snippet", "note", ...).
+ */
+export async function getSystemItemTypeBySlug(slug: string): Promise<ItemTypeInfo | null> {
+  const normalized = slug.toLowerCase()
+  const candidates = [normalized]
+  if (normalized.endsWith('s')) candidates.push(normalized.slice(0, -1))
+
+  const type = await prisma.itemType.findFirst({
+    where: { isSystem: true, name: { in: candidates } },
+    select: { id: true, name: true, icon: true, color: true },
+  })
+  return type
+}
+
+export async function getItemsByType(userId: string, typeId: string): Promise<ItemWithMeta[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, typeId },
+    include: {
+      type: { select: { icon: true, color: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    type: { icon: item.type.icon, color: item.type.color },
+    tags: item.tags.map((t) => t.tag.name),
+    createdAt: item.createdAt,
+  }))
+}
+
 export async function getItemStats(userId: string): Promise<ItemStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),
