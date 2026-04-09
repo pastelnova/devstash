@@ -1,20 +1,13 @@
-# Current Feature: Items List 3-Column Grid
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-
-- Update the items list view (`/items/[type]`) grid to show **3 columns on large screens** instead of 2
-- Keep the layout fully responsive: 1 column on mobile, 2 columns on medium screens, 3 columns on large screens
-- No changes to `ItemCard` content or styling — grid layout only
+<!-- What does "done" look like? -->
 
 ## Notes
-
-- File to change: [src/app/items/[type]/page.tsx](src/app/items/[type]/page.tsx) (grid container uses `md:grid-cols-2`)
-- Use Tailwind responsive utilities: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
-- Verify cards don't look cramped at the `lg` breakpoint — adjust gap if needed
-- No DB or data-fetching changes required
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -262,3 +255,10 @@ In Progress
 - Added sample test `src/lib/utils.test.ts` covering `cn()` — all tests pass
 - Updated `CLAUDE.md`, `context/coding-standards.md`, and `context/ai-interaction.md` with testing scope (server actions + lib only, no components), conventions, and updated workflow step
 - Build and lint pass
+
+### 2026-04-09 — Items List 3-Column Grid
+
+- Updated `src/app/items/[type]/page.tsx` grid container from `grid-cols-1 md:grid-cols-2` to `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+- Responsive: 1 column on mobile, 2 columns from `md`, 3 columns from `lg` (≥1024px)
+- Verified in browser after dev server restart (Tailwind v4 JIT needed a fresh scan to pick up the new `lg:grid-cols-3` class)
+- Build and tests pass
