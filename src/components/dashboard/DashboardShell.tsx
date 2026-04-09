@@ -7,6 +7,7 @@ import { Search, Plus, FolderPlus, Menu } from 'lucide-react'
 import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
+import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
 
 interface DashboardShellProps {
   children: React.ReactNode
@@ -20,6 +21,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
+    <ItemDrawerProvider>
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Top Bar */}
       <header className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
@@ -85,5 +87,6 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
+    </ItemDrawerProvider>
   )
 }

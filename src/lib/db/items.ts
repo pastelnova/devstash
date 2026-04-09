@@ -128,6 +128,64 @@ export async function getItemsByType(userId: string, typeId: string): Promise<It
   }))
 }
 
+export type ItemDetail = {
+  id: string
+  title: string
+  description: string | null
+  content: string | null
+  contentType: string
+  language: string | null
+  url: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
+  isFavorite: boolean
+  isPinned: boolean
+  type: {
+    id: string
+    name: string
+    icon: string | null
+    color: string | null
+  }
+  collection: { id: string; name: string } | null
+  tags: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+export async function getItemDetail(userId: string, itemId: string): Promise<ItemDetail | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    include: {
+      type: { select: { id: true, name: true, icon: true, color: true } },
+      collection: { select: { id: true, name: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+  })
+
+  if (!item) return null
+
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    content: item.content,
+    contentType: item.contentType,
+    language: item.language,
+    url: item.url,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    type: item.type,
+    collection: item.collection,
+    tags: item.tags.map((t) => t.tag.name),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  }
+}
+
 export async function getItemStats(userId: string): Promise<ItemStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),
