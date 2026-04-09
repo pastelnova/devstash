@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: Items List View
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Dynamic route `/items/[type]` displays items filtered by type (e.g., `/items/snippets`, `/items/notes`)
+- Fetch items from DB filtered by the type slug
+- Responsive grid of ItemCard components, two columns on `md` and up
+- Each card has a left border colored by its item type
+- Follow existing codebase patterns
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- Source spec: `context/features/item-list-view-spec.md`
+- Reuse existing `ItemRow` card styling pattern (rounded border with `border-l-4` colored by type) — see 2026-04-09 history entry
+- Use existing DB helpers in `src/lib/db/items.ts`; add a `getItemsByType(userId, typeSlug)` helper
+- Page should be a server component using `auth()`, wrapped in `DashboardShell` like `/profile` and `/dashboard`
+- Type slug must map to the `ItemType` (likely by lowercased name, e.g. `snippets` → `Snippet`)
 
 ## History
 
