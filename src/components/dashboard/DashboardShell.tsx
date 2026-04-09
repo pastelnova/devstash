@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 import { Search, Plus, FolderPlus, Menu } from 'lucide-react'
 import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType } from '@/lib/db/items'
@@ -26,33 +27,29 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
     <ItemDrawerProvider>
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Top Bar */}
-      <header className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Open menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+      <header className="flex items-center h-14 border-b border-border shrink-0">
+        {/* Logo area — matches sidebar width on desktop */}
+        <div className="flex items-center gap-3 px-4 md:w-60 shrink-0">
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
 
-        {/* Logo */}
-        <div className="hidden md:flex items-center gap-2 shrink-0">
-          <div className="h-6 w-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-            S
-          </div>
-          <span className="font-semibold text-sm">DevStash</span>
-        </div>
-        {/* Mobile logo */}
-        <div className="flex md:hidden items-center gap-2 shrink-0">
-          <div className="h-6 w-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-            S
-          </div>
-          <span className="font-semibold text-sm">DevStash</span>
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+            <div className="h-6 w-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+              S
+            </div>
+            <span className="font-semibold text-sm">DevStash</span>
+          </Link>
         </div>
 
-        <div className="flex-1 max-w-sm">
-          <div className="relative">
+        {/* Main area — aligns with dashboard content */}
+        <div className="flex-1 flex items-center gap-3 px-6 min-w-0">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search items..."
@@ -60,9 +57,8 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
               readOnly
             />
           </div>
-        </div>
 
-        <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5">
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">New Collection</span>
@@ -71,6 +67,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">New Item</span>
           </Button>
+          </div>
         </div>
       </header>
 
