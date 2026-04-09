@@ -237,6 +237,58 @@ export async function updateItem(
   return updated
 }
 
+export type CreateItemInput = {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  typeId: string
+  tags: string[]
+}
+
+/**
+ * Create a new item for the given user. Tag strategy mirrors `updateItem`:
+ * upsert Tag rows (unique per name+userId) and create the joins.
+ */
+export async function createItem(
+  userId: string,
+  input: CreateItemInput,
+): Promise<ItemDetail> {
+  const newItemId = await prisma.$transaction(async (tx) => {
+    const created = await tx.item.create({
+      data: {
+        title: input.title,
+        description: input.description,
+        content: input.content,
+        url: input.url,
+        language: input.language,
+        contentType: 'text',
+        userId,
+        typeId: input.typeId,
+      },
+      select: { id: true },
+    })
+
+    for (const name of input.tags) {
+      const tag = await tx.tag.upsert({
+        where: { name_userId: { name, userId } },
+        update: {},
+        create: { name, userId },
+      })
+      await tx.itemTag.create({ data: { itemId: created.id, tagId: tag.id } })
+    }
+
+    return created.id
+  })
+
+  const detail = await getItemDetail(userId, newItemId)
+  if (!detail) {
+    throw new Error('Item not found after create')
+  }
+  return detail
+}
+
 /**
  * Delete an item. Cascades remove ItemTag rows via the schema.
  * Caller must have verified ownership.
