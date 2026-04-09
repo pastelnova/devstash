@@ -18,11 +18,13 @@ vi.mock('@/lib/prisma', () => ({
 
 // Mock db query
 const updateItemQueryMock = vi.fn()
+const deleteItemQueryMock = vi.fn()
 vi.mock('@/lib/db/items', () => ({
   updateItem: (...args: unknown[]) => updateItemQueryMock(...args),
+  deleteItem: (...args: unknown[]) => deleteItemQueryMock(...args),
 }))
 
-import { updateItem } from './items'
+import { deleteItem, updateItem } from './items'
 import type { ItemDetail } from '@/lib/db/items'
 
 const sampleDetail: ItemDetail = {
@@ -135,5 +137,54 @@ describe('updateItem server action', () => {
       tags: [],
     })
     expect(result).toEqual({ success: false, error: 'Failed to update item' })
+  })
+})
+
+describe('deleteItem server action', () => {
+  beforeEach(() => {
+    authMock.mockReset()
+    findFirstMock.mockReset()
+    deleteItemQueryMock.mockReset()
+  })
+
+  it('returns Unauthorized when no session', async () => {
+    authMock.mockResolvedValue(null)
+    const result = await deleteItem('item_1')
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+    expect(findFirstMock).not.toHaveBeenCalled()
+    expect(deleteItemQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('returns Item not found when ownership check fails', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    findFirstMock.mockResolvedValue(null)
+    const result = await deleteItem('item_1')
+    expect(result).toEqual({ success: false, error: 'Item not found' })
+    expect(deleteItemQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('deletes the item on the happy path', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    findFirstMock.mockResolvedValue({ id: 'item_1' })
+    deleteItemQueryMock.mockResolvedValue(undefined)
+
+    const result = await deleteItem('item_1')
+
+    expect(result).toEqual({ success: true, data: { id: 'item_1' } })
+    expect(findFirstMock).toHaveBeenCalledTimes(1)
+    expect(findFirstMock).toHaveBeenCalledWith({
+      where: { id: 'item_1', userId: 'user_1' },
+      select: { id: true },
+    })
+    expect(deleteItemQueryMock).toHaveBeenCalledWith('item_1')
+  })
+
+  it('returns generic error when query throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    findFirstMock.mockResolvedValue({ id: 'item_1' })
+    deleteItemQueryMock.mockRejectedValue(new Error('db down'))
+
+    const result = await deleteItem('item_1')
+    expect(result).toEqual({ success: false, error: 'Failed to delete item' })
   })
 })

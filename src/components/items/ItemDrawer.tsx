@@ -8,8 +8,19 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { typeIconMap } from '@/lib/item-type-icons'
-import { updateItem } from '@/actions/items'
+import { deleteItem, updateItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
 interface ItemDrawerProps {
@@ -43,10 +54,12 @@ const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 const URL_TYPES = new Set(['link'])
 
 export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
+  const router = useRouter()
   const [item, setItem] = useState<ItemDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
+  const [deletePending, startDeleteTransition] = useTransition()
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -87,6 +100,20 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     }
   }
 
+  const handleDelete = () => {
+    if (!item) return
+    startDeleteTransition(async () => {
+      const result = await deleteItem(item.id)
+      if (result.success) {
+        toast.success('Item deleted')
+        onOpenChange(false)
+        router.refresh()
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl flex flex-col gap-0 p-0">
@@ -95,7 +122,13 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
           <div className="p-6 text-sm text-destructive">{error}</div>
         )}
         {item && !loading && !editing && (
-          <DrawerViewBody item={item} onCopy={handleCopy} onEdit={() => setEditing(true)} />
+          <DrawerViewBody
+            item={item}
+            onCopy={handleCopy}
+            onEdit={() => setEditing(true)}
+            onDelete={handleDelete}
+            deletePending={deletePending}
+          />
         )}
         {item && !loading && editing && (
           <DrawerEditBody
@@ -149,11 +182,16 @@ function DrawerViewBody({
   item,
   onCopy,
   onEdit,
+  onDelete,
+  deletePending,
 }: {
   item: ItemDetail
   onCopy: () => void
   onEdit: () => void
+  onDelete: () => void
+  deletePending: boolean
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -213,14 +251,42 @@ function DrawerViewBody({
             <Pencil className="h-4 w-4" />
             <span className="text-xs">Edit</span>
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto gap-1.5 text-destructive hover:text-destructive"
-            aria-label="Delete"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto gap-1.5 text-destructive hover:text-destructive"
+                  aria-label="Delete"
+                  disabled={deletePending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete <strong>{item.title}</strong>. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deletePending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => {
+                    setConfirmOpen(false)
+                    onDelete()
+                  }}
+                  disabled={deletePending}
+                >
+                  {deletePending ? 'Deleting…' : 'Delete'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </SheetHeader>
 

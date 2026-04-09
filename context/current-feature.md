@@ -1,17 +1,25 @@
-# Current Feature
+# Current Feature: Item Delete
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Users can delete an item from the item drawer
+- Clicking the Delete button opens a shadcn confirmation dialog (destructive styling)
+- Confirming deletes the item from the database (owner-only)
+- Success shows a sonner toast and closes the drawer
+- Affected lists (pinned, recent, items-by-type, stats) refresh to reflect the deletion
+- Errors show an inline/toast error message; no partial state
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- Add `deleteItem(userId, itemId)` to `src/lib/db/items.ts` — Prisma delete with ownership check
+- Add `deleteItem` server action to `src/actions/items.ts` — `auth()` + ownership check, `{ success, data, error }` contract
+- Wire the existing Delete button in `ItemDrawer.tsx` to open the AlertDialog and call the server action
+- Use shadcn `alert-dialog` component (install via `npx shadcn@latest add alert-dialog` if not present)
+- Use `useTransition` for pending state; call `router.refresh()` on success
+- Add Vitest coverage in `src/actions/items.test.ts`: unauthorized, ownership miss, happy path, query throw
 
 ## History
-
-<!-- Keep this updated. Earliest to latest -->
 
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
 
