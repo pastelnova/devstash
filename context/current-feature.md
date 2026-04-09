@@ -262,3 +262,15 @@
 - Responsive: 1 column on mobile, 2 columns from `md`, 3 columns from `lg` (≥1024px)
 - Verified in browser after dev server restart (Tailwind v4 JIT needed a fresh scan to pick up the new `lg:grid-cols-3` class)
 - Build and tests pass
+
+### 2026-04-09 — Item Drawer
+
+- Installed shadcn `sheet` component
+- Added `getItemDetail(userId, itemId)` to `src/lib/db/items.ts` — full item with type, collection, tags, content, url, language
+- Created `GET /api/items/[id]` route with auth check — 401 unauthorized, 404 when item missing or not owned by user
+- Built `src/components/items/ItemDrawer.tsx` — right-side shadcn Sheet, skeleton loading state, action bar (Favorite ★ yellow when active, Pin, Copy, Edit, right-aligned Delete), meta grid, tags, content (pre/mono), URL
+- Built `src/components/items/ItemDrawerContext.tsx` — `ItemDrawerProvider` + `useItemDrawer()` hook managing open state and selected item id; clears id after close animation
+- `ItemCard.tsx` and `ItemRow.tsx` converted to client `<button>` components that call `openItem(id)` on click
+- Provider mounted in `DashboardShell.tsx` so drawer works on dashboard and items list pages without page changes
+- Copy button writes `content ?? url ?? title` to clipboard; Favorite/Pin/Edit/Delete wired visually only (mutations out of scope per spec)
+- Build passes, all existing tests pass
