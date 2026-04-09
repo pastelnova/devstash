@@ -90,6 +90,15 @@ Example v4 configuration:
 - Return `{ success, data, error }` pattern from actions
 - Display user-friendly error messages via toast
 
+## Testing
+
+- Vitest for unit tests; `node` environment
+- **Scope:** only server actions (`src/actions/**`) and utilities/lib (`src/lib/**`). Do not write tests for React components, pages, or layouts
+- Co-locate tests: `foo.ts` → `foo.test.ts`
+- Mock Prisma, Resend, Upstash, OpenAI, and Next.js server APIs (`next/headers`, `next/navigation`) with `vi.mock` — never hit real DBs or external services
+- Tests must be deterministic — no real DB, no network
+- Run `npm run test:run` before committing
+
 ## Code Quality
 
 - No commented-out code unless specified

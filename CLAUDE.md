@@ -14,10 +14,15 @@ Read the following to get the full context of the project:
 ## Commands
 
 ```bash
-npm run dev      # start dev server at localhost:3000
-npm run build    # production build
-npm run lint     # run ESLint
+npm run dev            # start dev server at localhost:3000
+npm run build          # production build
+npm run lint           # run ESLint
+npm run test           # Vitest in watch mode
+npm run test:run       # Vitest single run
+npm run test:coverage  # Vitest with v8 coverage
 ```
+
+Unit tests cover only server actions (`src/actions/**`) and utilities (`src/lib/**`). Components are not tested. See [context/ai-interaction.md](context/ai-interaction.md) → **Testing**.
 
 IMPORTANT: Do not add Claude to any commit messages
 
