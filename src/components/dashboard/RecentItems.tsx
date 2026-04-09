@@ -7,7 +7,7 @@ export function RecentItems({ items }: { items: ItemWithMeta[] }) {
   return (
     <section>
       <h2 className="text-base font-semibold mb-3">Recent Items</h2>
-      <div className="rounded-lg border border-border bg-card px-4">
+      <div className="flex flex-col gap-2">
         {items.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}

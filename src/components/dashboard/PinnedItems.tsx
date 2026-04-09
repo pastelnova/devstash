@@ -11,7 +11,7 @@ export function PinnedItems({ items }: { items: ItemWithMeta[] }) {
         <Pin className="h-4 w-4 text-muted-foreground" />
         <h2 className="text-base font-semibold">Pinned</h2>
       </div>
-      <div className="rounded-lg border border-border bg-card px-4">
+      <div className="flex flex-col gap-2">
         {items.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}

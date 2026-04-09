@@ -23,8 +23,8 @@ export function CollectionsSection({ collections }: Props) {
         {collections.map((col) => (
           <div
             key={col.id}
-            className="rounded-lg border bg-card p-4 hover:bg-muted/30 transition-colors"
-            style={{ borderColor: col.dominantColor ?? undefined }}
+            className="rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors"
+            style={{ borderLeftColor: col.dominantColor ?? undefined }}
           >
             <div className="flex items-start justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0">

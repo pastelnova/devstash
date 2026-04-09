@@ -228,3 +228,10 @@
 - Uses `redirectTo: "/dashboard"` (NextAuth v5 pattern) for server-side redirect
 - Credentials login unchanged (still client-side `signIn` with `redirect: false`)
 - Build passes
+
+### 2026-04-09 — Dashboard Card Left Borders
+
+- `CollectionsSection.tsx` — collection cards now use `border-l-4` with only `borderLeftColor` set to the dominant type color (was full colored border)
+- `ItemRow.tsx` — reworked from list row to standalone card: `rounded-lg border border-l-4 bg-card p-3` with `borderLeftColor` set to the item's type color
+- `PinnedItems.tsx` / `RecentItems.tsx` — removed outer card wrapper; now `flex flex-col gap-2` so each ItemRow stands as its own card with small margins between them
+- Build passes

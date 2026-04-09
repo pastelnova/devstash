@@ -12,7 +12,10 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
   })
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
+    <div
+      className="flex items-start gap-3 rounded-lg border border-l-4 bg-card p-3 hover:bg-muted/30 transition-colors"
+      style={{ borderLeftColor: iconColor }}
+    >
       <div
         className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
         style={{ backgroundColor: `${iconColor}22` }}
