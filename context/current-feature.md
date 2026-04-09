@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Items List 3-Column Grid
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+
+- Update the items list view (`/items/[type]`) grid to show **3 columns on large screens** instead of 2
+- Keep the layout fully responsive: 1 column on mobile, 2 columns on medium screens, 3 columns on large screens
+- No changes to `ItemCard` content or styling — grid layout only
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+
+- File to change: [src/app/items/[type]/page.tsx](src/app/items/[type]/page.tsx) (grid container uses `md:grid-cols-2`)
+- Use Tailwind responsive utilities: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+- Verify cards don't look cramped at the `lg` breakpoint — adjust gap if needed
+- No DB or data-fetching changes required
 
 ## History
 
@@ -245,3 +252,13 @@
 - Responsive grid: 1 column on mobile, 2 columns from `md` up
 - Page header shows type icon + pluralized title + item count; empty state when no items exist
 - Build passes
+
+### 2026-04-09 — Vitest Unit Testing Setup
+
+- Installed `vitest` and `@vitest/coverage-v8` as dev dependencies
+- Added `vitest.config.ts` — `node` environment, globals enabled, `resolve.tsconfigPaths: true` for `@/*` aliases, tests scoped to `src/actions/**` and `src/lib/**` (components explicitly excluded)
+- Added `"types": ["vitest/globals"]` to `tsconfig.json` for ambient `describe`/`it`/`expect`
+- Added `test`, `test:run`, and `test:coverage` scripts to `package.json`
+- Added sample test `src/lib/utils.test.ts` covering `cn()` — all tests pass
+- Updated `CLAUDE.md`, `context/coding-standards.md`, and `context/ai-interaction.md` with testing scope (server actions + lib only, no components), conventions, and updated workflow step
+- Build and lint pass
