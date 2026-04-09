@@ -186,6 +186,57 @@ export async function getItemDetail(userId: string, itemId: string): Promise<Ite
   }
 }
 
+export type UpdateItemInput = {
+  title: string
+  description: string | null
+  content: string | null
+  url: string | null
+  language: string | null
+  tags: string[]
+}
+
+/**
+ * Update an item's editable fields and its tag set.
+ * Tag strategy: remove all existing ItemTag rows for the item, then
+ * upsert Tag rows (unique per name+userId) and recreate the joins.
+ * Caller must have verified ownership.
+ */
+export async function updateItem(
+  userId: string,
+  itemId: string,
+  input: UpdateItemInput,
+): Promise<ItemDetail> {
+  await prisma.$transaction(async (tx) => {
+    await tx.item.update({
+      where: { id: itemId },
+      data: {
+        title: input.title,
+        description: input.description,
+        content: input.content,
+        url: input.url,
+        language: input.language,
+      },
+    })
+
+    await tx.itemTag.deleteMany({ where: { itemId } })
+
+    for (const name of input.tags) {
+      const tag = await tx.tag.upsert({
+        where: { name_userId: { name, userId } },
+        update: {},
+        create: { name, userId },
+      })
+      await tx.itemTag.create({ data: { itemId, tagId: tag.id } })
+    }
+  })
+
+  const updated = await getItemDetail(userId, itemId)
+  if (!updated) {
+    throw new Error('Item not found after update')
+  }
+  return updated
+}
+
 export async function getItemStats(userId: string): Promise<ItemStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

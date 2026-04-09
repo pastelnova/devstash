@@ -1,10 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Copy, File, Pencil, Pin, Star, Trash2 } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Copy, File, Pencil, Pin, Star, Trash2, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { updateItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
 interface ItemDrawerProps {
@@ -13,10 +18,35 @@ interface ItemDrawerProps {
   onOpenChange: (open: boolean) => void
 }
 
+type EditState = {
+  title: string
+  description: string
+  content: string
+  url: string
+  language: string
+  tags: string
+}
+
+function toEditState(item: ItemDetail): EditState {
+  return {
+    title: item.title,
+    description: item.description ?? '',
+    content: item.content ?? '',
+    url: item.url ?? '',
+    language: item.language ?? '',
+    tags: item.tags.join(', '),
+  }
+}
+
+const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
+const LANGUAGE_TYPES = new Set(['snippet', 'command'])
+const URL_TYPES = new Set(['link'])
+
 export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const [item, setItem] = useState<ItemDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -25,6 +55,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     setLoading(true)
     setError(null)
     setItem(null)
+    setEditing(false)
 
     fetch(`/api/items/${itemId}`)
       .then(async (res) => {
@@ -63,8 +94,18 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
         {error && !loading && (
           <div className="p-6 text-sm text-destructive">{error}</div>
         )}
-        {item && !loading && (
-          <DrawerBody item={item} onCopy={handleCopy} />
+        {item && !loading && !editing && (
+          <DrawerViewBody item={item} onCopy={handleCopy} onEdit={() => setEditing(true)} />
+        )}
+        {item && !loading && editing && (
+          <DrawerEditBody
+            item={item}
+            onCancel={() => setEditing(false)}
+            onSaved={(updated) => {
+              setItem(updated)
+              setEditing(false)
+            }}
+          />
         )}
       </SheetContent>
     </Sheet>
@@ -91,10 +132,28 @@ function DrawerSkeleton() {
   )
 }
 
-function DrawerBody({ item, onCopy }: { item: ItemDetail; onCopy: () => void }) {
+function TypeIconBadge({ item }: { item: ItemDetail }) {
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
   const iconColor = item.type.color ?? '#94a3b8'
+  return (
+    <div
+      className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
+      style={{ backgroundColor: `${iconColor}22` }}
+    >
+      <Icon className="h-5 w-5" style={{ color: iconColor }} />
+    </div>
+  )
+}
 
+function DrawerViewBody({
+  item,
+  onCopy,
+  onEdit,
+}: {
+  item: ItemDetail
+  onCopy: () => void
+  onEdit: () => void
+}) {
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -105,12 +164,7 @@ function DrawerBody({ item, onCopy }: { item: ItemDetail; onCopy: () => void }) 
     <>
       <SheetHeader className="px-6 pt-6 pb-4 border-b">
         <div className="flex items-start gap-3">
-          <div
-            className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${iconColor}22` }}
-          >
-            <Icon className="h-5 w-5" style={{ color: iconColor }} />
-          </div>
+          <TypeIconBadge item={item} />
           <div className="flex-1 min-w-0 pr-8">
             <SheetTitle className="text-base font-semibold truncate">{item.title}</SheetTitle>
             {item.description && (
@@ -149,7 +203,13 @@ function DrawerBody({ item, onCopy }: { item: ItemDetail; onCopy: () => void }) 
             <Copy className="h-4 w-4" />
             <span className="text-xs">Copy</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1.5" aria-label="Edit">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5"
+            onClick={onEdit}
+            aria-label="Edit"
+          >
             <Pencil className="h-4 w-4" />
             <span className="text-xs">Edit</span>
           </Button>
@@ -217,6 +277,186 @@ function DrawerBody({ item, onCopy }: { item: ItemDetail; onCopy: () => void }) 
         )}
       </div>
     </>
+  )
+}
+
+function DrawerEditBody({
+  item,
+  onCancel,
+  onSaved,
+}: {
+  item: ItemDetail
+  onCancel: () => void
+  onSaved: (updated: ItemDetail) => void
+}) {
+  const router = useRouter()
+  const [form, setForm] = useState<EditState>(() => toEditState(item))
+  const [pending, startTransition] = useTransition()
+
+  const typeName = item.type.name.toLowerCase()
+  const showContent = CONTENT_TYPES.has(typeName)
+  const showLanguage = LANGUAGE_TYPES.has(typeName)
+  const showUrl = URL_TYPES.has(typeName)
+
+  const titleTrimmed = form.title.trim()
+  const canSave = titleTrimmed.length > 0 && !pending
+
+  const handleSave = () => {
+    const tags = form.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0)
+
+    startTransition(async () => {
+      const result = await updateItem(item.id, {
+        title: form.title,
+        description: form.description,
+        content: showContent ? form.content : null,
+        url: showUrl ? form.url : null,
+        language: showLanguage ? form.language : null,
+        tags,
+      })
+
+      if (result.success) {
+        toast.success('Item updated')
+        router.refresh()
+        onSaved(result.data)
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
+  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
+  return (
+    <>
+      <SheetHeader className="px-6 pt-6 pb-4 border-b">
+        <div className="flex items-start gap-3">
+          <TypeIconBadge item={item} />
+          <div className="flex-1 min-w-0 pr-8">
+            <SheetTitle className="text-base font-semibold">Edit item</SheetTitle>
+            <SheetDescription className="mt-1">
+              {capitalize(item.type.name)} · {date}
+            </SheetDescription>
+          </div>
+        </div>
+
+        {/* Action bar — Save / Cancel */}
+        <div className="flex items-center gap-2 mt-4">
+          <Button size="sm" onClick={handleSave} disabled={!canSave}>
+            {pending ? 'Saving…' : 'Save'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={pending}
+            className="gap-1.5"
+          >
+            <X className="h-4 w-4" />
+            Cancel
+          </Button>
+        </div>
+      </SheetHeader>
+
+      {/* Body — form */}
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        <Field label="Title" htmlFor="item-title">
+          <Input
+            id="item-title"
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            aria-invalid={titleTrimmed.length === 0}
+          />
+        </Field>
+
+        <Field label="Description" htmlFor="item-description">
+          <textarea
+            id="item-description"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            rows={2}
+            className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+          />
+        </Field>
+
+        {showContent && (
+          <Field label="Content" htmlFor="item-content">
+            <textarea
+              id="item-content"
+              value={form.content}
+              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+              rows={10}
+              className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+            />
+          </Field>
+        )}
+
+        {showLanguage && (
+          <Field label="Language" htmlFor="item-language">
+            <Input
+              id="item-language"
+              value={form.language}
+              onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
+              placeholder="e.g. typescript"
+            />
+          </Field>
+        )}
+
+        {showUrl && (
+          <Field label="URL" htmlFor="item-url">
+            <Input
+              id="item-url"
+              value={form.url}
+              onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+              placeholder="https://…"
+            />
+          </Field>
+        )}
+
+        <Field
+          label="Tags"
+          htmlFor="item-tags"
+          hint="Comma-separated"
+        >
+          <Input
+            id="item-tags"
+            value={form.tags}
+            onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
+            placeholder="react, hooks, ui"
+          />
+        </Field>
+      </div>
+    </>
+  )
+}
+
+function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+}: {
+  label: string
+  htmlFor: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
+          {label}
+        </Label>
+        {hint && <span className="text-[10px] text-muted-foreground">{hint}</span>}
+      </div>
+      {children}
+    </div>
   )
 }
 
