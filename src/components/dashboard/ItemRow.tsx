@@ -1,8 +1,12 @@
+'use client'
+
 import { File } from 'lucide-react'
 import { typeIconMap } from '@/lib/item-type-icons'
 import type { ItemWithMeta } from '@/lib/db/items'
+import { useItemDrawer } from '@/components/items/ItemDrawerContext'
 
 export function ItemRow({ item }: { item: ItemWithMeta }) {
+  const { openItem } = useItemDrawer()
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
   const iconColor = item.type.color ?? '#94a3b8'
 
@@ -12,8 +16,10 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
   })
 
   return (
-    <div
-      className="flex items-start gap-3 rounded-lg border border-l-4 bg-card p-3 hover:bg-muted/30 transition-colors"
+    <button
+      type="button"
+      onClick={() => openItem(item.id)}
+      className="flex items-start gap-3 rounded-lg border border-l-4 bg-card p-3 hover:bg-muted/30 transition-colors text-left w-full cursor-pointer"
       style={{ borderLeftColor: iconColor }}
     >
       <div
@@ -38,6 +44,6 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
         )}
       </div>
       <time className="text-xs text-muted-foreground shrink-0 mt-0.5">{date}</time>
-    </div>
+    </button>
   )
 }
