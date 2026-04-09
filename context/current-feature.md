@@ -296,3 +296,12 @@
 - Uses `useTransition` for pending state; Delete button and Cancel disabled while deleting
 - Added 4 Vitest cases to `src/actions/items.test.ts`: unauthorized, ownership miss, happy path, query throw
 - Build and all 13 tests pass
+
+### 2026-04-09 — Item Create
+
+- Added `createItem(userId, input)` to `src/lib/db/items.ts` — transactional: creates `Item` with `contentType: 'text'`, upserts `Tag` rows by `(name, userId)`, creates joins; returns full `ItemDetail` via `getItemDetail`
+- Added `createItem` server action to `src/actions/items.ts` — Zod schema with `type` enum (`snippet`/`prompt`/`command`/`note`/`link`), refine rule requiring URL for link type, reuses `nullableTrimmedString` + tag dedupe from update schema. Looks up system `ItemType` by name inside the action, returns `{ success, data, error }`
+- Created `src/components/items/ItemCreateDialog.tsx` — shadcn Dialog with 5-button segmented type selector (colored icon + label from `typeIconMap`), conditional fields per type (content for snippet/prompt/command/note, language for snippet/command, url for link), form reset on close, sonner toast + `router.refresh()` on success
+- Wired "New Item" top bar button in `DashboardShell.tsx` to open the dialog; passes through existing `itemTypes` prop
+- Added 7 Vitest cases to `src/actions/items.test.ts`: unauthorized, empty title, link missing URL, invalid URL, system type not found, happy path (trim + tag dedupe + typeId forwarded), query throw
+- Build and all 20 tests pass
