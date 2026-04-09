@@ -237,6 +237,16 @@ export async function updateItem(
   return updated
 }
 
+/**
+ * Delete an item. Cascades remove ItemTag rows via the schema.
+ * Caller must have verified ownership.
+ */
+export async function deleteItem(itemId: string): Promise<void> {
+  await prisma.item.delete({
+    where: { id: itemId },
+  })
+}
+
 export async function getItemStats(userId: string): Promise<ItemStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

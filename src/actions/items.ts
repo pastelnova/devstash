@@ -3,7 +3,11 @@
 import { z } from 'zod'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { updateItem as updateItemQuery, type ItemDetail } from '@/lib/db/items'
+import {
+  deleteItem as deleteItemQuery,
+  updateItem as updateItemQuery,
+  type ItemDetail,
+} from '@/lib/db/items'
 
 const nullableTrimmedString = z
   .string()
@@ -61,5 +65,27 @@ export async function updateItem(
     return { success: true, data: updated }
   } catch {
     return { success: false, error: 'Failed to update item' }
+  }
+}
+
+export async function deleteItem(itemId: string): Promise<ActionResult<{ id: string }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId: session.user.id },
+    select: { id: true },
+  })
+  if (!existing) {
+    return { success: false, error: 'Item not found' }
+  }
+
+  try {
+    await deleteItemQuery(itemId)
+    return { success: true, data: { id: itemId } }
+  } catch {
+    return { success: false, error: 'Failed to delete item' }
   }
 }
