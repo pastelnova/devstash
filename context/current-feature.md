@@ -1,29 +1,13 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
-
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-
-- Edit button toggles the item drawer into an inline edit mode (same drawer stays open)
-- Action bar is replaced with Save/Cancel buttons in edit mode
-- Cancel discards changes; Save persists via server action, refreshes drawer data, and returns to view mode
-- Toast notifications on save success/error
-- Editable fields for all types: title (required), description, tags (comma-separated → array)
-- Type-specific editable fields: content (snippet/prompt/command/note), language (snippet/command), url (link)
-- Display-only in edit mode: item type, collections, created/updated dates
-- Zod validation in the server action; errors returned via `{ success, error }` shape and displayed on the client
-- `updateItem(itemId, data)` server action in `src/actions/items.ts` with auth + ownership checks
-- `updateItem` query function in `src/lib/db/items.ts`; tag update disconnects all then connect-or-creates; returns full `ItemDetail`
-- `router.refresh()` after save so underlying card lists reflect changes
+<!-- What does "done" look like? -->
 
 ## Notes
-
-- Simple controlled inputs with local state — no form library
-- Client-side Save disabled while title is empty (UX guard); server-side Zod is source of truth
-- Content textarea is plain — no code editor yet
-- Follow existing `{ success, data, error }` server action pattern and coding standards (Zod validation, auth via `auth()`, ownership check before DB call)
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -290,3 +274,16 @@ In Progress
 - Provider mounted in `DashboardShell.tsx` so drawer works on dashboard and items list pages without page changes
 - Copy button writes `content ?? url ?? title` to clipboard; Favorite/Pin/Edit/Delete wired visually only (mutations out of scope per spec)
 - Build passes, all existing tests pass
+
+### 2026-04-09 — Item Drawer Edit Mode
+
+- Installed `zod` for input validation
+- Added `updateItem(userId, itemId, input)` to `src/lib/db/items.ts` — transactional: updates fields, deletes all `ItemTag` rows, upserts `Tag` rows by `(name, userId)`, recreates joins; returns full `ItemDetail` via `getItemDetail`
+- Created `src/actions/items.ts` with `updateItem` server action — Zod schema (title required, nullable trimmed strings, `z.url()` validation, tag dedupe), `auth()` + ownership check, `{ success, data, error }` contract. Schema is module-local (not exported) because `"use server"` files can only export async functions
+- Split `ItemDrawer.tsx` into `DrawerViewBody` / `DrawerEditBody`; Edit button toggles `editing` state; Save/Cancel replace the action bar in edit mode
+- Editable fields: title (required), description, tags (comma-separated); type-specific content (snippet/prompt/command/note), language (snippet/command), url (link)
+- Non-editable in edit mode: item type, collection, dates
+- Uses `useTransition` for pending state; sonner toasts on success/error; `router.refresh()` after save so card lists reflect changes
+- Save disabled client-side while title is empty; Zod is server-side source of truth
+- Added `src/actions/items.test.ts` — 6 Vitest cases: unauthorized, empty title, invalid URL, ownership miss, happy path (asserts trim + tag dedupe), query throw
+- Build and all 9 tests pass
