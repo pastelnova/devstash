@@ -1,21 +1,13 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Dynamic route `/items/[type]` displays items filtered by type (e.g., `/items/snippets`, `/items/notes`)
-- Fetch items from DB filtered by the type slug
-- Responsive grid of ItemCard components, two columns on `md` and up
-- Each card has a left border colored by its item type
-- Follow existing codebase patterns
+<!-- What does "done" look like? -->
 
 ## Notes
-- Source spec: `context/features/item-list-view-spec.md`
-- Reuse existing `ItemRow` card styling pattern (rounded border with `border-l-4` colored by type) — see 2026-04-09 history entry
-- Use existing DB helpers in `src/lib/db/items.ts`; add a `getItemsByType(userId, typeSlug)` helper
-- Page should be a server component using `auth()`, wrapped in `DashboardShell` like `/profile` and `/dashboard`
-- Type slug must map to the `ItemType` (likely by lowercased name, e.g. `snippets` → `Snippet`)
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -242,4 +234,14 @@ In Progress
 - `CollectionsSection.tsx` — collection cards now use `border-l-4` with only `borderLeftColor` set to the dominant type color (was full colored border)
 - `ItemRow.tsx` — reworked from list row to standalone card: `rounded-lg border border-l-4 bg-card p-3` with `borderLeftColor` set to the item's type color
 - `PinnedItems.tsx` / `RecentItems.tsx` — removed outer card wrapper; now `flex flex-col gap-2` so each ItemRow stands as its own card with small margins between them
+- Build passes
+
+### 2026-04-09 — Items List View
+
+- Created dynamic route `src/app/items/[type]/page.tsx` — protected server component wrapped in `DashboardShell`
+- Added `getSystemItemTypeBySlug(slug)` and `getItemsByType(userId, typeId)` to `src/lib/db/items.ts`
+- Slug resolver accepts both singular (`/items/snippet`) and plural (`/items/snippets`) forms; 404s on unknown slugs via `notFound()`
+- New `src/components/items/ItemCard.tsx` — vertical card with colored left border, type icon circle, title, description, tags, and date
+- Responsive grid: 1 column on mobile, 2 columns from `md` up
+- Page header shows type icon + pluralized title + item count; empty state when no items exist
 - Build passes
