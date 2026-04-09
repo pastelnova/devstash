@@ -1,23 +1,13 @@
-# Current Feature: Item Delete
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Users can delete an item from the item drawer
-- Clicking the Delete button opens a shadcn confirmation dialog (destructive styling)
-- Confirming deletes the item from the database (owner-only)
-- Success shows a sonner toast and closes the drawer
-- Affected lists (pinned, recent, items-by-type, stats) refresh to reflect the deletion
-- Errors show an inline/toast error message; no partial state
+<!-- What does "done" look like? -->
 
 ## Notes
-- Add `deleteItem(userId, itemId)` to `src/lib/db/items.ts` — Prisma delete with ownership check
-- Add `deleteItem` server action to `src/actions/items.ts` — `auth()` + ownership check, `{ success, data, error }` contract
-- Wire the existing Delete button in `ItemDrawer.tsx` to open the AlertDialog and call the server action
-- Use shadcn `alert-dialog` component (install via `npx shadcn@latest add alert-dialog` if not present)
-- Use `useTransition` for pending state; call `router.refresh()` on success
-- Add Vitest coverage in `src/actions/items.test.ts`: unauthorized, ownership miss, happy path, query throw
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -295,3 +285,14 @@ In Progress
 - Save disabled client-side while title is empty; Zod is server-side source of truth
 - Added `src/actions/items.test.ts` — 6 Vitest cases: unauthorized, empty title, invalid URL, ownership miss, happy path (asserts trim + tag dedupe), query throw
 - Build and all 9 tests pass
+
+### 2026-04-09 — Item Delete
+
+- Installed shadcn `alert-dialog` component
+- Added `deleteItem(itemId)` to `src/lib/db/items.ts` — Prisma delete; cascades remove `ItemTag` rows via schema; caller verifies ownership
+- Added `deleteItem` server action to `src/actions/items.ts` — `auth()` + ownership check via `findFirst`, `{ success, data: { id }, error }` contract
+- Wired Delete button in `ItemDrawer.tsx` with controlled `AlertDialog` (destructive styling); confirmation shows the item title
+- On success: sonner toast, drawer closes via `onOpenChange(false)`, `router.refresh()` so pinned/recent/items-by-type/stats reflect the deletion; on error: sonner error toast
+- Uses `useTransition` for pending state; Delete button and Cancel disabled while deleting
+- Added 4 Vitest cases to `src/actions/items.test.ts`: unauthorized, ownership miss, happy path, query throw
+- Build and all 13 tests pass
