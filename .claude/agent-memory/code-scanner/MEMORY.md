@@ -1,0 +1,1 @@
+- [DevStash Codebase Audit — April 2026](project_devstash_audit.md) — first full scan: security, perf, quality findings before auth/CRUD features land
