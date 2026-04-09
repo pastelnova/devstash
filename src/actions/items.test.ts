@@ -8,10 +8,14 @@ vi.mock('@/auth', () => ({
 
 // Mock prisma
 const findFirstMock = vi.fn()
+const itemTypeFindFirstMock = vi.fn()
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     item: {
       findFirst: (...args: unknown[]) => findFirstMock(...args),
+    },
+    itemType: {
+      findFirst: (...args: unknown[]) => itemTypeFindFirstMock(...args),
     },
   },
 }))
@@ -19,12 +23,14 @@ vi.mock('@/lib/prisma', () => ({
 // Mock db query
 const updateItemQueryMock = vi.fn()
 const deleteItemQueryMock = vi.fn()
+const createItemQueryMock = vi.fn()
 vi.mock('@/lib/db/items', () => ({
   updateItem: (...args: unknown[]) => updateItemQueryMock(...args),
   deleteItem: (...args: unknown[]) => deleteItemQueryMock(...args),
+  createItem: (...args: unknown[]) => createItemQueryMock(...args),
 }))
 
-import { deleteItem, updateItem } from './items'
+import { createItem, deleteItem, updateItem } from './items'
 import type { ItemDetail } from '@/lib/db/items'
 
 const sampleDetail: ItemDetail = {
@@ -137,6 +143,116 @@ describe('updateItem server action', () => {
       tags: [],
     })
     expect(result).toEqual({ success: false, error: 'Failed to update item' })
+  })
+})
+
+describe('createItem server action', () => {
+  beforeEach(() => {
+    authMock.mockReset()
+    itemTypeFindFirstMock.mockReset()
+    createItemQueryMock.mockReset()
+  })
+
+  it('returns Unauthorized when no session', async () => {
+    authMock.mockResolvedValue(null)
+    const result = await createItem({
+      type: 'snippet',
+      title: 'Hello',
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+    expect(itemTypeFindFirstMock).not.toHaveBeenCalled()
+    expect(createItemQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects empty title via Zod', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    const result = await createItem({
+      type: 'snippet',
+      title: '   ',
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/title/i)
+    expect(itemTypeFindFirstMock).not.toHaveBeenCalled()
+  })
+
+  it('requires URL for link type', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    const result = await createItem({
+      type: 'link',
+      title: 'Cool link',
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/url/i)
+    expect(itemTypeFindFirstMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects invalid URL via Zod', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    const result = await createItem({
+      type: 'link',
+      title: 'Cool link',
+      url: 'not-a-url',
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/url/i)
+  })
+
+  it('returns error when system item type not found', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue(null)
+    const result = await createItem({
+      type: 'snippet',
+      title: 'Hello',
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Invalid item type' })
+    expect(createItemQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('calls query with trimmed/normalized data on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue({ id: 'type_1' })
+    createItemQueryMock.mockResolvedValue(sampleDetail)
+
+    const result = await createItem({
+      type: 'snippet',
+      title: '  New title  ',
+      description: '',
+      content: 'console.log(1)',
+      language: 'typescript',
+      tags: ['react', 'react', ' hooks '],
+    })
+
+    expect(result).toEqual({ success: true, data: sampleDetail })
+    expect(createItemQueryMock).toHaveBeenCalledTimes(1)
+    const [userId, data] = createItemQueryMock.mock.calls[0]
+    expect(userId).toBe('user_1')
+    expect(data).toMatchObject({
+      title: 'New title',
+      description: null,
+      content: 'console.log(1)',
+      url: null,
+      language: 'typescript',
+      typeId: 'type_1',
+    })
+    expect(data.tags).toEqual(['react', 'hooks'])
+  })
+
+  it('returns generic error when query throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue({ id: 'type_1' })
+    createItemQueryMock.mockRejectedValue(new Error('db down'))
+
+    const result = await createItem({
+      type: 'note',
+      title: 'A note',
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Failed to create item' })
   })
 })
 

@@ -8,6 +8,7 @@ import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
 import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
+import { ItemCreateDialog } from '@/components/items/ItemCreateDialog'
 
 interface DashboardShellProps {
   children: React.ReactNode
@@ -19,6 +20,7 @@ interface DashboardShellProps {
 export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
 
   return (
     <ItemDrawerProvider>
@@ -65,7 +67,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">New Collection</span>
           </Button>
-          <Button size="sm" className="gap-1.5">
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">New Item</span>
           </Button>
@@ -86,6 +88,12 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+
+      <ItemCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        itemTypes={itemTypes}
+      />
     </div>
     </ItemDrawerProvider>
   )
