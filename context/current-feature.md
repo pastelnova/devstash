@@ -1,19 +1,13 @@
-# Current Feature: Image Gallery View
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Create an image thumbnail card component to replace the regular ItemCard for image types
-- Show a 3-column image grid/gallery on the `/items/images` page
-- Display image thumbnails with 16:9 aspect ratio (`aspect-video`)
-- Use `object-cover` to fill cards (may crop edges)
-- Add subtle hover zoom effect (5% scale with 300ms transition)
+<!-- What does "done" look like? -->
 
 ## Notes
-- Images are served via the existing `/api/download/[id]` proxy route
-- Only applies to the image type items list page — dashboard pinned/recent remain unchanged
-- Reuse existing `ItemDrawerContext` so clicking a thumbnail opens the item drawer
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -354,4 +348,13 @@ In Progress
 - Updated `ItemCreateDialog.tsx` — 7-type selector (added file and image), `FileUpload` component shown for file/image types
 - Updated `ItemDrawer.tsx` — image preview via download proxy, file info card with icon and size, download button replaces copy for file/image types
 - Added 8 new Vitest cases: 6 for `createFileItem` action, 2 for R2 cleanup on delete
+- Build and all 28 tests pass
+
+### 2026-04-10 — Image Gallery View
+
+- Created `src/components/items/ImageCard.tsx` — thumbnail card with 16:9 `aspect-video`, `object-cover`, hover zoom (5% scale, 300ms transition), `bg-muted` placeholder
+- Uses plain `<img>` tag (not `next/image`) because the R2 download proxy stream isn't compatible with Next.js image optimization
+- Updated `src/app/items/[type]/page.tsx` — renders `ImageCard` for image type, regular `ItemCard` for all others
+- Added `file` and `image` to `CREATABLE_SET` so "New File" / "New Image" buttons appear on those pages
+- Clicking an image thumbnail opens the existing item drawer via `ItemDrawerContext`
 - Build and all 28 tests pass
