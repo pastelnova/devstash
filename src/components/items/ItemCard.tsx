@@ -1,12 +1,14 @@
 'use client'
 
-import { File } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Copy, File } from 'lucide-react'
 import { typeIconMap } from '@/lib/item-type-icons'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from './ItemDrawerContext'
 
 export function ItemCard({ item }: { item: ItemWithMeta }) {
   const { openItem } = useItemDrawer()
+  const [copied, setCopied] = useState(false)
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
   const iconColor = item.type.color ?? '#94a3b8'
 
@@ -16,11 +18,19 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
     year: 'numeric',
   })
 
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const text = item.content ?? item.url ?? item.title
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
   return (
     <button
       type="button"
       onClick={() => openItem(item.id)}
-      className="flex flex-col gap-3 rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors h-full text-left w-full cursor-pointer"
+      className="group flex flex-col gap-3 rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors h-full text-left w-full cursor-pointer"
       style={{ borderLeftColor: iconColor }}
     >
       <div className="flex items-start gap-3">
@@ -36,7 +46,16 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
           )}
         </div>
-        <time className="text-xs text-muted-foreground shrink-0">{date}</time>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={handleCopy}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
+          className="shrink-0 rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+          title="Copy"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+        </span>
       </div>
       {item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">

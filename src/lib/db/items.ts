@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 export type ItemWithMeta = {
   id: string
   title: string
+  content: string | null
+  url: string | null
   description: string | null
   type: {
     icon: string | null
@@ -32,6 +34,8 @@ export async function getPinnedItems(userId: string): Promise<ItemWithMeta[]> {
   return items.map((item) => ({
     id: item.id,
     title: item.title,
+    content: item.content,
+    url: item.url,
     description: item.description,
     type: { icon: item.type.icon, color: item.type.color },
     tags: item.tags.map((t) => t.tag.name),
@@ -53,6 +57,8 @@ export async function getRecentItems(userId: string): Promise<ItemWithMeta[]> {
   return items.map((item) => ({
     id: item.id,
     title: item.title,
+    content: item.content,
+    url: item.url,
     description: item.description,
     type: { icon: item.type.icon, color: item.type.color },
     tags: item.tags.map((t) => t.tag.name),
@@ -121,6 +127,8 @@ export async function getItemsByType(userId: string, typeId: string): Promise<It
   return items.map((item) => ({
     id: item.id,
     title: item.title,
+    content: item.content,
+    url: item.url,
     description: item.description,
     type: { icon: item.type.icon, color: item.type.color },
     tags: item.tags.map((t) => t.tag.name),
