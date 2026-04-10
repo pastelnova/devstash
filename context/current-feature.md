@@ -1,13 +1,22 @@
 # Current Feature
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Create MarkdownEditor component with Write/Preview tabs
+- Replace textarea with MarkdownEditor for notes and prompts (snippets/commands keep CodeEditor)
+- Use react-markdown + remark-gfm for GitHub Flavored Markdown
+- Match dark theme styling (bg-[#1e1e1e] container, bg-[#2d2d2d] header)
+- Copy button in header (same style as CodeEditor)
+- Readonly mode shows Preview only; edit mode defaults to Write tab
+- Proper markdown styling: headings, code blocks, lists, blockquotes, links, tables
+- Fluid height with max 400px matching CodeEditor
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- Integration points: ItemCreateDialog (note/prompt), ItemDrawer edit mode (note/prompt), ItemDrawer view mode (note/prompt readonly)
+- Use custom CSS class (.markdown-preview) for reliable dark mode styling
+- Keep CodeEditor unchanged for snippets and commands
 
 ## History
 

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { CodeEditor } from '@/components/items/CodeEditor'
+import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { deleteItem, updateItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -329,9 +330,7 @@ function DrawerViewBody({
                 readOnly
               />
             ) : (
-              <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap font-mono">
-                {item.content}
-              </pre>
+              <MarkdownEditor value={item.content} readOnly />
             )}
           </div>
         )}
@@ -469,12 +468,9 @@ function DrawerEditBody({
                 onChange={(val) => setForm((f) => ({ ...f, content: val }))}
               />
             ) : (
-              <textarea
-                id="item-content"
+              <MarkdownEditor
                 value={form.content}
-                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                rows={10}
-                className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                onChange={(val) => setForm((f) => ({ ...f, content: val }))}
               />
             )}
           </Field>

@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { CodeEditor } from '@/components/items/CodeEditor'
+import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { createItem, type CreateItemInput } from '@/actions/items'
 import type { SystemItemType } from '@/lib/db/items'
 
@@ -187,12 +188,9 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
                   onChange={(val) => setForm((f) => ({ ...f, content: val }))}
                 />
               ) : (
-                <textarea
-                  id="create-content"
+                <MarkdownEditor
                   value={form.content}
-                  onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                  rows={8}
-                  className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                  onChange={(val) => setForm((f) => ({ ...f, content: val }))}
                 />
               )}
             </Field>
