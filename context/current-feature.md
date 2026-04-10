@@ -1,24 +1,13 @@
-# Current Feature: Code Editor Component
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Create CodeEditor component using Monaco Editor with dark theme
-- Replace Textarea with CodeEditor for snippets and commands only
-- Keep Textarea for notes, prompts, and other non-code types
-- Add macOS-style window dots (red/yellow/green) at top of editor
-- Add quick copy button in editor header
-- Show language label in editor header next to copy
-- Support both display (readonly) and edit modes
-- Fluid height with max 400px and themed scrollbar
+<!-- What does "done" look like? -->
 
 ## Notes
-- Monaco Editor integration — needs `@monaco-editor/react` package
-- Only applies to snippet and command item types; notes/prompts stay with Textarea
-- Editor header: macOS dots (left) + language label + copy button (right)
-- Two modes: readonly (view in drawer) and editable (edit mode in drawer)
-- Max height 400px with overflow scroll; scrollbar should match dark theme
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -315,4 +304,18 @@ In Progress
 - Created `src/components/items/ItemCreateDialog.tsx` — shadcn Dialog with 5-button segmented type selector (colored icon + label from `typeIconMap`), conditional fields per type (content for snippet/prompt/command/note, language for snippet/command, url for link), form reset on close, sonner toast + `router.refresh()` on success
 - Wired "New Item" top bar button in `DashboardShell.tsx` to open the dialog; passes through existing `itemTypes` prop
 - Added 7 Vitest cases to `src/actions/items.test.ts`: unauthorized, empty title, link missing URL, invalid URL, system type not found, happy path (trim + tag dedupe + typeId forwarded), query throw
+- Build and all 20 tests pass
+
+### 2026-04-10 — Code Editor Component
+
+- Installed `@monaco-editor/react` package
+- Created `src/components/items/CodeEditor.tsx` — Monaco Editor wrapper with macOS window dots (red/yellow/green), language label, copy button with "Copied" feedback, `vs-dark` theme, fluid height (min 100px, max 400px), slim 8px scrollbars, no minimap
+- Updated `ItemDrawer.tsx` view mode — snippets and commands use `CodeEditor` (readonly) instead of `<pre>`; notes and prompts keep plain `<pre>`
+- Updated `ItemDrawer.tsx` edit mode — snippets and commands use `CodeEditor` (editable) instead of `<textarea>`; notes and prompts keep `<textarea>`
+- Updated `ItemCreateDialog.tsx` — same split: `CodeEditor` for snippet/command content, `<textarea>` for note/prompt
+- Added `defaultType` prop to `ItemCreateDialog` for pre-selecting item type on open
+- Exported `useOpenCreateDialog` context from `DashboardShell` so child components can trigger the create dialog
+- Added `defaultCreateType` prop to `DashboardShell`, forwarded to the dialog
+- Created `src/components/items/NewItemByTypeButton.tsx` — "New [Type]" button using the create dialog context
+- Updated `src/app/items/[type]/page.tsx` — renders type-specific "New [Type]" button in the page header; passes `defaultCreateType` to `DashboardShell`
 - Build and all 20 tests pass
