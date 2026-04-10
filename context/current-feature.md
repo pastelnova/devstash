@@ -1,24 +1,13 @@
-# Current Feature: File & Image Upload with Cloudflare R2
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Create upload API route for Cloudflare R2
-- Create FileUpload component with drag-and-drop
-- Update create item modal to use FileUpload for file/image types
-- Delete files from R2 when items are deleted
-- Create download proxy API route (avoids CORS issues)
-- Add download button in ItemDrawer for file types
-- Show upload progress indicator
-- Display image preview for images, file info for files
+<!-- What does "done" look like? -->
 
 ## Notes
-- DB functions go in `src/lib/db/items.ts`
-- **Image constraints:** max 5 MB, extensions: `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`
-- **File constraints:** max 10 MB, extensions: `.pdf`, `.txt`, `.md`, `.json`, `.yaml`, `.yml`, `.xml`, `.csv`, `.toml`, `.ini`
-- MIME types for images: `image/png`, `image/jpeg`, `image/gif`, `image/webp`, `image/svg+xml`
-- MIME types for files: `application/pdf`, `text/plain`, `text/markdown`, `application/json`, `application/x-yaml`, `text/yaml`, `application/xml`, `text/xml`, `text/csv`, `application/toml`, `text/plain` (for `.ini`)
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -344,3 +333,19 @@ In Progress
 - Updated `ItemCreateDialog.tsx` — notes and prompts use `MarkdownEditor` instead of `<textarea>`
 - Snippets and commands unchanged (still use CodeEditor)
 - Build and all 20 tests pass
+
+### 2026-04-10 — File & Image Upload with Cloudflare R2
+
+- Installed `@aws-sdk/client-s3` for R2 (S3-compatible)
+- Created `src/lib/r2.ts` — R2 client singleton with `uploadToR2()`, `deleteFromR2()`, `getFromR2()` helpers
+- Created `POST /api/upload` route — validates extension, MIME type, and file size (images 5 MB, files 10 MB); uploads to R2 with key `userId/type/uuid.ext`
+- Created `GET /api/download/[id]` route — auth + ownership check, streams from R2; `inline` disposition for images, `attachment` for files
+- Added `createFileItem()` to `src/lib/db/items.ts` — transactional create with `contentType: 'file'`, `fileUrl`, `fileName`, `fileSize`
+- Updated `deleteItem()` in `src/lib/db/items.ts` to return `fileUrl` for R2 cleanup
+- Added `createFileItem` server action to `src/actions/items.ts` — Zod schema for `file`/`image` types
+- Updated `deleteItem` action to delete R2 file (best-effort) when item has `fileUrl`
+- Created `src/components/items/FileUpload.tsx` — drag-and-drop zone with XHR upload progress circle, uploaded file preview with remove button
+- Updated `ItemCreateDialog.tsx` — 7-type selector (added file and image), `FileUpload` component shown for file/image types
+- Updated `ItemDrawer.tsx` — image preview via download proxy, file info card with icon and size, download button replaces copy for file/image types
+- Added 8 new Vitest cases: 6 for `createFileItem` action, 2 for R2 cleanup on delete
+- Build and all 28 tests pass
