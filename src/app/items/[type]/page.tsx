@@ -10,11 +10,12 @@ import {
 } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { ItemCard } from '@/components/items/ItemCard'
+import { ImageCard } from '@/components/items/ImageCard'
 import { NewItemByTypeButton } from '@/components/items/NewItemByTypeButton'
 import { typeIconMap } from '@/lib/item-type-icons'
 import type { CreatableType } from '@/components/items/ItemCreateDialog'
 
-const CREATABLE_SET = new Set(['snippet', 'prompt', 'command', 'note', 'link'])
+const CREATABLE_SET = new Set(['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'])
 
 export default async function ItemsByTypePage({
   params,
@@ -79,9 +80,13 @@ export default async function ItemsByTypePage({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {items.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
+            {items.map((item) =>
+              typeLower === 'image' ? (
+                <ImageCard key={item.id} item={item} />
+              ) : (
+                <ItemCard key={item.id} item={item} />
+              )
+            )}
           </div>
         )}
       </div>
