@@ -9,6 +9,15 @@ Not Started
 
 ## History
 
+### 2026-04-10 — Collection Create
+
+- Added `createCollection(userId, input)` to `src/lib/db/collections.ts` — Prisma create with select, returns `CollectionBasic`
+- Created `src/actions/collections.ts` with `createCollection` server action — Zod schema (name required, max 100, trimmed; description nullable), auth check, `{ success, data, error }` contract
+- Created `src/components/dashboard/CollectionCreateDialog.tsx` — shadcn Dialog with name + description fields, pending state, toast on success/error, `router.refresh()` after create
+- Wired "New Collection" button in `DashboardShell.tsx` to open the dialog
+- Added 6 Vitest cases to `src/actions/collections.test.ts`: unauthorized, empty name, name too long, trim + null description, happy path with description, query throw
+- Build and all 34 tests pass
+
 ### 2026-04-10 — Code Scanner Quick Wins 2
 
 - Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
