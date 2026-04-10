@@ -1,22 +1,13 @@
 # Current Feature
 
 ## Status
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-- Create MarkdownEditor component with Write/Preview tabs
-- Replace textarea with MarkdownEditor for notes and prompts (snippets/commands keep CodeEditor)
-- Use react-markdown + remark-gfm for GitHub Flavored Markdown
-- Match dark theme styling (bg-[#1e1e1e] container, bg-[#2d2d2d] header)
-- Copy button in header (same style as CodeEditor)
-- Readonly mode shows Preview only; edit mode defaults to Write tab
-- Proper markdown styling: headings, code blocks, lists, blockquotes, links, tables
-- Fluid height with max 400px matching CodeEditor
+<!-- What does "done" look like? -->
 
 ## Notes
-- Integration points: ItemCreateDialog (note/prompt), ItemDrawer edit mode (note/prompt), ItemDrawer view mode (note/prompt readonly)
-- Use custom CSS class (.markdown-preview) for reliable dark mode styling
-- Keep CodeEditor unchanged for snippets and commands
+<!-- Constraints, context, or implementation details -->
 
 ## History
 
@@ -327,4 +318,18 @@ In Progress
 - Added `defaultCreateType` prop to `DashboardShell`, forwarded to the dialog
 - Created `src/components/items/NewItemByTypeButton.tsx` — "New [Type]" button using the create dialog context
 - Updated `src/app/items/[type]/page.tsx` — renders type-specific "New [Type]" button in the page header; passes `defaultCreateType` to `DashboardShell`
+- Build and all 20 tests pass
+
+### 2026-04-10 — Markdown Editor for Notes & Prompts
+
+- Installed `react-markdown`, `remark-gfm`, and `@tailwindcss/typography`
+- Registered `@plugin "@tailwindcss/typography"` in `globals.css` (Tailwind v4 CSS-based config)
+- Created `src/components/items/MarkdownEditor.tsx` — Write/Preview tabbed editor with `react-markdown` + `remark-gfm`, copy button, dark theme container matching CodeEditor styling (`bg-[#1e1e1e]` body, `bg-[#252526]` header)
+- Preview uses `prose prose-invert prose-sm` classes from `@tailwindcss/typography` for proper rendering of headings, code blocks, inline code, lists, blockquotes, links, tables, and task lists
+- Readonly mode shows Preview tab only; edit mode defaults to Write tab with Preview available
+- Fluid height with max 400px matching CodeEditor
+- Updated `ItemDrawer.tsx` view mode — notes and prompts use `MarkdownEditor` (readonly) instead of `<pre>`
+- Updated `ItemDrawer.tsx` edit mode — notes and prompts use `MarkdownEditor` instead of `<textarea>`
+- Updated `ItemCreateDialog.tsx` — notes and prompts use `MarkdownEditor` instead of `<textarea>`
+- Snippets and commands unchanged (still use CodeEditor)
 - Build and all 20 tests pass
