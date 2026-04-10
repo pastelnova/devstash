@@ -47,12 +47,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!email || !password) return null
 
+        const normalizedEmail = email.toLowerCase().trim()
+
         // Rate limit by IP + email
         const limiter = rateLimiters.login
         if (limiter) {
           try {
             const ip = await getClientIp()
-            const identifier = `${ip}:${email.toLowerCase().trim()}`
+            const identifier = `${ip}:${normalizedEmail}`
             const { success } = await limiter.limit(identifier)
             if (!success) throw new RateLimitError()
           } catch (e) {
@@ -61,7 +63,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
         if (!user || !user.password) return null
 
         const isValid = await bcrypt.compare(password, user.password)

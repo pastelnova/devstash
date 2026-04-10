@@ -10,6 +10,7 @@ import {
   Download,
 } from 'lucide-react'
 import type { FileItemMeta } from '@/lib/db/items'
+import { formatFileSize } from '@/lib/utils'
 import { useItemDrawer } from './ItemDrawerContext'
 
 const EXT_ICON_MAP: Record<string, typeof File> = {
@@ -58,13 +59,6 @@ function getExtension(fileName: string | null): string {
   if (!fileName) return ''
   const dot = fileName.lastIndexOf('.')
   return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : ''
-}
-
-function formatFileSize(bytes: number | null): string {
-  if (bytes == null) return '--'
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export function FileRow({ item }: { item: FileItemMeta }) {

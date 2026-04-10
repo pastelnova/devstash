@@ -1,24 +1,22 @@
 # Current Feature
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
 
 ## Goals
-<!-- What does "done" look like? -->
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
 
 ## History
 
-### 2026-04-10 — File List View
+### 2026-04-10 — Code Scanner Quick Wins 2
 
-- Created `src/components/items/FileRow.tsx` — single-column list row with extension-based file icon (code, text, image, archive, spreadsheet), file name, size, upload date, and download button
-- Row click opens ItemDrawer via `useItemDrawer`; download button uses `stopPropagation` for direct download
-- Hover highlight with `hover:bg-muted/30` and colored left border matching file type color
-- Responsive: size and date columns hidden on mobile (`hidden sm:flex`)
-- Added `FileItemMeta` type and `getFileItemsByType()` to `src/lib/db/items.ts` — lightweight query with file-specific fields
-- Updated `src/app/items/[type]/page.tsx` — file type renders `FileRow` in flex column layout; other types unchanged
+- Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
+- Extracted `Field` component to `src/components/items/ItemFormField.tsx`; removed duplicates from `ItemDrawer.tsx` and `ItemCreateDialog.tsx`
+- Moved `capitalize` from `ItemDrawer.tsx` to `src/lib/utils.ts`
+- Replaced `window.location.href = '/profile'` with Next.js `<Link>` in `Sidebar.tsx`
+- Added `.max(50)` on tag strings and `.max(20)` on tag arrays in all 3 Zod schemas in `src/actions/items.ts`
+- Sanitized `Content-Disposition` filename by stripping `"` and `\` in download route
+- Normalized email to `.toLowerCase().trim()` at register and credentials authorize
 - Build and all 28 tests pass
 
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
@@ -367,4 +365,14 @@
 - Updated `src/app/items/[type]/page.tsx` — renders `ImageCard` for image type, regular `ItemCard` for all others
 - Added `file` and `image` to `CREATABLE_SET` so "New File" / "New Image" buttons appear on those pages
 - Clicking an image thumbnail opens the existing item drawer via `ItemDrawerContext`
+- Build and all 28 tests pass
+
+### 2026-04-10 — File List View
+
+- Created `src/components/items/FileRow.tsx` — single-column list row with extension-based file icon (code, text, image, archive, spreadsheet), file name, size, upload date, and download button
+- Row click opens ItemDrawer via `useItemDrawer`; download button uses `stopPropagation` for direct download
+- Hover highlight with `hover:bg-muted/30` and colored left border matching file type color
+- Responsive: size and date columns hidden on mobile (`hidden sm:flex`)
+- Added `FileItemMeta` type and `getFileItemsByType()` to `src/lib/db/items.ts` — lightweight query with file-specific fields
+- Updated `src/app/items/[type]/page.tsx` — file type renders `FileRow` in flex column layout; other types unchanged
 - Build and all 28 tests pass

@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { Upload, X, FileIcon, ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { formatFileSize } from '@/lib/utils'
 
 interface UploadResult {
   key: string
@@ -20,12 +21,6 @@ interface FileUploadProps {
 
 const IMAGE_ACCEPT = '.png,.jpg,.jpeg,.gif,.webp,.svg'
 const FILE_ACCEPT = '.pdf,.txt,.md,.json,.yaml,.yml,.xml,.csv,.toml,.ini'
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
 
 export function FileUpload({ type, onUploaded, onRemove, uploaded }: FileUploadProps) {
   const [dragOver, setDragOver] = useState(false)

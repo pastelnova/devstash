@@ -7,7 +7,6 @@ import { Copy, Download, File, FileIcon, Pencil, Pin, Star, Trash2, X } from 'lu
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,8 +19,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { capitalize, formatFileSize } from '@/lib/utils'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
+import { Field } from '@/components/items/ItemFormField'
 import { deleteItem, updateItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -55,12 +56,6 @@ const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 const URL_TYPES = new Set(['link'])
 const FILE_VIEW_TYPES = new Set(['file', 'image'])
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
 
 export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const router = useRouter()
@@ -564,30 +559,6 @@ function DrawerEditBody({
   )
 }
 
-function Field({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string
-  htmlFor: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
-          {label}
-        </Label>
-        {hint && <span className="text-[10px] text-muted-foreground">{hint}</span>}
-      </div>
-      {children}
-    </div>
-  )
-}
-
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
@@ -597,6 +568,3 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}

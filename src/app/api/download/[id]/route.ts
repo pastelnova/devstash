@@ -26,9 +26,10 @@ export async function GET(
   const { body, contentType } = await getFromR2(item.fileUrl)
 
   const isImage = contentType.startsWith('image/')
+  const safeName = (item.fileName ?? 'download').replace(/["\\]/g, '')
   const disposition = isImage
     ? 'inline'
-    : `attachment; filename="${item.fileName ?? 'download'}"`
+    : `attachment; filename="${safeName}"`
 
   return new Response(body, {
     headers: {

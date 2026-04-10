@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { Field } from '@/components/items/ItemFormField'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { FileUpload } from '@/components/items/FileUpload'
@@ -289,26 +290,3 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
   )
 }
 
-function Field({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string
-  htmlFor: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
-          {label}
-        </Label>
-        {hint && <span className="text-[10px] text-muted-foreground">{hint}</span>}
-      </div>
-      {children}
-    </div>
-  )
-}
