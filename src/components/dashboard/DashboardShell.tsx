@@ -10,6 +10,7 @@ import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
 import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
 import { ItemCreateDialog, type CreatableType } from '@/components/items/ItemCreateDialog'
+import { CollectionCreateDialog } from '@/components/dashboard/CollectionCreateDialog'
 
 const CreateDialogContext = createContext<(() => void) | null>(null)
 
@@ -31,6 +32,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [collectionCreateOpen, setCollectionCreateOpen] = useState(false)
 
   return (
     <ItemDrawerProvider>
@@ -68,7 +70,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCollectionCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">New Collection</span>
           </Button>
@@ -104,6 +106,10 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
         onOpenChange={setCreateOpen}
         itemTypes={itemTypes}
         defaultType={defaultCreateType}
+      />
+      <CollectionCreateDialog
+        open={collectionCreateOpen}
+        onOpenChange={setCollectionCreateOpen}
       />
     </div>
     </ItemDrawerProvider>
