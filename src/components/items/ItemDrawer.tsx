@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Copy, File, Pencil, Pin, Star, Trash2, X } from 'lucide-react'
+import { Copy, Download, File, FileIcon, Pencil, Pin, Star, Trash2, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -54,6 +54,13 @@ function toEditState(item: ItemDetail): EditState {
 const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 const URL_TYPES = new Set(['link'])
+const FILE_VIEW_TYPES = new Set(['file', 'image'])
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const router = useRouter()
@@ -239,10 +246,23 @@ function DrawerViewBody({
             <Pin className={item.isPinned ? 'h-4 w-4 fill-current' : 'h-4 w-4'} />
             <span className="text-xs">Pin</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCopy} aria-label="Copy">
-            <Copy className="h-4 w-4" />
-            <span className="text-xs">Copy</span>
-          </Button>
+          {FILE_VIEW_TYPES.has(item.type.name.toLowerCase()) && item.fileUrl && (
+            <a
+              href={`/api/download/${item.id}`}
+              download
+              aria-label="Download"
+              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span className="text-xs">Download</span>
+            </a>
+          )}
+          {!FILE_VIEW_TYPES.has(item.type.name.toLowerCase()) && (
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCopy} aria-label="Copy">
+              <Copy className="h-4 w-4" />
+              <span className="text-xs">Copy</span>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -315,6 +335,35 @@ function DrawerViewBody({
                   {tag}
                 </span>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Image preview */}
+        {item.type.name.toLowerCase() === 'image' && item.fileUrl && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/download/${item.id}`}
+              alt={item.title}
+              className="max-w-full max-h-80 rounded-lg border border-border object-contain"
+            />
+          </div>
+        )}
+
+        {/* File info */}
+        {item.type.name.toLowerCase() === 'file' && item.fileUrl && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-2">File</p>
+            <div className="flex items-center gap-3 rounded-lg border border-input bg-muted/30 p-3">
+              <FileIcon className="h-5 w-5 text-muted-foreground shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{item.fileName}</p>
+                {item.fileSize && (
+                  <p className="text-xs text-muted-foreground">{formatFileSize(item.fileSize)}</p>
+                )}
+              </div>
             </div>
           </div>
         )}

@@ -5,10 +5,12 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import {
   createItem as createItemQuery,
+  createFileItem as createFileItemQuery,
   deleteItem as deleteItemQuery,
   updateItem as updateItemQuery,
   type ItemDetail,
 } from '@/lib/db/items'
+import { deleteFromR2 } from '@/lib/r2'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
 
@@ -102,6 +104,59 @@ export async function createItem(
   }
 }
 
+const createFileItemSchema = z.object({
+  type: z.enum(['file', 'image']),
+  title: z.string().trim().min(1, 'Title is required'),
+  description: nullableTrimmedString.optional().default(null),
+  tags: z
+    .array(z.string().trim().min(1))
+    .default([])
+    .transform((arr) => Array.from(new Set(arr))),
+  fileUrl: z.string().min(1, 'File is required'),
+  fileName: z.string().min(1, 'File name is required'),
+  fileSize: z.number().positive(),
+})
+
+export type CreateFileItemInput = z.input<typeof createFileItemSchema>
+
+export async function createFileItem(
+  input: CreateFileItemInput,
+): Promise<ActionResult<ItemDetail>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const parsed = createFileItemSchema.safeParse(input)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    return { success: false, error: first?.message ?? 'Invalid input' }
+  }
+
+  const itemType = await prisma.itemType.findFirst({
+    where: { isSystem: true, name: parsed.data.type },
+    select: { id: true },
+  })
+  if (!itemType) {
+    return { success: false, error: 'Invalid item type' }
+  }
+
+  try {
+    const created = await createFileItemQuery(session.user.id, {
+      title: parsed.data.title,
+      description: parsed.data.description,
+      typeId: itemType.id,
+      tags: parsed.data.tags,
+      fileUrl: parsed.data.fileUrl,
+      fileName: parsed.data.fileName,
+      fileSize: parsed.data.fileSize,
+    })
+    return { success: true, data: created }
+  } catch {
+    return { success: false, error: 'Failed to create item' }
+  }
+}
+
 export async function updateItem(
   itemId: string,
   input: UpdateItemInput,
@@ -148,7 +203,13 @@ export async function deleteItem(itemId: string): Promise<ActionResult<{ id: str
   }
 
   try {
-    await deleteItemQuery(itemId)
+    const fileUrl = await deleteItemQuery(itemId)
+    // Clean up R2 file if one existed
+    if (fileUrl) {
+      await deleteFromR2(fileUrl).catch(() => {
+        // Best-effort — item is already deleted from DB
+      })
+    }
     return { success: true, data: { id: itemId } }
   } catch {
     return { success: false, error: 'Failed to delete item' }

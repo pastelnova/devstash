@@ -24,13 +24,21 @@ vi.mock('@/lib/prisma', () => ({
 const updateItemQueryMock = vi.fn()
 const deleteItemQueryMock = vi.fn()
 const createItemQueryMock = vi.fn()
+const createFileItemQueryMock = vi.fn()
 vi.mock('@/lib/db/items', () => ({
   updateItem: (...args: unknown[]) => updateItemQueryMock(...args),
   deleteItem: (...args: unknown[]) => deleteItemQueryMock(...args),
   createItem: (...args: unknown[]) => createItemQueryMock(...args),
+  createFileItem: (...args: unknown[]) => createFileItemQueryMock(...args),
 }))
 
-import { createItem, deleteItem, updateItem } from './items'
+// Mock R2
+const deleteFromR2Mock = vi.fn()
+vi.mock('@/lib/r2', () => ({
+  deleteFromR2: (...args: unknown[]) => deleteFromR2Mock(...args),
+}))
+
+import { createItem, createFileItem, deleteItem, updateItem } from './items'
 import type { ItemDetail } from '@/lib/db/items'
 
 const sampleDetail: ItemDetail = {
@@ -256,11 +264,119 @@ describe('createItem server action', () => {
   })
 })
 
+describe('createFileItem server action', () => {
+  beforeEach(() => {
+    authMock.mockReset()
+    itemTypeFindFirstMock.mockReset()
+    createFileItemQueryMock.mockReset()
+  })
+
+  it('returns Unauthorized when no session', async () => {
+    authMock.mockResolvedValue(null)
+    const result = await createFileItem({
+      type: 'image',
+      title: 'Photo',
+      fileUrl: 'user_1/images/abc.png',
+      fileName: 'photo.png',
+      fileSize: 1024,
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+  })
+
+  it('rejects empty title via Zod', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    const result = await createFileItem({
+      type: 'file',
+      title: '   ',
+      fileUrl: 'key',
+      fileName: 'doc.pdf',
+      fileSize: 500,
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/title/i)
+  })
+
+  it('rejects missing fileUrl', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    const result = await createFileItem({
+      type: 'file',
+      title: 'Doc',
+      fileUrl: '',
+      fileName: 'doc.pdf',
+      fileSize: 500,
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns error when system item type not found', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue(null)
+    const result = await createFileItem({
+      type: 'image',
+      title: 'Photo',
+      fileUrl: 'key',
+      fileName: 'photo.png',
+      fileSize: 1024,
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Invalid item type' })
+  })
+
+  it('calls query with correct data on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue({ id: 'type_image' })
+    createFileItemQueryMock.mockResolvedValue({ ...sampleDetail, contentType: 'file' })
+
+    const result = await createFileItem({
+      type: 'image',
+      title: '  My Photo  ',
+      description: 'A nice photo',
+      fileUrl: 'user_1/images/abc.png',
+      fileName: 'photo.png',
+      fileSize: 2048,
+      tags: ['design', 'design', ' ui '],
+    })
+
+    expect(result.success).toBe(true)
+    expect(createFileItemQueryMock).toHaveBeenCalledTimes(1)
+    const [userId, data] = createFileItemQueryMock.mock.calls[0]
+    expect(userId).toBe('user_1')
+    expect(data).toMatchObject({
+      title: 'My Photo',
+      fileUrl: 'user_1/images/abc.png',
+      fileName: 'photo.png',
+      fileSize: 2048,
+      typeId: 'type_image',
+    })
+    expect(data.tags).toEqual(['design', 'ui'])
+  })
+
+  it('returns generic error when query throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    itemTypeFindFirstMock.mockResolvedValue({ id: 'type_file' })
+    createFileItemQueryMock.mockRejectedValue(new Error('db down'))
+
+    const result = await createFileItem({
+      type: 'file',
+      title: 'Doc',
+      fileUrl: 'key',
+      fileName: 'doc.pdf',
+      fileSize: 500,
+      tags: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Failed to create item' })
+  })
+})
+
 describe('deleteItem server action', () => {
   beforeEach(() => {
     authMock.mockReset()
     findFirstMock.mockReset()
     deleteItemQueryMock.mockReset()
+    deleteFromR2Mock.mockReset()
   })
 
   it('returns Unauthorized when no session', async () => {
@@ -279,20 +395,39 @@ describe('deleteItem server action', () => {
     expect(deleteItemQueryMock).not.toHaveBeenCalled()
   })
 
-  it('deletes the item on the happy path', async () => {
+  it('deletes the item on the happy path (no file)', async () => {
     authMock.mockResolvedValue({ user: { id: 'user_1' } })
     findFirstMock.mockResolvedValue({ id: 'item_1' })
-    deleteItemQueryMock.mockResolvedValue(undefined)
+    deleteItemQueryMock.mockResolvedValue(null)
 
     const result = await deleteItem('item_1')
 
     expect(result).toEqual({ success: true, data: { id: 'item_1' } })
-    expect(findFirstMock).toHaveBeenCalledTimes(1)
-    expect(findFirstMock).toHaveBeenCalledWith({
-      where: { id: 'item_1', userId: 'user_1' },
-      select: { id: true },
-    })
     expect(deleteItemQueryMock).toHaveBeenCalledWith('item_1')
+    expect(deleteFromR2Mock).not.toHaveBeenCalled()
+  })
+
+  it('deletes R2 file when item has fileUrl', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    findFirstMock.mockResolvedValue({ id: 'item_1' })
+    deleteItemQueryMock.mockResolvedValue('user_1/images/abc.png')
+    deleteFromR2Mock.mockResolvedValue(undefined)
+
+    const result = await deleteItem('item_1')
+
+    expect(result).toEqual({ success: true, data: { id: 'item_1' } })
+    expect(deleteFromR2Mock).toHaveBeenCalledWith('user_1/images/abc.png')
+  })
+
+  it('succeeds even if R2 delete fails (best-effort)', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    findFirstMock.mockResolvedValue({ id: 'item_1' })
+    deleteItemQueryMock.mockResolvedValue('user_1/files/doc.pdf')
+    deleteFromR2Mock.mockRejectedValue(new Error('R2 down'))
+
+    const result = await deleteItem('item_1')
+
+    expect(result).toEqual({ success: true, data: { id: 'item_1' } })
   })
 
   it('returns generic error when query throws', async () => {

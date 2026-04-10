@@ -247,6 +247,16 @@ export type CreateItemInput = {
   tags: string[]
 }
 
+export type CreateFileItemInput = {
+  title: string
+  description: string | null
+  typeId: string
+  tags: string[]
+  fileUrl: string
+  fileName: string
+  fileSize: number
+}
+
 /**
  * Create a new item for the given user. Tag strategy mirrors `updateItem`:
  * upsert Tag rows (unique per name+userId) and create the joins.
@@ -290,13 +300,57 @@ export async function createItem(
 }
 
 /**
+ * Create a new file/image item. Tag strategy mirrors `createItem`.
+ */
+export async function createFileItem(
+  userId: string,
+  input: CreateFileItemInput,
+): Promise<ItemDetail> {
+  const newItemId = await prisma.$transaction(async (tx) => {
+    const created = await tx.item.create({
+      data: {
+        title: input.title,
+        description: input.description,
+        contentType: 'file',
+        fileUrl: input.fileUrl,
+        fileName: input.fileName,
+        fileSize: input.fileSize,
+        userId,
+        typeId: input.typeId,
+      },
+      select: { id: true },
+    })
+
+    for (const name of input.tags) {
+      const tag = await tx.tag.upsert({
+        where: { name_userId: { name, userId } },
+        update: {},
+        create: { name, userId },
+      })
+      await tx.itemTag.create({ data: { itemId: created.id, tagId: tag.id } })
+    }
+
+    return created.id
+  })
+
+  const detail = await getItemDetail(userId, newItemId)
+  if (!detail) {
+    throw new Error('Item not found after create')
+  }
+  return detail
+}
+
+/**
  * Delete an item. Cascades remove ItemTag rows via the schema.
+ * Returns the fileUrl if one existed (caller should delete from R2).
  * Caller must have verified ownership.
  */
-export async function deleteItem(itemId: string): Promise<void> {
-  await prisma.item.delete({
+export async function deleteItem(itemId: string): Promise<string | null> {
+  const item = await prisma.item.delete({
     where: { id: itemId },
+    select: { fileUrl: true },
   })
+  return item.fileUrl
 }
 
 export async function getItemStats(userId: string): Promise<ItemStats> {

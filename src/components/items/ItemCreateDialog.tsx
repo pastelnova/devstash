@@ -18,21 +18,30 @@ import { Label } from '@/components/ui/label'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
-import { createItem, type CreateItemInput } from '@/actions/items'
+import { FileUpload } from '@/components/items/FileUpload'
+import { createItem, createFileItem, type CreateItemInput, type CreateFileItemInput } from '@/actions/items'
 import type { SystemItemType } from '@/lib/db/items'
 
-const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
+const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
 export type CreatableType = (typeof CREATABLE_TYPES)[number]
 
 const CONTENT_TYPES = new Set<CreatableType>(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set<CreatableType>(['snippet', 'command'])
 const URL_TYPES = new Set<CreatableType>(['link'])
+const FILE_TYPES = new Set<CreatableType>(['file', 'image'])
 
 interface ItemCreateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   itemTypes: SystemItemType[]
   defaultType?: CreatableType
+}
+
+type UploadedFile = {
+  key: string
+  fileName: string
+  fileSize: number
+  contentType: string
 }
 
 type FormState = {
@@ -43,6 +52,7 @@ type FormState = {
   url: string
   language: string
   tags: string
+  uploadedFile: UploadedFile | null
 }
 
 const INITIAL_FORM: FormState = {
@@ -53,6 +63,7 @@ const INITIAL_FORM: FormState = {
   url: '',
   language: '',
   tags: '',
+  uploadedFile: null,
 }
 
 export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }: ItemCreateDialogProps) {
@@ -76,12 +87,14 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
   const showContent = CONTENT_TYPES.has(form.type)
   const showLanguage = LANGUAGE_TYPES.has(form.type)
   const showUrl = URL_TYPES.has(form.type)
+  const showFile = FILE_TYPES.has(form.type)
 
   const titleTrimmed = form.title.trim()
   const urlTrimmed = form.url.trim()
   const canSave =
     titleTrimmed.length > 0 &&
     (!showUrl || urlTrimmed.length > 0) &&
+    (!showFile || form.uploadedFile !== null) &&
     !pending
 
   const initialForm = defaultType ? { ...INITIAL_FORM, type: defaultType } : INITIAL_FORM
@@ -99,18 +112,33 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
       .map((t) => t.trim())
       .filter((t) => t.length > 0)
 
-    const input: CreateItemInput = {
-      type: form.type,
-      title: form.title,
-      description: form.description,
-      content: showContent ? form.content : null,
-      url: showUrl ? form.url : null,
-      language: showLanguage ? form.language : null,
-      tags,
-    }
-
     startTransition(async () => {
-      const result = await createItem(input)
+      let result
+
+      if (showFile && form.uploadedFile) {
+        const input: CreateFileItemInput = {
+          type: form.type as 'file' | 'image',
+          title: form.title,
+          description: form.description,
+          tags,
+          fileUrl: form.uploadedFile.key,
+          fileName: form.uploadedFile.fileName,
+          fileSize: form.uploadedFile.fileSize,
+        }
+        result = await createFileItem(input)
+      } else {
+        const input: CreateItemInput = {
+          type: form.type as 'snippet' | 'prompt' | 'command' | 'note' | 'link',
+          title: form.title,
+          description: form.description,
+          content: showContent ? form.content : null,
+          url: showUrl ? form.url : null,
+          language: showLanguage ? form.language : null,
+          tags,
+        }
+        result = await createItem(input)
+      }
+
       if (result.success) {
         toast.success('Item created')
         setForm(initialForm)
@@ -127,14 +155,14 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>New item</DialogTitle>
-          <DialogDescription>Add a snippet, prompt, command, note, or link.</DialogDescription>
+          <DialogDescription>Add a snippet, prompt, command, note, link, file, or image.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Type selector */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">Type</Label>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-7 gap-1.5">
               {typeOptions.map((opt) => {
                 const Icon = opt.icon ? (typeIconMap[opt.icon] ?? File) : File
                 const active = form.type === opt.name
@@ -215,6 +243,21 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
                 onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
                 placeholder="https://…"
                 aria-invalid={urlTrimmed.length === 0}
+              />
+            </Field>
+          )}
+
+          {showFile && (
+            <Field label={form.type === 'image' ? 'Image' : 'File'} htmlFor="create-file">
+              <FileUpload
+                type={form.type as 'file' | 'image'}
+                uploaded={form.uploadedFile}
+                onUploaded={(result) =>
+                  setForm((f) => ({ ...f, uploadedFile: result }))
+                }
+                onRemove={() =>
+                  setForm((f) => ({ ...f, uploadedFile: null }))
+                }
               />
             </Field>
           )}
