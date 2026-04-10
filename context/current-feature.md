@@ -1,24 +1,11 @@
 # Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-Break up large code blocks by extracting components and helpers to reduce file size and eliminate duplication.
-
-### Tasks
-
-- [ ] **Extract `DrawerViewBody`** — move from `ItemDrawer.tsx` to `src/components/items/DrawerViewBody.tsx` (~215 lines); includes shared helpers `TypeIconBadge`, `MetaRow`, and type-set constants into a shared file
-- [ ] **Extract `DrawerEditBody`** — move from `ItemDrawer.tsx` to `src/components/items/DrawerEditBody.tsx` (~160 lines)
-- [ ] **Extract `upsertTags` helper** — deduplicate the tag upsert loop repeated 3x in `src/lib/db/items.ts` into a reusable `upsertTags(tx, userId, itemId, tags)` function
-- [ ] **Extract `toItemWithMeta` mapper** — deduplicate the Prisma-to-`ItemWithMeta` transform repeated 3x in `src/lib/db/items.ts` into a reusable mapper function
-
 ## Notes
-
-- No behavior changes — pure refactor
-- Shared helpers (`TypeIconBadge`, `MetaRow`, type-set constants) should be importable by both DrawerViewBody and DrawerEditBody
-- Run `npm run test:run` and `npm run build` after all changes
 
 ## History
 
@@ -389,4 +376,15 @@ Break up large code blocks by extracting components and helpers to reduce file s
 - Responsive: size and date columns hidden on mobile (`hidden sm:flex`)
 - Added `FileItemMeta` type and `getFileItemsByType()` to `src/lib/db/items.ts` — lightweight query with file-specific fields
 - Updated `src/app/items/[type]/page.tsx` — file type renders `FileRow` in flex column layout; other types unchanged
+- Build and all 28 tests pass
+
+### 2026-04-10 — Extract Drawer Components & DB Helpers
+
+- Extracted `DrawerViewBody` from `ItemDrawer.tsx` to `src/components/items/DrawerViewBody.tsx` (~240 lines)
+- Extracted `DrawerEditBody` from `ItemDrawer.tsx` to `src/components/items/DrawerEditBody.tsx` (~195 lines)
+- Extracted shared helpers (`TypeIconBadge`, `MetaRow`, type-set constants) to `src/components/items/drawer-shared.tsx`
+- `ItemDrawer.tsx` reduced from 570 to 115 lines (shell + skeleton only)
+- Extracted `upsertTags(tx, userId, itemId, tags)` helper in `src/lib/db/items.ts` — deduplicated tag upsert loop from `updateItem`, `createItem`, `createFileItem`
+- Extracted `toItemWithMeta` mapper in `src/lib/db/items.ts` — deduplicated Prisma-to-`ItemWithMeta` transform from `getPinnedItems`, `getRecentItems`, `getItemsByType`
+- Pure refactor, no behavior changes
 - Build and all 28 tests pass
