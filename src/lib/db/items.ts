@@ -128,6 +128,35 @@ export async function getItemsByType(userId: string, typeId: string): Promise<It
   }))
 }
 
+export type FileItemMeta = {
+  id: string
+  title: string
+  fileName: string | null
+  fileSize: number | null
+  createdAt: Date
+  type: {
+    icon: string | null
+    color: string | null
+  }
+}
+
+export async function getFileItemsByType(userId: string, typeId: string): Promise<FileItemMeta[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, typeId },
+    select: {
+      id: true,
+      title: true,
+      fileName: true,
+      fileSize: true,
+      createdAt: true,
+      type: { select: { icon: true, color: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return items
+}
+
 export type ItemDetail = {
   id: string
   title: string
