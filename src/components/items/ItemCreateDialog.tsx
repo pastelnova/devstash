@@ -16,11 +16,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { CodeEditor } from '@/components/items/CodeEditor'
 import { createItem, type CreateItemInput } from '@/actions/items'
 import type { SystemItemType } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
-type CreatableType = (typeof CREATABLE_TYPES)[number]
+export type CreatableType = (typeof CREATABLE_TYPES)[number]
 
 const CONTENT_TYPES = new Set<CreatableType>(['snippet', 'prompt', 'command', 'note'])
 const LANGUAGE_TYPES = new Set<CreatableType>(['snippet', 'command'])
@@ -30,6 +31,7 @@ interface ItemCreateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   itemTypes: SystemItemType[]
+  defaultType?: CreatableType
 }
 
 type FormState = {
@@ -52,9 +54,11 @@ const INITIAL_FORM: FormState = {
   tags: '',
 }
 
-export function ItemCreateDialog({ open, onOpenChange, itemTypes }: ItemCreateDialogProps) {
+export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }: ItemCreateDialogProps) {
   const router = useRouter()
-  const [form, setForm] = useState<FormState>(INITIAL_FORM)
+  const [form, setForm] = useState<FormState>(() =>
+    defaultType ? { ...INITIAL_FORM, type: defaultType } : INITIAL_FORM,
+  )
   const [pending, startTransition] = useTransition()
 
   // Build selector entries keyed off the system item types actually in the DB,
@@ -79,9 +83,11 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes }: ItemCreateDi
     (!showUrl || urlTrimmed.length > 0) &&
     !pending
 
+  const initialForm = defaultType ? { ...INITIAL_FORM, type: defaultType } : INITIAL_FORM
+
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setForm(INITIAL_FORM)
+      setForm(initialForm)
     }
     onOpenChange(next)
   }
@@ -106,7 +112,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes }: ItemCreateDi
       const result = await createItem(input)
       if (result.success) {
         toast.success('Item created')
-        setForm(INITIAL_FORM)
+        setForm(initialForm)
         onOpenChange(false)
         router.refresh()
       } else {
@@ -174,13 +180,21 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes }: ItemCreateDi
 
           {showContent && (
             <Field label="Content" htmlFor="create-content">
-              <textarea
-                id="create-content"
-                value={form.content}
-                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                rows={8}
-                className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              />
+              {showLanguage ? (
+                <CodeEditor
+                  value={form.content}
+                  language={form.language || undefined}
+                  onChange={(val) => setForm((f) => ({ ...f, content: val }))}
+                />
+              ) : (
+                <textarea
+                  id="create-content"
+                  value={form.content}
+                  onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                  rows={8}
+                  className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                />
+              )}
             </Field>
           )}
 

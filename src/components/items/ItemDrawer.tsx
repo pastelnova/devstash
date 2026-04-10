@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { CodeEditor } from '@/components/items/CodeEditor'
 import { deleteItem, updateItem } from '@/actions/items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -321,9 +322,17 @@ function DrawerViewBody({
         {item.content && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">Content</p>
-            <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap font-mono">
-              {item.content}
-            </pre>
+            {LANGUAGE_TYPES.has(item.type.name.toLowerCase()) ? (
+              <CodeEditor
+                value={item.content}
+                language={item.language ?? undefined}
+                readOnly
+              />
+            ) : (
+              <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap font-mono">
+                {item.content}
+              </pre>
+            )}
           </div>
         )}
 
@@ -453,13 +462,21 @@ function DrawerEditBody({
 
         {showContent && (
           <Field label="Content" htmlFor="item-content">
-            <textarea
-              id="item-content"
-              value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-              rows={10}
-              className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-            />
+            {showLanguage ? (
+              <CodeEditor
+                value={form.content}
+                language={form.language || undefined}
+                onChange={(val) => setForm((f) => ({ ...f, content: val }))}
+              />
+            ) : (
+              <textarea
+                id="item-content"
+                value={form.content}
+                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                rows={10}
+                className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-xs font-mono outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+              />
+            )}
           </Field>
         )}
 

@@ -1,13 +1,24 @@
-# Current Feature
+# Current Feature: Code Editor Component
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
-<!-- What does "done" look like? -->
+- Create CodeEditor component using Monaco Editor with dark theme
+- Replace Textarea with CodeEditor for snippets and commands only
+- Keep Textarea for notes, prompts, and other non-code types
+- Add macOS-style window dots (red/yellow/green) at top of editor
+- Add quick copy button in editor header
+- Show language label in editor header next to copy
+- Support both display (readonly) and edit modes
+- Fluid height with max 400px and themed scrollbar
 
 ## Notes
-<!-- Constraints, context, or implementation details -->
+- Monaco Editor integration — needs `@monaco-editor/react` package
+- Only applies to snippet and command item types; notes/prompts stay with Textarea
+- Editor header: macOS dots (left) + language label + copy button (right)
+- Two modes: readonly (view in drawer) and editable (edit mode in drawer)
+- Max height 400px with overflow scroll; scrollbar should match dark theme
 
 ## History
 

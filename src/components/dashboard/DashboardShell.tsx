@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -9,16 +9,25 @@ import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType } from '@/lib/db/items'
 import type { SidebarCollection } from '@/lib/db/collections'
 import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
-import { ItemCreateDialog } from '@/components/items/ItemCreateDialog'
+import { ItemCreateDialog, type CreatableType } from '@/components/items/ItemCreateDialog'
+
+const CreateDialogContext = createContext<(() => void) | null>(null)
+
+export function useOpenCreateDialog() {
+  const open = useContext(CreateDialogContext)
+  if (!open) throw new Error('useOpenCreateDialog must be used within DashboardShell')
+  return open
+}
 
 interface DashboardShellProps {
   children: React.ReactNode
   itemTypes: SystemItemType[]
   sidebarCollections: SidebarCollection[]
   user?: SidebarUser | null
+  defaultCreateType?: CreatableType
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections, user, defaultCreateType }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -83,13 +92,18 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
           user={user}
         />
 
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <CreateDialogContext.Provider value={() => setCreateOpen(true)}>
+            {children}
+          </CreateDialogContext.Provider>
+        </main>
       </div>
 
       <ItemCreateDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
         itemTypes={itemTypes}
+        defaultType={defaultCreateType}
       />
     </div>
     </ItemDrawerProvider>

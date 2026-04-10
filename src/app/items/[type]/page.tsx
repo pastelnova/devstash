@@ -10,7 +10,11 @@ import {
 } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { ItemCard } from '@/components/items/ItemCard'
+import { NewItemByTypeButton } from '@/components/items/NewItemByTypeButton'
 import { typeIconMap } from '@/lib/item-type-icons'
+import type { CreatableType } from '@/components/items/ItemCreateDialog'
+
+const CREATABLE_SET = new Set(['snippet', 'prompt', 'command', 'note', 'link'])
 
 export default async function ItemsByTypePage({
   params,
@@ -37,13 +41,16 @@ export default async function ItemsByTypePage({
 
   const Icon = itemType.icon ? (typeIconMap[itemType.icon] ?? File) : File
   const color = itemType.color ?? '#94a3b8'
+  const typeLower = itemType.name.toLowerCase()
   const title = `${itemType.name.charAt(0).toUpperCase()}${itemType.name.slice(1)}s`
+  const creatableType = CREATABLE_SET.has(typeLower) ? (typeLower as CreatableType) : undefined
 
   return (
     <DashboardShell
       itemTypes={itemTypes}
       sidebarCollections={sidebarCollections}
       user={session.user}
+      defaultCreateType={creatableType}
     >
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -53,12 +60,15 @@ export default async function ItemsByTypePage({
           >
             <Icon className="h-5 w-5" style={{ color }} />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-semibold">{title}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               {items.length} {items.length === 1 ? 'item' : 'items'}
             </p>
           </div>
+          {creatableType && (
+            <NewItemByTypeButton typeName={itemType.name.charAt(0).toUpperCase() + itemType.name.slice(1)} />
+          )}
         </div>
 
         {items.length === 0 ? (
