@@ -1,10 +1,24 @@
 # Current Feature
 
 ## Status
+In Progress
 
 ## Goals
 
+Break up large code blocks by extracting components and helpers to reduce file size and eliminate duplication.
+
+### Tasks
+
+- [ ] **Extract `DrawerViewBody`** — move from `ItemDrawer.tsx` to `src/components/items/DrawerViewBody.tsx` (~215 lines); includes shared helpers `TypeIconBadge`, `MetaRow`, and type-set constants into a shared file
+- [ ] **Extract `DrawerEditBody`** — move from `ItemDrawer.tsx` to `src/components/items/DrawerEditBody.tsx` (~160 lines)
+- [ ] **Extract `upsertTags` helper** — deduplicate the tag upsert loop repeated 3x in `src/lib/db/items.ts` into a reusable `upsertTags(tx, userId, itemId, tags)` function
+- [ ] **Extract `toItemWithMeta` mapper** — deduplicate the Prisma-to-`ItemWithMeta` transform repeated 3x in `src/lib/db/items.ts` into a reusable mapper function
+
 ## Notes
+
+- No behavior changes — pure refactor
+- Shared helpers (`TypeIconBadge`, `MetaRow`, type-set constants) should be importable by both DrawerViewBody and DrawerEditBody
+- Run `npm run test:run` and `npm run build` after all changes
 
 ## History
 

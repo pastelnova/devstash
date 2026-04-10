@@ -1,4 +1,7 @@
 import { prisma } from '@/lib/prisma'
+import type { PrismaClient } from '../../../generated/prisma/client'
+
+type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0]
 
 export type ItemWithMeta = {
   id: string
@@ -12,6 +15,51 @@ export type ItemWithMeta = {
   }
   tags: string[]
   createdAt: Date
+}
+
+/** Shared Prisma-to-ItemWithMeta mapper for item queries that include type + tags. */
+function toItemWithMeta(item: {
+  id: string
+  title: string
+  content: string | null
+  url: string | null
+  description: string | null
+  type: { icon: string | null; color: string | null }
+  tags: { tag: { name: string } }[]
+  createdAt: Date
+}): ItemWithMeta {
+  return {
+    id: item.id,
+    title: item.title,
+    content: item.content,
+    url: item.url,
+    description: item.description,
+    type: { icon: item.type.icon, color: item.type.color },
+    tags: item.tags.map((t) => t.tag.name),
+    createdAt: item.createdAt,
+  }
+}
+
+/**
+ * Upsert tags and create ItemTag joins inside a transaction.
+ * Deletes existing ItemTag rows for the item first, then upserts Tag rows
+ * (unique per name+userId) and recreates the joins.
+ */
+async function upsertTags(
+  tx: TransactionClient,
+  userId: string,
+  itemId: string,
+  tags: string[],
+): Promise<void> {
+  await tx.itemTag.deleteMany({ where: { itemId } })
+  for (const name of tags) {
+    const tag = await tx.tag.upsert({
+      where: { name_userId: { name, userId } },
+      update: {},
+      create: { name, userId },
+    })
+    await tx.itemTag.create({ data: { itemId, tagId: tag.id } })
+  }
 }
 
 export type ItemStats = {
@@ -31,16 +79,7 @@ export async function getPinnedItems(userId: string): Promise<ItemWithMeta[]> {
     orderBy: { createdAt: 'desc' },
   })
 
-  return items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    content: item.content,
-    url: item.url,
-    description: item.description,
-    type: { icon: item.type.icon, color: item.type.color },
-    tags: item.tags.map((t) => t.tag.name),
-    createdAt: item.createdAt,
-  }))
+  return items.map(toItemWithMeta)
 }
 
 export async function getRecentItems(userId: string): Promise<ItemWithMeta[]> {
@@ -54,16 +93,7 @@ export async function getRecentItems(userId: string): Promise<ItemWithMeta[]> {
     take: 10,
   })
 
-  return items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    content: item.content,
-    url: item.url,
-    description: item.description,
-    type: { icon: item.type.icon, color: item.type.color },
-    tags: item.tags.map((t) => t.tag.name),
-    createdAt: item.createdAt,
-  }))
+  return items.map(toItemWithMeta)
 }
 
 export type SystemItemType = {
@@ -124,16 +154,7 @@ export async function getItemsByType(userId: string, typeId: string): Promise<It
     orderBy: { createdAt: 'desc' },
   })
 
-  return items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    content: item.content,
-    url: item.url,
-    description: item.description,
-    type: { icon: item.type.icon, color: item.type.color },
-    tags: item.tags.map((t) => t.tag.name),
-    createdAt: item.createdAt,
-  }))
+  return items.map(toItemWithMeta)
 }
 
 export type FileItemMeta = {
@@ -255,16 +276,7 @@ export async function updateItem(
       },
     })
 
-    await tx.itemTag.deleteMany({ where: { itemId } })
-
-    for (const name of input.tags) {
-      const tag = await tx.tag.upsert({
-        where: { name_userId: { name, userId } },
-        update: {},
-        create: { name, userId },
-      })
-      await tx.itemTag.create({ data: { itemId, tagId: tag.id } })
-    }
+    await upsertTags(tx, userId, itemId, input.tags)
   })
 
   const updated = await getItemDetail(userId, itemId)
@@ -317,14 +329,7 @@ export async function createItem(
       select: { id: true },
     })
 
-    for (const name of input.tags) {
-      const tag = await tx.tag.upsert({
-        where: { name_userId: { name, userId } },
-        update: {},
-        create: { name, userId },
-      })
-      await tx.itemTag.create({ data: { itemId: created.id, tagId: tag.id } })
-    }
+    await upsertTags(tx, userId, created.id, input.tags)
 
     return created.id
   })
@@ -358,14 +363,7 @@ export async function createFileItem(
       select: { id: true },
     })
 
-    for (const name of input.tags) {
-      const tag = await tx.tag.upsert({
-        where: { name_userId: { name, userId } },
-        update: {},
-        create: { name, userId },
-      })
-      await tx.itemTag.create({ data: { itemId: created.id, tagId: tag.id } })
-    }
+    await upsertTags(tx, userId, created.id, input.tags)
 
     return created.id
   })
