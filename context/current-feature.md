@@ -11,6 +11,16 @@
 
 ## History
 
+### 2026-04-10 — File List View
+
+- Created `src/components/items/FileRow.tsx` — single-column list row with extension-based file icon (code, text, image, archive, spreadsheet), file name, size, upload date, and download button
+- Row click opens ItemDrawer via `useItemDrawer`; download button uses `stopPropagation` for direct download
+- Hover highlight with `hover:bg-muted/30` and colored left border matching file type color
+- Responsive: size and date columns hidden on mobile (`hidden sm:flex`)
+- Added `FileItemMeta` type and `getFileItemsByType()` to `src/lib/db/items.ts` — lightweight query with file-specific fields
+- Updated `src/app/items/[type]/page.tsx` — file type renders `FileRow` in flex column layout; other types unchanged
+- Build and all 28 tests pass
+
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
 
 - Scaffolded project with Next.js (App Router, React 19, TypeScript)
