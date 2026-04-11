@@ -1,29 +1,15 @@
-# Current Feature — Item-Collection Assignment
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Allow adding an item to one or more collections via the create and edit forms
-- Add a collection selector input to `ItemCreateDialog` and `DrawerEditBody`
-- Migrate schema from single `collectionId` FK to many-to-many `CollectionItem` join table
-- Update DB queries (`getItemDetail`, `createItem`, `updateItem`, `createFileItem`) to use the join table
-- Update server actions and Zod schemas to accept `collectionIds: string[]`
-- Update `DrawerViewBody` to display multiple collections
-- Update existing tests and add new ones for collection assignment
-- No collection detail pages needed yet
+<!-- Goals will be added when a new feature is loaded -->
 
 ## Notes
 
-- Current schema: `Item.collectionId` (single optional FK) — needs migration to `CollectionItem` join table
-- Pattern: follow `ItemTag` join table approach (`@@id([itemId, collectionId])`)
-- Migration: `prisma migrate dev` (never `db push`)
-- The selector should show the user's existing collections (fetched via props or context)
-- `DashboardShell` already has `sidebarCollections` — can pass to the create dialog
-- For edit form, collections need to come from `ItemDetail` (update the type)
-- Seed data already assigns some items to collections via `collectionId` — update seed to use join table
-- Dashboard `CollectionsSection` and `Sidebar` collection queries use `items` relation — update after migration
+<!-- Notes will be added when a new feature is loaded -->
 
 ## History
 
@@ -415,3 +401,19 @@ In Progress
 - Extracted `toItemWithMeta` mapper in `src/lib/db/items.ts` — deduplicated Prisma-to-`ItemWithMeta` transform from `getPinnedItems`, `getRecentItems`, `getItemsByType`
 - Pure refactor, no behavior changes
 - Build and all 28 tests pass
+
+### 2026-04-11 — Item-Collection Assignment
+
+- Migrated schema from single `Item.collectionId` FK to many-to-many `CollectionItem` join table (follows `ItemTag` pattern with `@@id([collectionId, itemId])`)
+- Created migration `20260411100848_item_collection_many_to_many` — preserves existing assignments during migration
+- Updated `getItemDetail` to include `collections` via join table; added `ItemDetail.collections` array
+- Updated `createItem`, `updateItem`, `createFileItem` in `src/lib/db/items.ts` to accept and sync `collectionIds: string[]`
+- Updated server actions and Zod schemas to accept `collectionIds` array
+- Created `src/components/items/CollectionSelect.tsx` — multi-select dropdown for choosing collections
+- Added `CollectionSelect` to `ItemCreateDialog` and `DrawerEditBody`
+- Updated `DrawerViewBody` to display multiple collections
+- Updated `CollectionsSection` to show type icons with correct colors (was grey)
+- Updated sidebar and collection queries for join table (`getSidebarCollections`, `getCollections`)
+- Updated seed data to use `CollectionItem` join table
+- Updated `ItemDrawerContext` to pass collections data through
+- Build and all 34 tests pass
