@@ -1,15 +1,21 @@
-# Current Feature
+# Current Feature — Collections Pages
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be added when a new feature is loaded -->
+- Create `/collections` page listing all user collections using existing collection cards
+- Create `/collections/[id]` page showing items in a specific collection using existing item cards
+- Link sidebar "View all collections" to `/collections`
+- Link all collection cards to their specific `/collections/[id]` page
 
 ## Notes
 
-<!-- Notes will be added when a new feature is loaded -->
+- Reuse `CollectionsSection` cards or similar existing collection card components
+- Reuse `ItemCard` / `ItemRow` / `ImageCard` / `FileRow` for items within a collection
+- Both pages should be protected (auth required) and wrapped in `DashboardShell`
+- Collection detail page should show collection name, description, and all items
 
 ## History
 

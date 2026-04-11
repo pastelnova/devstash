@@ -67,6 +67,41 @@ export async function getSidebarCollections(userId: string): Promise<SidebarColl
   })
 }
 
+/** Shared mapper for collection queries that include _count.items and nested item types. */
+function toCollectionWithMeta(col: {
+  id: string
+  name: string
+  description: string | null
+  isFavorite: boolean
+  _count: { items: number }
+  items: { item: { type: { id: string; icon: string | null; color: string | null } } }[]
+}): CollectionWithMeta {
+  const typeCounts: Record<string, { count: number; icon: string; color: string }> = {}
+  for (const ci of col.items) {
+    const { id, icon, color } = ci.item.type
+    if (!typeCounts[id]) {
+      typeCounts[id] = { count: 0, icon: icon ?? '', color: color ?? '' }
+    }
+    typeCounts[id].count++
+  }
+
+  const sorted = Object.values(typeCounts).sort((a, b) => b.count - a.count)
+  const dominantColor = sorted[0]?.color ?? null
+  const typeIcons = sorted
+    .filter((t) => t.icon)
+    .map((t) => ({ icon: t.icon, color: t.color }))
+
+  return {
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    isFavorite: col.isFavorite,
+    itemCount: col._count.items,
+    typeIcons,
+    dominantColor,
+  }
+}
+
 export async function getCollections(userId: string): Promise<CollectionWithMeta[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
@@ -81,32 +116,48 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
     take: 6,
   })
 
-  return collections.map((col) => {
-    // Count usage per type to find the dominant one (for border color)
-    const typeCounts: Record<string, { count: number; icon: string; color: string }> = {}
-    for (const ci of col.items) {
-      const { id, icon, color } = ci.item.type
-      if (!typeCounts[id]) {
-        typeCounts[id] = { count: 0, icon: icon ?? '', color: color ?? '' }
-      }
-      typeCounts[id].count++
-    }
+  return collections.map(toCollectionWithMeta)
+}
 
-    const typeEntries = Object.values(typeCounts)
-    const sorted = typeEntries.sort((a, b) => b.count - a.count)
-    const dominantColor = sorted[0]?.color ?? null
-    const typeIcons = sorted
-      .filter((t) => t.icon)
-      .map((t) => ({ icon: t.icon, color: t.color }))
-
-    return {
-      id: col.id,
-      name: col.name,
-      description: col.description,
-      isFavorite: col.isFavorite,
-      itemCount: col._count.items,
-      typeIcons,
-      dominantColor,
-    }
+export async function getAllCollections(userId: string): Promise<CollectionWithMeta[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    include: {
+      _count: { select: { items: true } },
+      items: {
+        include: { item: { include: { type: true } } },
+        take: 20,
+      },
+    },
+    orderBy: { createdAt: 'desc' },
   })
+
+  return collections.map(toCollectionWithMeta)
+}
+
+export type CollectionDetail = {
+  id: string
+  name: string
+  description: string | null
+  isFavorite: boolean
+  itemCount: number
+}
+
+export async function getCollectionById(
+  userId: string,
+  collectionId: string,
+): Promise<CollectionDetail | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    include: { _count: { select: { items: true } } },
+  })
+  if (!collection) return null
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection._count.items,
+  }
 }

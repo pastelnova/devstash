@@ -171,6 +171,36 @@ export async function getItemsByType(userId: string, typeId: string): Promise<It
   return items.map(toItemWithMeta)
 }
 
+export type CollectionItemWithMeta = ItemWithMeta & {
+  typeName: string
+  fileName: string | null
+  fileSize: number | null
+}
+
+export async function getItemsByCollection(
+  userId: string,
+  collectionId: string,
+): Promise<CollectionItemWithMeta[]> {
+  const items = await prisma.item.findMany({
+    where: {
+      userId,
+      collections: { some: { collectionId } },
+    },
+    include: {
+      type: { select: { name: true, icon: true, color: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return items.map((item) => ({
+    ...toItemWithMeta(item),
+    typeName: item.type.name,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+  }))
+}
+
 export type FileItemMeta = {
   id: string
   title: string

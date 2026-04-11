@@ -21,8 +21,9 @@ export function CollectionsSection({ collections }: Props) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {collections.map((col) => (
-          <div
+          <Link
             key={col.id}
+            href={`/collections/${col.id}`}
             className="rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors"
             style={{ borderLeftColor: col.dominantColor ?? undefined }}
           >
@@ -51,7 +52,7 @@ export function CollectionsSection({ collections }: Props) {
                 )
               })}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>
