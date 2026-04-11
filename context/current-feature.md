@@ -1,21 +1,15 @@
-# Current Feature — Collections Pages
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create `/collections` page listing all user collections using existing collection cards
-- Create `/collections/[id]` page showing items in a specific collection using existing item cards
-- Link sidebar "View all collections" to `/collections`
-- Link all collection cards to their specific `/collections/[id]` page
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
 
-- Reuse `CollectionsSection` cards or similar existing collection card components
-- Reuse `ItemCard` / `ItemRow` / `ImageCard` / `FileRow` for items within a collection
-- Both pages should be protected (auth required) and wrapped in `DashboardShell`
-- Collection detail page should show collection name, description, and all items
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
 
@@ -422,4 +416,16 @@ In Progress
 - Updated sidebar and collection queries for join table (`getSidebarCollections`, `getCollections`)
 - Updated seed data to use `CollectionItem` join table
 - Updated `ItemDrawerContext` to pass collections data through
+- Build and all 34 tests pass
+
+### 2026-04-11 — Collections Pages
+
+- Created `/collections` page (`src/app/collections/page.tsx`) — lists all user collections in a 3-column grid with colored left borders, type icons, item counts, and empty state; cards link to `/collections/[id]`
+- Created `/collections/[id]` page (`src/app/collections/[id]/page.tsx`) — shows collection name with total item count, description, per-type icon breakdown; items grouped by type: `ItemCard` for regular items, `ImageCard` for images, `FileRow` for files; back link to `/collections`
+- Added `getAllCollections(userId)` to `src/lib/db/collections.ts` — like `getCollections` but without `take: 6` limit
+- Added `getCollectionById(userId, collectionId)` to `src/lib/db/collections.ts` — returns `CollectionDetail` with ownership check
+- Extracted `toCollectionWithMeta` shared mapper in `src/lib/db/collections.ts` — deduplicated from `getCollections` and `getAllCollections`
+- Added `CollectionItemWithMeta` type and `getItemsByCollection(userId, collectionId)` to `src/lib/db/items.ts` — includes `typeName`, `fileName`, `fileSize` for type-aware rendering
+- Updated `CollectionsSection.tsx` — collection cards now wrapped in `<Link>` to `/collections/[id]`
+- Sidebar "View all collections" and individual collection links already pointed to correct routes
 - Build and all 34 tests pass
