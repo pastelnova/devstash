@@ -1,11 +1,29 @@
-# Current Feature
+# Current Feature — Item-Collection Assignment
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Allow adding an item to one or more collections via the create and edit forms
+- Add a collection selector input to `ItemCreateDialog` and `DrawerEditBody`
+- Migrate schema from single `collectionId` FK to many-to-many `CollectionItem` join table
+- Update DB queries (`getItemDetail`, `createItem`, `updateItem`, `createFileItem`) to use the join table
+- Update server actions and Zod schemas to accept `collectionIds: string[]`
+- Update `DrawerViewBody` to display multiple collections
+- Update existing tests and add new ones for collection assignment
+- No collection detail pages needed yet
+
 ## Notes
+
+- Current schema: `Item.collectionId` (single optional FK) — needs migration to `CollectionItem` join table
+- Pattern: follow `ItemTag` join table approach (`@@id([itemId, collectionId])`)
+- Migration: `prisma migrate dev` (never `db push`)
+- The selector should show the user's existing collections (fetched via props or context)
+- `DashboardShell` already has `sidebarCollections` — can pass to the create dialog
+- For edit form, collections need to come from `ItemDetail` (update the type)
+- Seed data already assigns some items to collections via `collectionId` — update seed to use join table
+- Dashboard `CollectionsSection` and `Sidebar` collection queries use `items` relation — update after migration
 
 ## History
 

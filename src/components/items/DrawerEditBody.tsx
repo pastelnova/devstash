@@ -12,6 +12,7 @@ import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { Field } from '@/components/items/ItemFormField'
 import { updateItem } from '@/actions/items'
+import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
 import { TypeIconBadge, CONTENT_TYPES, LANGUAGE_TYPES, URL_TYPES } from '@/components/items/drawer-shared'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -22,6 +23,7 @@ type EditState = {
   url: string
   language: string
   tags: string
+  collectionIds: string[]
 }
 
 function toEditState(item: ItemDetail): EditState {
@@ -32,16 +34,18 @@ function toEditState(item: ItemDetail): EditState {
     url: item.url ?? '',
     language: item.language ?? '',
     tags: item.tags.join(', '),
+    collectionIds: item.collections.map((c) => c.id),
   }
 }
 
 interface DrawerEditBodyProps {
   item: ItemDetail
+  collections: CollectionOption[]
   onCancel: () => void
   onSaved: (updated: ItemDetail) => void
 }
 
-export function DrawerEditBody({ item, onCancel, onSaved }: DrawerEditBodyProps) {
+export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerEditBodyProps) {
   const router = useRouter()
   const [form, setForm] = useState<EditState>(() => toEditState(item))
   const [pending, startTransition] = useTransition()
@@ -68,6 +72,7 @@ export function DrawerEditBody({ item, onCancel, onSaved }: DrawerEditBodyProps)
         url: showUrl ? form.url : null,
         language: showLanguage ? form.language : null,
         tags,
+        collectionIds: form.collectionIds,
       })
 
       if (result.success) {
@@ -173,6 +178,16 @@ export function DrawerEditBody({ item, onCancel, onSaved }: DrawerEditBodyProps)
               value={form.url}
               onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
               placeholder="https://…"
+            />
+          </Field>
+        )}
+
+        {collections.length > 0 && (
+          <Field label="Collections" htmlFor="item-collections">
+            <CollectionSelect
+              collections={collections}
+              selected={form.collectionIds}
+              onChange={(ids) => setForm((f) => ({ ...f, collectionIds: ids }))}
             />
           </Field>
         )}

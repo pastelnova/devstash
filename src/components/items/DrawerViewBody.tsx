@@ -154,7 +154,9 @@ export function DrawerViewBody({
         <div className="grid grid-cols-2 gap-3 text-xs">
           <MetaRow label="Type" value={capitalize(item.type.name)} />
           <MetaRow label="Created" value={date} />
-          {item.collection && <MetaRow label="Collection" value={item.collection.name} />}
+          {item.collections.length > 0 && (
+            <MetaRow label={item.collections.length === 1 ? 'Collection' : 'Collections'} value={item.collections.map((c) => c.name).join(', ')} />
+          )}
           {item.language && <MetaRow label="Language" value={item.language} />}
         </div>
 

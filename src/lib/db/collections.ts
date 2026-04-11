@@ -20,13 +20,18 @@ export async function createCollection(
   })
 }
 
+export type CollectionTypeIcon = {
+  icon: string
+  color: string
+}
+
 export type CollectionWithMeta = {
   id: string
   name: string
   description: string | null
   isFavorite: boolean
   itemCount: number
-  typeIcons: string[]
+  typeIcons: CollectionTypeIcon[]
   dominantColor: string | null
 }
 
@@ -42,7 +47,7 @@ export async function getSidebarCollections(userId: string): Promise<SidebarColl
     where: { userId },
     include: {
       items: {
-        include: { type: { select: { color: true } } },
+        include: { item: { include: { type: { select: { color: true } } } } },
         take: 20,
       },
     },
@@ -51,8 +56,8 @@ export async function getSidebarCollections(userId: string): Promise<SidebarColl
 
   return collections.map((col) => {
     const colorCounts: Record<string, number> = {}
-    for (const item of col.items) {
-      const color = item.type.color
+    for (const ci of col.items) {
+      const color = ci.item.type.color
       if (color) colorCounts[color] = (colorCounts[color] ?? 0) + 1
     }
     const dominantColor =
@@ -68,7 +73,7 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
     include: {
       _count: { select: { items: true } },
       items: {
-        include: { type: true },
+        include: { item: { include: { type: true } } },
         take: 20,
       },
     },
@@ -79,8 +84,8 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
   return collections.map((col) => {
     // Count usage per type to find the dominant one (for border color)
     const typeCounts: Record<string, { count: number; icon: string; color: string }> = {}
-    for (const item of col.items) {
-      const { id, icon, color } = item.type
+    for (const ci of col.items) {
+      const { id, icon, color } = ci.item.type
       if (!typeCounts[id]) {
         typeCounts[id] = { count: 0, icon: icon ?? '', color: color ?? '' }
       }
@@ -90,7 +95,9 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
     const typeEntries = Object.values(typeCounts)
     const sorted = typeEntries.sort((a, b) => b.count - a.count)
     const dominantColor = sorted[0]?.color ?? null
-    const typeIcons = sorted.map((t) => t.icon).filter(Boolean)
+    const typeIcons = sorted
+      .filter((t) => t.icon)
+      .map((t) => ({ icon: t.icon, color: t.color }))
 
     return {
       id: col.id,

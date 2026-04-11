@@ -7,15 +7,17 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { DrawerViewBody } from '@/components/items/DrawerViewBody'
 import { DrawerEditBody } from '@/components/items/DrawerEditBody'
 import { deleteItem } from '@/actions/items'
+import type { CollectionOption } from '@/components/items/CollectionSelect'
 import type { ItemDetail } from '@/lib/db/items'
 
 interface ItemDrawerProps {
   itemId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  collections: CollectionOption[]
 }
 
-export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDrawerProps) {
   const router = useRouter()
   const [item, setItem] = useState<ItemDetail | null>(null)
   const [loading, setLoading] = useState(false)
@@ -95,6 +97,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
         {item && !loading && editing && (
           <DrawerEditBody
             item={item}
+            collections={collections}
             onCancel={() => setEditing(false)}
             onSaved={(updated) => {
               setItem(updated)

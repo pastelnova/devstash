@@ -62,6 +62,20 @@ async function upsertTags(
   }
 }
 
+/**
+ * Replace all CollectionItem joins for an item with the given collectionIds.
+ */
+async function upsertCollections(
+  tx: TransactionClient,
+  itemId: string,
+  collectionIds: string[],
+): Promise<void> {
+  await tx.collectionItem.deleteMany({ where: { itemId } })
+  for (const collectionId of collectionIds) {
+    await tx.collectionItem.create({ data: { itemId, collectionId } })
+  }
+}
+
 export type ItemStats = {
   totalItems: number
   totalCollections: number
@@ -205,7 +219,7 @@ export type ItemDetail = {
     icon: string | null
     color: string | null
   }
-  collection: { id: string; name: string } | null
+  collections: { id: string; name: string }[]
   tags: string[]
   createdAt: Date
   updatedAt: Date
@@ -216,7 +230,7 @@ export async function getItemDetail(userId: string, itemId: string): Promise<Ite
     where: { id: itemId, userId },
     include: {
       type: { select: { id: true, name: true, icon: true, color: true } },
-      collection: { select: { id: true, name: true } },
+      collections: { include: { collection: { select: { id: true, name: true } } } },
       tags: { include: { tag: { select: { name: true } } } },
     },
   })
@@ -237,7 +251,7 @@ export async function getItemDetail(userId: string, itemId: string): Promise<Ite
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     type: item.type,
-    collection: item.collection,
+    collections: item.collections.map((c) => c.collection),
     tags: item.tags.map((t) => t.tag.name),
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
@@ -251,6 +265,7 @@ export type UpdateItemInput = {
   url: string | null
   language: string | null
   tags: string[]
+  collectionIds: string[]
 }
 
 /**
@@ -277,6 +292,7 @@ export async function updateItem(
     })
 
     await upsertTags(tx, userId, itemId, input.tags)
+    await upsertCollections(tx, itemId, input.collectionIds)
   })
 
   const updated = await getItemDetail(userId, itemId)
@@ -294,6 +310,7 @@ export type CreateItemInput = {
   language: string | null
   typeId: string
   tags: string[]
+  collectionIds: string[]
 }
 
 export type CreateFileItemInput = {
@@ -301,6 +318,7 @@ export type CreateFileItemInput = {
   description: string | null
   typeId: string
   tags: string[]
+  collectionIds: string[]
   fileUrl: string
   fileName: string
   fileSize: number
@@ -330,6 +348,7 @@ export async function createItem(
     })
 
     await upsertTags(tx, userId, created.id, input.tags)
+    await upsertCollections(tx, created.id, input.collectionIds)
 
     return created.id
   })
@@ -364,6 +383,7 @@ export async function createFileItem(
     })
 
     await upsertTags(tx, userId, created.id, input.tags)
+    await upsertCollections(tx, created.id, input.collectionIds)
 
     return created.id
   })

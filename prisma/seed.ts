@@ -89,7 +89,7 @@ async function main() {
     collectionId: string
     tagNames: string[]
   }) {
-    const { tagNames: itemTags, ...rest } = data
+    const { tagNames: itemTags, collectionId, ...rest } = data
     const item = await prisma.item.create({
       data: { ...rest, userId: user.id },
     })
@@ -97,6 +97,9 @@ async function main() {
       if (tags[name]) {
         await prisma.itemTag.create({ data: { itemId: item.id, tagId: tags[name] } })
       }
+    }
+    if (collectionId) {
+      await prisma.collectionItem.create({ data: { itemId: item.id, collectionId } })
     }
     return item
   }

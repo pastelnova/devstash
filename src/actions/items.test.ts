@@ -55,7 +55,7 @@ const sampleDetail: ItemDetail = {
   isFavorite: false,
   isPinned: false,
   type: { id: 'type_1', name: 'snippet', icon: 'Code', color: '#fff' },
-  collection: null,
+  collections: [],
   tags: [],
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-02'),
@@ -123,6 +123,7 @@ describe('updateItem server action', () => {
       url: '',
       language: 'typescript',
       tags: ['react', 'react', ' hooks '],
+      collectionIds: ['col_1', 'col_2'],
     })
 
     expect(result).toEqual({ success: true, data: sampleDetail })
@@ -139,6 +140,8 @@ describe('updateItem server action', () => {
     })
     // Dedupes and trims tags
     expect(data.tags).toEqual(['react', 'hooks'])
+    // Passes collection IDs through
+    expect(data.collectionIds).toEqual(['col_1', 'col_2'])
   })
 
   it('returns generic error when query throws', async () => {
@@ -233,6 +236,7 @@ describe('createItem server action', () => {
       content: 'console.log(1)',
       language: 'typescript',
       tags: ['react', 'react', ' hooks '],
+      collectionIds: ['col_1'],
     })
 
     expect(result).toEqual({ success: true, data: sampleDetail })
@@ -248,6 +252,7 @@ describe('createItem server action', () => {
       typeId: 'type_1',
     })
     expect(data.tags).toEqual(['react', 'hooks'])
+    expect(data.collectionIds).toEqual(['col_1'])
   })
 
   it('returns generic error when query throws', async () => {
@@ -338,6 +343,7 @@ describe('createFileItem server action', () => {
       fileName: 'photo.png',
       fileSize: 2048,
       tags: ['design', 'design', ' ui '],
+      collectionIds: ['col_1'],
     })
 
     expect(result.success).toBe(true)
@@ -352,6 +358,7 @@ describe('createFileItem server action', () => {
       typeId: 'type_image',
     })
     expect(data.tags).toEqual(['design', 'ui'])
+    expect(data.collectionIds).toEqual(['col_1'])
   })
 
   it('returns generic error when query throws', async () => {

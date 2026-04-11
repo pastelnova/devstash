@@ -21,6 +21,7 @@ import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { FileUpload } from '@/components/items/FileUpload'
 import { createItem, createFileItem, type CreateItemInput, type CreateFileItemInput } from '@/actions/items'
+import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
 import type { SystemItemType } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
@@ -35,6 +36,7 @@ interface ItemCreateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   itemTypes: SystemItemType[]
+  collections: CollectionOption[]
   defaultType?: CreatableType
 }
 
@@ -53,6 +55,7 @@ type FormState = {
   url: string
   language: string
   tags: string
+  collectionIds: string[]
   uploadedFile: UploadedFile | null
 }
 
@@ -64,10 +67,11 @@ const INITIAL_FORM: FormState = {
   url: '',
   language: '',
   tags: '',
+  collectionIds: [],
   uploadedFile: null,
 }
 
-export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }: ItemCreateDialogProps) {
+export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, defaultType }: ItemCreateDialogProps) {
   const router = useRouter()
   const [form, setForm] = useState<FormState>(() =>
     defaultType ? { ...INITIAL_FORM, type: defaultType } : INITIAL_FORM,
@@ -122,6 +126,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
           title: form.title,
           description: form.description,
           tags,
+          collectionIds: form.collectionIds,
           fileUrl: form.uploadedFile.key,
           fileName: form.uploadedFile.fileName,
           fileSize: form.uploadedFile.fileSize,
@@ -136,6 +141,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
           url: showUrl ? form.url : null,
           language: showLanguage ? form.language : null,
           tags,
+          collectionIds: form.collectionIds,
         }
         result = await createItem(input)
       }
@@ -259,6 +265,16 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, defaultType }:
                 onRemove={() =>
                   setForm((f) => ({ ...f, uploadedFile: null }))
                 }
+              />
+            </Field>
+          )}
+
+          {collections.length > 0 && (
+            <Field label="Collections" htmlFor="create-collections">
+              <CollectionSelect
+                collections={collections}
+                selected={form.collectionIds}
+                onChange={(ids) => setForm((f) => ({ ...f, collectionIds: ids }))}
               />
             </Field>
           )}

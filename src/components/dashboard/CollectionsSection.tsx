@@ -40,9 +40,15 @@ export function CollectionsSection({ collections }: Props) {
             <p className="text-xs text-muted-foreground mb-2">{col.itemCount} items</p>
             <p className="text-xs text-muted-foreground/70 mb-4 line-clamp-2">{col.description}</p>
             <div className="flex items-center gap-1.5">
-              {col.typeIcons.map((iconKey) => {
-                const Icon = typeIconMap[iconKey] ?? File
-                return <Icon key={iconKey} className="h-3.5 w-3.5 text-muted-foreground/50" />
+              {col.typeIcons.map((t) => {
+                const Icon = typeIconMap[t.icon] ?? File
+                return (
+                  <Icon
+                    key={t.icon}
+                    className="h-3.5 w-3.5"
+                    style={{ color: t.color || undefined }}
+                  />
+                )
               })}
             </div>
           </div>

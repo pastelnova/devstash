@@ -35,6 +35,7 @@ const updateItemSchema = z.object({
     .max(20)
     .default([])
     .transform((arr) => Array.from(new Set(arr))),
+  collectionIds: z.array(z.string().min(1)).default([]),
 })
 
 export type UpdateItemInput = z.input<typeof updateItemSchema>
@@ -56,6 +57,7 @@ const createItemSchema = z
       .max(20)
       .default([])
       .transform((arr) => Array.from(new Set(arr))),
+    collectionIds: z.array(z.string().min(1)).default([]),
   })
   .refine((d) => d.type !== 'link' || d.url !== null, {
     message: 'URL is required for links',
@@ -99,6 +101,7 @@ export async function createItem(
       language: parsed.data.language,
       typeId: itemType.id,
       tags: parsed.data.tags,
+      collectionIds: parsed.data.collectionIds,
     })
     return { success: true, data: created }
   } catch {
@@ -115,6 +118,7 @@ const createFileItemSchema = z.object({
     .max(20)
     .default([])
     .transform((arr) => Array.from(new Set(arr))),
+  collectionIds: z.array(z.string().min(1)).default([]),
   fileUrl: z.string().min(1, 'File is required'),
   fileName: z.string().min(1, 'File name is required'),
   fileSize: z.number().positive(),
@@ -150,6 +154,7 @@ export async function createFileItem(
       description: parsed.data.description,
       typeId: itemType.id,
       tags: parsed.data.tags,
+      collectionIds: parsed.data.collectionIds,
       fileUrl: parsed.data.fileUrl,
       fileName: parsed.data.fileName,
       fileSize: parsed.data.fileSize,
@@ -184,7 +189,10 @@ export async function updateItem(
   }
 
   try {
-    const updated = await updateItemQuery(session.user.id, itemId, parsed.data)
+    const updated = await updateItemQuery(session.user.id, itemId, {
+      ...parsed.data,
+      collectionIds: parsed.data.collectionIds,
+    })
     return { success: true, data: updated }
   } catch {
     return { success: false, error: 'Failed to update item' }

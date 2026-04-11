@@ -35,7 +35,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
   const [collectionCreateOpen, setCollectionCreateOpen] = useState(false)
 
   return (
-    <ItemDrawerProvider>
+    <ItemDrawerProvider collections={sidebarCollections}>
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Top Bar */}
       <header className="flex items-center h-14 border-b border-border shrink-0">
@@ -105,6 +105,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
         open={createOpen}
         onOpenChange={setCreateOpen}
         itemTypes={itemTypes}
+        collections={sidebarCollections}
         defaultType={defaultCreateType}
       />
       <CollectionCreateDialog
