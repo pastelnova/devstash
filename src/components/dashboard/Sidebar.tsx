@@ -9,6 +9,7 @@ import {
   ChevronRight,
   PanelLeft,
   LogOut,
+  Settings,
   User,
   X,
 } from 'lucide-react'
@@ -225,6 +226,12 @@ export function Sidebar({
               <Link href="/profile" className="flex items-center gap-2 w-full px-2 py-1.5">
                 <User className="h-4 w-4" />
                 Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 p-0">
+              <Link href="/settings" className="flex items-center gap-2 w-full px-2 py-1.5">
+                <Settings className="h-4 w-4" />
+                Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem

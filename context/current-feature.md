@@ -1,13 +1,23 @@
 # Current Feature
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals will be populated by /feature load -->
+- Create a `/settings` page (protected, wrapped in `DashboardShell`)
+- Add a "Settings" link in the sidebar user dropdown (between Profile and Sign out)
+- Move `ChangePasswordSection` from profile page to settings page
+- Move `DeleteAccountSection` from profile page to settings page
+- Profile page keeps: `ProfileInfo` and `ProfileStats` only
 
 ## Notes
-<!-- Notes will be populated by /feature load -->
+- Settings page URL: `/settings`
+- Protected route — redirect to `/sign-in` if unauthenticated
+- Sidebar dropdown currently has: Profile link + Sign out — add Settings between them
+- `ChangePasswordSection` only shown if user has a password (same logic as profile)
+- Move components from `src/components/profile/` — keep them in the same directory or move to `src/components/settings/` as appropriate
+- Need to fetch `hasPassword(userId)` in settings page
+- Settings page needs the same shell data: `itemTypes`, `sidebarCollections`, `searchItems`, `searchCollections`, `user`
 
 ## History
 
