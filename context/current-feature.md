@@ -1,19 +1,13 @@
-# Current Feature — Pagination
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add pagination to `/items/[type]` page with numbered page links
-- Add pagination to `/collections/[id]` page with numbered page links
-- Pagination controls at bottom with page numbers and prev/next links
-- Disable (grey out) prev/next when not available
-- Only fetch the amount of resources that a page requires (no fetch-all)
+<!-- Goals will be populated by /feature load -->
 
 ## Notes
-- Constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
-- Dashboard limits: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
-- Spec: `context/features/pagination-spec.md`
+<!-- Notes will be populated by /feature load -->
 
 ## History
 
@@ -458,4 +452,16 @@ In Progress
 - Updated `DashboardShell.tsx` — `Cmd+K` / `Ctrl+K` keyboard shortcut toggles palette; top bar search replaced with button showing `⌘K` badge
 - All 5 pages (dashboard, collections, collection detail, items by type, profile) updated to fetch and pass `searchItems` + `searchCollections` props
 - Selecting an item opens the item drawer; selecting a collection navigates to `/collections/[id]`
+- Build and all 43 tests pass
+
+### 2026-04-13 — Pagination
+
+- Created `src/lib/constants.ts` with `ITEMS_PER_PAGE`, `COLLECTIONS_PER_PAGE`, `DASHBOARD_COLLECTIONS_LIMIT`, `DASHBOARD_RECENT_ITEMS_LIMIT`
+- Created reusable `src/components/Pagination.tsx` — numbered page links with prev/next arrows (greyed out when unavailable), ellipsis for large page ranges
+- Updated `getItemsByType`, `getFileItemsByType`, `getItemsByCollection` in `src/lib/db/items.ts` — accept `page` + `perPage` params, return `{ data, total }` using Prisma `skip`/`take` + `count`
+- Updated `getAllCollections` in `src/lib/db/collections.ts` — same paginated pattern with `PaginatedCollections` return type
+- Replaced hardcoded limits: `getRecentItems` uses `DASHBOARD_RECENT_ITEMS_LIMIT`, `getCollections` uses `DASHBOARD_COLLECTIONS_LIMIT`
+- Updated `/items/[type]` page — reads `?page=` search param, passes to paginated query, renders `<Pagination>` at bottom
+- Updated `/collections` page — paginated with `COLLECTIONS_PER_PAGE`, total count in header
+- Updated `/collections/[id]` page — paginated collection items with `ITEMS_PER_PAGE`
 - Build and all 43 tests pass
