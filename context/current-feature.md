@@ -1,23 +1,13 @@
 # Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create a `/settings` page (protected, wrapped in `DashboardShell`)
-- Add a "Settings" link in the sidebar user dropdown (between Profile and Sign out)
-- Move `ChangePasswordSection` from profile page to settings page
-- Move `DeleteAccountSection` from profile page to settings page
-- Profile page keeps: `ProfileInfo` and `ProfileStats` only
+
 
 ## Notes
-- Settings page URL: `/settings`
-- Protected route — redirect to `/sign-in` if unauthenticated
-- Sidebar dropdown currently has: Profile link + Sign out — add Settings between them
-- `ChangePasswordSection` only shown if user has a password (same logic as profile)
-- Move components from `src/components/profile/` — keep them in the same directory or move to `src/components/settings/` as appropriate
-- Need to fetch `hasPassword(userId)` in settings page
-- Settings page needs the same shell data: `itemTypes`, `sidebarCollections`, `searchItems`, `searchCollections`, `user`
+
 
 ## History
 
@@ -474,4 +464,14 @@ In Progress
 - Updated `/items/[type]` page — reads `?page=` search param, passes to paginated query, renders `<Pagination>` at bottom
 - Updated `/collections` page — paginated with `COLLECTIONS_PER_PAGE`, total count in header
 - Updated `/collections/[id]` page — paginated collection items with `ITEMS_PER_PAGE`
+- Build and all 43 tests pass
+
+### 2026-04-13 — Settings Page
+
+- Created `/settings` route (`src/app/settings/page.tsx`) — protected server component wrapped in `DashboardShell`
+- Moved `ChangePasswordSection` and `DeleteAccountSection` from profile page to settings page
+- `ChangePasswordSection` only shown if user has a password (via `hasPassword(userId)`)
+- Added "Settings" link with gear icon in sidebar user dropdown (between Profile and Sign out)
+- Updated profile page to show only `ProfileInfo` and `ProfileStats`; removed `hasPassword` fetch and password/delete imports
+- Components remain in `src/components/profile/` (no directory move needed)
 - Build and all 43 tests pass
