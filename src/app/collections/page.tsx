@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import { FolderOpen } from 'lucide-react'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { getAllCollections, getSidebarCollections } from '@/lib/db/collections'
-import { getSystemItemTypes } from '@/lib/db/items'
+import { getAllCollections, getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
+import { getSystemItemTypes, getSearchItems } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { CollectionCard } from '@/components/dashboard/CollectionCard'
 
@@ -15,14 +15,16 @@ export default async function CollectionsPage() {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) redirect('/sign-in')
 
-  const [collections, itemTypes, sidebarCollections] = await Promise.all([
+  const [collections, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     getAllCollections(userId),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Collections</h1>

@@ -194,3 +194,27 @@ export async function deleteCollection(
 
   return { id: collectionId }
 }
+
+export type SearchCollection = {
+  id: string
+  name: string
+  itemCount: number
+}
+
+export async function getSearchCollections(userId: string): Promise<SearchCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      name: true,
+      _count: { select: { items: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return collections.map((c) => ({
+    id: c.id,
+    name: c.name,
+    itemCount: c._count.items,
+  }))
+}

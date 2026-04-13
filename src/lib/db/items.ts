@@ -448,3 +448,31 @@ export async function getItemStats(userId: string): Promise<ItemStats> {
 
   return { totalItems, totalCollections, favoriteItems, favoriteCollections }
 }
+
+export type SearchItem = {
+  id: string
+  title: string
+  typeIcon: string | null
+  typeColor: string | null
+  typeName: string
+}
+
+export async function getSearchItems(userId: string): Promise<SearchItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      title: true,
+      type: { select: { icon: true, color: true, name: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    typeIcon: item.type.icon,
+    typeColor: item.type.color,
+    typeName: item.type.name,
+  }))
+}

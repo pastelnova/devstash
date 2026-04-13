@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ArrowLeft, File, FolderOpen } from 'lucide-react'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { getCollectionById, getSidebarCollections } from '@/lib/db/collections'
-import { getSystemItemTypes, getItemsByCollection } from '@/lib/db/items'
+import { getCollectionById, getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
+import { getSystemItemTypes, getItemsByCollection, getSearchItems } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { CollectionActions } from '@/components/dashboard/CollectionActions'
 import { ItemCard } from '@/components/items/ItemCard'
@@ -29,10 +29,12 @@ export default async function CollectionDetailPage({
   const collection = await getCollectionById(userId, id)
   if (!collection) notFound()
 
-  const [allItems, itemTypes, sidebarCollections] = await Promise.all([
+  const [allItems, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     getItemsByCollection(userId, id),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ])
 
   const regularItems = allItems.filter((i) => i.typeName.toLowerCase() !== 'image' && i.typeName.toLowerCase() !== 'file')
@@ -50,7 +52,7 @@ export default async function CollectionDetailPage({
   }
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
       <div className="space-y-6">
         <div>
           <Link

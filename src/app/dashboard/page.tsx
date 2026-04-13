@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { getCollections, getSidebarCollections } from '@/lib/db/collections'
-import { getPinnedItems, getRecentItems, getItemStats, getSystemItemTypes } from '@/lib/db/items'
+import { getCollections, getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
+import { getPinnedItems, getRecentItems, getItemStats, getSystemItemTypes, getSearchItems } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { StatsCards } from '@/components/dashboard/StatsCards'
 import { CollectionsSection } from '@/components/dashboard/CollectionsSection'
@@ -19,17 +19,19 @@ export default async function DashboardPage() {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) redirect('/sign-in')
 
-  const [collections, pinnedItems, recentItems, stats, itemTypes, sidebarCollections] = await Promise.all([
+  const [collections, pinnedItems, recentItems, stats, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     getCollections(userId),
     getPinnedItems(userId),
     getRecentItems(userId),
     getItemStats(userId),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>

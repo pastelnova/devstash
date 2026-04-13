@@ -2,12 +2,13 @@ import { notFound, redirect } from 'next/navigation'
 import { File } from 'lucide-react'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { getSidebarCollections } from '@/lib/db/collections'
+import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import {
   getSystemItemTypes,
   getSystemItemTypeBySlug,
   getItemsByType,
   getFileItemsByType,
+  getSearchItems,
 } from '@/lib/db/items'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { ItemCard } from '@/components/items/ItemCard'
@@ -38,11 +39,13 @@ export default async function ItemsByTypePage({
 
   const isFileType = itemType.name.toLowerCase() === 'file'
 
-  const [items, fileItems, itemTypes, sidebarCollections] = await Promise.all([
+  const [items, fileItems, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     isFileType ? Promise.resolve([]) : getItemsByType(userId, itemType.id),
     isFileType ? getFileItemsByType(userId, itemType.id) : Promise.resolve([]),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ])
 
   const Icon = itemType.icon ? (typeIconMap[itemType.icon] ?? File) : File
@@ -56,6 +59,8 @@ export default async function ItemsByTypePage({
     <DashboardShell
       itemTypes={itemTypes}
       sidebarCollections={sidebarCollections}
+      searchItems={searchItems}
+      searchCollections={searchCollections}
       user={session.user}
       defaultCreateType={creatableType}
     >

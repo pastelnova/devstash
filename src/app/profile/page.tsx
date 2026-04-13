@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { getProfileStats, hasPassword } from '@/lib/db/profile'
-import { getSystemItemTypes } from '@/lib/db/items'
-import { getSidebarCollections } from '@/lib/db/collections'
+import { getSystemItemTypes, getSearchItems } from '@/lib/db/items'
+import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { ProfileInfo } from '@/components/profile/ProfileInfo'
 import { ProfileStats } from '@/components/profile/ProfileStats'
@@ -19,15 +19,17 @@ export default async function ProfilePage() {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) redirect('/sign-in')
 
-  const [stats, canChangePassword, itemTypes, sidebarCollections] = await Promise.all([
+  const [stats, canChangePassword, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     getProfileStats(userId),
     hasPassword(userId),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
       <div className="space-y-8 max-w-2xl">
         <div>
           <h1 className="text-2xl font-semibold">Profile</h1>

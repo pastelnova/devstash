@@ -1,16 +1,16 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { Search, Plus, FolderPlus, Menu } from 'lucide-react'
 import { Sidebar, type SidebarUser } from './Sidebar'
-import type { SystemItemType } from '@/lib/db/items'
-import type { SidebarCollection } from '@/lib/db/collections'
+import type { SystemItemType, SearchItem } from '@/lib/db/items'
+import type { SidebarCollection, SearchCollection } from '@/lib/db/collections'
 import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
 import { ItemCreateDialog, type CreatableType } from '@/components/items/ItemCreateDialog'
 import { CollectionCreateDialog } from '@/components/dashboard/CollectionCreateDialog'
+import { CommandPalette } from '@/components/dashboard/CommandPalette'
 
 const CreateDialogContext = createContext<(() => void) | null>(null)
 
@@ -24,15 +24,29 @@ interface DashboardShellProps {
   children: React.ReactNode
   itemTypes: SystemItemType[]
   sidebarCollections: SidebarCollection[]
+  searchItems: SearchItem[]
+  searchCollections: SearchCollection[]
   user?: SidebarUser | null
   defaultCreateType?: CreatableType
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections, user, defaultCreateType }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections, searchItems, searchCollections, user, defaultCreateType }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [collectionCreateOpen, setCollectionCreateOpen] = useState(false)
+  const [commandOpen, setCommandOpen] = useState(false)
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setCommandOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
 
   return (
     <ItemDrawerProvider collections={sidebarCollections}>
@@ -60,14 +74,16 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
 
         {/* Main area — aligns with dashboard content */}
         <div className="flex-1 flex items-center gap-3 px-6 min-w-0">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search items..."
-              className="pl-8 bg-muted border-0 h-8 text-sm"
-              readOnly
-            />
-          </div>
+          <button
+            className="relative flex-1 max-w-md flex items-center gap-2 h-8 rounded-md bg-muted px-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onClick={() => setCommandOpen(true)}
+          >
+            <Search className="h-4 w-4 shrink-0" />
+            <span className="flex-1 text-left">Search items...</span>
+            <kbd className="pointer-events-none hidden sm:inline-flex h-5 items-center rounded bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground border border-border">
+              ⌘K
+            </kbd>
+          </button>
 
           <div className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCollectionCreateOpen(true)}>
@@ -111,6 +127,12 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user, 
       <CollectionCreateDialog
         open={collectionCreateOpen}
         onOpenChange={setCollectionCreateOpen}
+      />
+      <CommandPalette
+        items={searchItems}
+        collections={searchCollections}
+        open={commandOpen}
+        onOpenChange={setCommandOpen}
       />
     </div>
     </ItemDrawerProvider>
