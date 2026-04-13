@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { getProfileStats } from '@/lib/db/profile'
+import { getProfileStats, getEditorPreferences } from '@/lib/db/profile'
 import { getSystemItemTypes, getSearchItems } from '@/lib/db/items'
 import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
@@ -17,16 +17,17 @@ export default async function ProfilePage() {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) redirect('/sign-in')
 
-  const [stats, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+  const [stats, itemTypes, sidebarCollections, searchItems, searchCollections, editorPreferences] = await Promise.all([
     getProfileStats(userId),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
     getSearchCollections(userId),
+    getEditorPreferences(userId),
   ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user} editorPreferences={editorPreferences}>
       <div className="space-y-8 max-w-2xl">
         <div>
           <h1 className="text-2xl font-semibold">Profile</h1>

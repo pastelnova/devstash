@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { type EditorPreferences, EDITOR_DEFAULTS } from '@/types/editor-preferences'
 
 export type ProfileStats = {
   totalItems: number
@@ -39,4 +40,24 @@ export async function hasPassword(userId: string): Promise<boolean> {
     select: { password: true },
   })
   return !!user?.password
+}
+
+export async function getEditorPreferences(userId: string): Promise<EditorPreferences> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { editorPreferences: true },
+  })
+  return { ...EDITOR_DEFAULTS, ...(user?.editorPreferences as Partial<EditorPreferences> | null) }
+}
+
+export async function updateEditorPreferences(
+  userId: string,
+  preferences: EditorPreferences,
+): Promise<EditorPreferences> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { editorPreferences: JSON.parse(JSON.stringify(preferences)) },
+    select: { editorPreferences: true },
+  })
+  return { ...EDITOR_DEFAULTS, ...(user.editorPreferences as Partial<EditorPreferences> | null) }
 }

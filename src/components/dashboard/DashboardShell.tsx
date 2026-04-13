@@ -11,6 +11,8 @@ import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
 import { ItemCreateDialog, type CreatableType } from '@/components/items/ItemCreateDialog'
 import { CollectionCreateDialog } from '@/components/dashboard/CollectionCreateDialog'
 import { CommandPalette } from '@/components/dashboard/CommandPalette'
+import { EditorPreferencesProvider } from '@/components/settings/EditorPreferencesContext'
+import type { EditorPreferences } from '@/types/editor-preferences'
 
 const CreateDialogContext = createContext<(() => void) | null>(null)
 
@@ -28,9 +30,10 @@ interface DashboardShellProps {
   searchCollections: SearchCollection[]
   user?: SidebarUser | null
   defaultCreateType?: CreatableType
+  editorPreferences?: EditorPreferences | null
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections, searchItems, searchCollections, user, defaultCreateType }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections, searchItems, searchCollections, user, defaultCreateType, editorPreferences }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -49,6 +52,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
   }, [])
 
   return (
+    <EditorPreferencesProvider initial={editorPreferences}>
     <ItemDrawerProvider collections={sidebarCollections}>
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Top Bar */}
@@ -136,5 +140,6 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
       />
     </div>
     </ItemDrawerProvider>
+    </EditorPreferencesProvider>
   )
 }

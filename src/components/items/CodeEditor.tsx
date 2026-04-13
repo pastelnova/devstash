@@ -1,8 +1,10 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import Editor, { type OnMount } from '@monaco-editor/react'
+import Editor, { type BeforeMount, type OnMount } from '@monaco-editor/react'
 import { Check, Copy } from 'lucide-react'
+import { useEditorPreferences } from '@/components/settings/EditorPreferencesContext'
+import { monokaiTheme, githubDarkTheme } from '@/lib/monaco-themes'
 
 const LINE_HEIGHT = 19
 const PADDING_Y = 24 // 12px top + 12px bottom
@@ -17,6 +19,7 @@ interface CodeEditorProps {
 }
 
 export function CodeEditor({ value, language, readOnly = false, onChange }: CodeEditorProps) {
+  const { preferences } = useEditorPreferences()
   const [copied, setCopied] = useState(false)
 
   const editorHeight = useMemo(() => {
@@ -48,6 +51,11 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
     },
     [onChange],
   )
+
+  const handleBeforeMount: BeforeMount = (monaco) => {
+    monaco.editor.defineTheme('monokai', monokaiTheme)
+    monaco.editor.defineTheme('github-dark', githubDarkTheme)
+  }
 
   const displayLanguage = language || 'text'
 
@@ -92,18 +100,19 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
         height={editorHeight}
         value={value}
         language={language || 'plaintext'}
-        theme="vs-dark"
+        theme={preferences.theme}
+        beforeMount={handleBeforeMount}
         onChange={readOnly ? undefined : handleChange}
         onMount={handleMount}
         options={{
           readOnly,
-          minimap: { enabled: false },
-          fontSize: 13,
+          minimap: { enabled: preferences.minimap },
+          fontSize: preferences.fontSize,
           lineNumbers: 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,
-          wordWrap: 'on',
-          tabSize: 2,
+          wordWrap: preferences.wordWrap ? 'on' : 'off',
+          tabSize: preferences.tabSize,
           renderLineHighlight: readOnly ? 'none' : 'line',
           overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,

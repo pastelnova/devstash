@@ -3,6 +3,7 @@ import { File } from 'lucide-react'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
+import { getEditorPreferences } from '@/lib/db/profile'
 import {
   getSystemItemTypes,
   getSystemItemTypeBySlug,
@@ -45,13 +46,14 @@ export default async function ItemsByTypePage({
   const isFileType = itemType.name.toLowerCase() === 'file'
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
 
-  const [itemsResult, fileItemsResult, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+  const [itemsResult, fileItemsResult, itemTypes, sidebarCollections, searchItems, searchCollections, editorPreferences] = await Promise.all([
     isFileType ? Promise.resolve({ data: [], total: 0 }) : getItemsByType(userId, itemType.id, page, ITEMS_PER_PAGE),
     isFileType ? getFileItemsByType(userId, itemType.id, page, ITEMS_PER_PAGE) : Promise.resolve({ data: [], total: 0 }),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
     getSearchCollections(userId),
+    getEditorPreferences(userId),
   ])
 
   const items = itemsResult.data
@@ -74,6 +76,7 @@ export default async function ItemsByTypePage({
       searchCollections={searchCollections}
       user={session.user}
       defaultCreateType={creatableType}
+      editorPreferences={editorPreferences}
     >
       <div className="space-y-6">
         <div className="flex items-center gap-3">

@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { hasPassword } from '@/lib/db/profile'
+import { hasPassword, getEditorPreferences } from '@/lib/db/profile'
 import { getSystemItemTypes, getSearchItems } from '@/lib/db/items'
 import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { ChangePasswordSection } from '@/components/profile/ChangePasswordSection'
 import { DeleteAccountSection } from '@/components/profile/DeleteAccountSection'
+import { EditorPreferencesSection } from '@/components/settings/EditorPreferencesSection'
 
 export default async function SettingsPage() {
   const session = await auth()
@@ -13,8 +14,9 @@ export default async function SettingsPage() {
 
   const userId = session.user.id
 
-  const [canChangePassword, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+  const [canChangePassword, editorPreferences, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     hasPassword(userId),
+    getEditorPreferences(userId),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
@@ -22,12 +24,14 @@ export default async function SettingsPage() {
   ])
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user} editorPreferences={editorPreferences}>
       <div className="space-y-8 max-w-2xl">
         <div>
           <h1 className="text-2xl font-semibold">Settings</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage your account settings</p>
         </div>
+
+        <EditorPreferencesSection />
 
         {canChangePassword && <ChangePasswordSection />}
 

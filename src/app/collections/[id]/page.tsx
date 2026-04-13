@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { getCollectionById, getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import { getSystemItemTypes, getItemsByCollection, getSearchItems } from '@/lib/db/items'
+import { getEditorPreferences } from '@/lib/db/profile'
 import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { Pagination } from '@/components/Pagination'
@@ -36,12 +37,13 @@ export default async function CollectionDetailPage({
 
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
 
-  const [itemsResult, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+  const [itemsResult, itemTypes, sidebarCollections, searchItems, searchCollections, editorPreferences] = await Promise.all([
     getItemsByCollection(userId, id, page, ITEMS_PER_PAGE),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
     getSearchCollections(userId),
+    getEditorPreferences(userId),
   ])
 
   const allItems = itemsResult.data
@@ -63,7 +65,7 @@ export default async function CollectionDetailPage({
   }
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user}>
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} searchItems={searchItems} searchCollections={searchCollections} user={session.user} editorPreferences={editorPreferences}>
       <div className="space-y-6">
         <div>
           <Link
