@@ -10,7 +10,9 @@ import {
   getFileItemsByType,
   getSearchItems,
 } from '@/lib/db/items'
+import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
+import { Pagination } from '@/components/Pagination'
 import { ItemCard } from '@/components/items/ItemCard'
 import { ImageCard } from '@/components/items/ImageCard'
 import { FileRow } from '@/components/items/FileRow'
@@ -22,10 +24,13 @@ const CREATABLE_SET = new Set(['snippet', 'prompt', 'command', 'note', 'link', '
 
 export default async function ItemsByTypePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ type: string }>
+  searchParams: Promise<{ page?: string }>
 }) {
   const { type: typeSlug } = await params
+  const { page: pageParam } = await searchParams
 
   const session = await auth()
   if (!session?.user?.id) redirect('/sign-in')
@@ -38,22 +43,28 @@ export default async function ItemsByTypePage({
   if (!itemType) notFound()
 
   const isFileType = itemType.name.toLowerCase() === 'file'
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
 
-  const [items, fileItems, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
-    isFileType ? Promise.resolve([]) : getItemsByType(userId, itemType.id),
-    isFileType ? getFileItemsByType(userId, itemType.id) : Promise.resolve([]),
+  const [itemsResult, fileItemsResult, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+    isFileType ? Promise.resolve({ data: [], total: 0 }) : getItemsByType(userId, itemType.id, page, ITEMS_PER_PAGE),
+    isFileType ? getFileItemsByType(userId, itemType.id, page, ITEMS_PER_PAGE) : Promise.resolve({ data: [], total: 0 }),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
     getSearchCollections(userId),
   ])
 
+  const items = itemsResult.data
+  const fileItems = fileItemsResult.data
+  const totalCount = isFileType ? fileItemsResult.total : itemsResult.total
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
   const Icon = itemType.icon ? (typeIconMap[itemType.icon] ?? File) : File
   const color = itemType.color ?? '#94a3b8'
   const typeLower = itemType.name.toLowerCase()
   const title = `${itemType.name.charAt(0).toUpperCase()}${itemType.name.slice(1)}s`
   const creatableType = CREATABLE_SET.has(typeLower) ? (typeLower as CreatableType) : undefined
-  const totalCount = isFileType ? fileItems.length : items.length
+  const baseUrl = `/items/${typeSlug}`
 
   return (
     <DashboardShell
@@ -106,6 +117,8 @@ export default async function ItemsByTypePage({
             )}
           </div>
         )}
+
+        <Pagination currentPage={page} totalPages={totalPages} baseUrl={baseUrl} />
       </div>
     </DashboardShell>
   )

@@ -5,7 +5,9 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { getCollectionById, getSidebarCollections, getSearchCollections } from '@/lib/db/collections'
 import { getSystemItemTypes, getItemsByCollection, getSearchItems } from '@/lib/db/items'
+import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
+import { Pagination } from '@/components/Pagination'
 import { CollectionActions } from '@/components/dashboard/CollectionActions'
 import { ItemCard } from '@/components/items/ItemCard'
 import { ImageCard } from '@/components/items/ImageCard'
@@ -14,10 +16,13 @@ import { typeIconMap } from '@/lib/item-type-icons'
 
 export default async function CollectionDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ page?: string }>
 }) {
   const { id } = await params
+  const { page: pageParam } = await searchParams
 
   const session = await auth()
   if (!session?.user?.id) redirect('/sign-in')
@@ -29,19 +34,25 @@ export default async function CollectionDetailPage({
   const collection = await getCollectionById(userId, id)
   if (!collection) notFound()
 
-  const [allItems, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
-    getItemsByCollection(userId, id),
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
+
+  const [itemsResult, itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
+    getItemsByCollection(userId, id, page, ITEMS_PER_PAGE),
     getSystemItemTypes(userId),
     getSidebarCollections(userId),
     getSearchItems(userId),
     getSearchCollections(userId),
   ])
 
+  const allItems = itemsResult.data
+  const totalCount = itemsResult.total
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
   const regularItems = allItems.filter((i) => i.typeName.toLowerCase() !== 'image' && i.typeName.toLowerCase() !== 'file')
   const imageItems = allItems.filter((i) => i.typeName.toLowerCase() === 'image')
   const fileItems = allItems.filter((i) => i.typeName.toLowerCase() === 'file')
 
-  // Count items per type for the header breakdown
+  // Count items per type for the header breakdown (use total from collection, not paginated)
   const typeCounts: Record<string, { count: number; icon: string | null; color: string | null }> = {}
   for (const item of allItems) {
     const name = item.typeName.toLowerCase()
@@ -89,7 +100,7 @@ export default async function CollectionDetailPage({
           )}
         </div>
 
-        {allItems.length === 0 ? (
+        {totalCount === 0 ? (
           <div className="rounded-lg border border-dashed bg-card p-12 text-center">
             <FolderOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">
@@ -139,6 +150,8 @@ export default async function CollectionDetailPage({
             )}
           </div>
         )}
+
+        <Pagination currentPage={page} totalPages={totalPages} baseUrl={`/collections/${id}`} />
       </div>
     </DashboardShell>
   )

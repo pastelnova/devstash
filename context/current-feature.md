@@ -1,61 +1,21 @@
-# Current Feature
+# Current Feature — Pagination
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals will be populated by /feature load -->
+- Add pagination to `/items/[type]` page with numbered page links
+- Add pagination to `/collections/[id]` page with numbered page links
+- Pagination controls at bottom with page numbers and prev/next links
+- Disable (grey out) prev/next when not available
+- Only fetch the amount of resources that a page requires (no fetch-all)
 
 ## Notes
-<!-- Notes will be populated by /feature load -->
+- Constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
+- Dashboard limits: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
+- Spec: `context/features/pagination-spec.md`
 
 ## History
-
-### 2026-04-13 — Global Search / Command Palette
-
-- Installed shadcn `command` component (wraps `cmdk`) with `CommandDialog`, `CommandInput`, `CommandList`, `CommandGroup`, `CommandItem`
-- Added `getSearchItems(userId)` to `src/lib/db/items.ts` — lightweight query returning `id`, `title`, `typeIcon`, `typeColor`, `typeName`
-- Added `getSearchCollections(userId)` to `src/lib/db/collections.ts` — lightweight query returning `id`, `name`, `itemCount`
-- Created `src/components/dashboard/CommandPalette.tsx` — `CommandDialog` with grouped Items and Collections sections, type icons, item counts
-- Custom word-based substring filter on `Command` — replaces cmdk's default loose fuzzy match; each search word must appear as a substring
-- Updated `DashboardShell.tsx` — `Cmd+K` / `Ctrl+K` keyboard shortcut toggles palette; top bar search replaced with button showing `⌘K` badge
-- All 5 pages (dashboard, collections, collection detail, items by type, profile) updated to fetch and pass `searchItems` + `searchCollections` props
-- Selecting an item opens the item drawer; selecting a collection navigates to `/collections/[id]`
-- Build and all 43 tests pass
-
-### 2026-04-13 — Collection Actions (Edit, Delete, Favorite)
-
-- Added `updateCollection(userId, collectionId, input)` and `deleteCollection(userId, collectionId)` to `src/lib/db/collections.ts` — ownership check, delete removes `CollectionItem` join rows + `Collection` row
-- Added `updateCollection` and `deleteCollection` server actions to `src/actions/collections.ts` — Zod validation for update (name required, max 100, trimmed), auth + not-found checks, `{ success, data, error }` contract
-- Created `src/components/dashboard/CollectionEditDialog.tsx` — reuses `CollectionCreateDialog` pattern, pre-fills name + description, sonner toast + `router.refresh()` on save
-- Created `src/components/dashboard/CollectionDeleteDialog.tsx` — `AlertDialog` with destructive styling, explains items are kept, optional `redirectTo` prop
-- Created `src/components/dashboard/CollectionActions.tsx` — edit/delete/favorite icon buttons for the collection detail page header
-- Created `src/components/dashboard/CollectionCard.tsx` — reusable card with 3-dot `DropdownMenu` (favorite, edit, delete), `stopPropagation` on menu so card click navigates to `/collections/[id]`
-- Updated `/collections/[id]` page header — added `CollectionActions` with redirect to `/collections` on delete
-- Updated `/collections` page and dashboard `CollectionsSection` to use the new `CollectionCard` component
-- Favorite button is visual-only placeholder (local state toggle, no server mutation)
-- Added 9 Vitest cases to `src/actions/collections.test.ts`: 5 for `updateCollection`, 4 for `deleteCollection`
-- Build and all 43 tests pass
-
-### 2026-04-10 — Collection Create
-
-- Added `createCollection(userId, input)` to `src/lib/db/collections.ts` — Prisma create with select, returns `CollectionBasic`
-- Created `src/actions/collections.ts` with `createCollection` server action — Zod schema (name required, max 100, trimmed; description nullable), auth check, `{ success, data, error }` contract
-- Created `src/components/dashboard/CollectionCreateDialog.tsx` — shadcn Dialog with name + description fields, pending state, toast on success/error, `router.refresh()` after create
-- Wired "New Collection" button in `DashboardShell.tsx` to open the dialog
-- Added 6 Vitest cases to `src/actions/collections.test.ts`: unauthorized, empty name, name too long, trim + null description, happy path with description, query throw
-- Build and all 34 tests pass
-
-### 2026-04-10 — Code Scanner Quick Wins 2
-
-- Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
-- Extracted `Field` component to `src/components/items/ItemFormField.tsx`; removed duplicates from `ItemDrawer.tsx` and `ItemCreateDialog.tsx`
-- Moved `capitalize` from `ItemDrawer.tsx` to `src/lib/utils.ts`
-- Replaced `window.location.href = '/profile'` with Next.js `<Link>` in `Sidebar.tsx`
-- Added `.max(50)` on tag strings and `.max(20)` on tag arrays in all 3 Zod schemas in `src/actions/items.ts`
-- Sanitized `Content-Disposition` filename by stripping `"` and `\` in download route
-- Normalized email to `.toLowerCase().trim()` at register and credentials authorize
-- Build and all 28 tests pass
 
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
 
@@ -453,3 +413,49 @@ Not Started
 - Updated `CollectionsSection.tsx` — collection cards now wrapped in `<Link>` to `/collections/[id]`
 - Sidebar "View all collections" and individual collection links already pointed to correct routes
 - Build and all 34 tests pass
+
+### 2026-04-10 — Code Scanner Quick Wins 2
+
+- Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
+- Extracted `Field` component to `src/components/items/ItemFormField.tsx`; removed duplicates from `ItemDrawer.tsx` and `ItemCreateDialog.tsx`
+- Moved `capitalize` from `ItemDrawer.tsx` to `src/lib/utils.ts`
+- Replaced `window.location.href = '/profile'` with Next.js `<Link>` in `Sidebar.tsx`
+- Added `.max(50)` on tag strings and `.max(20)` on tag arrays in all 3 Zod schemas in `src/actions/items.ts`
+- Sanitized `Content-Disposition` filename by stripping `"` and `\` in download route
+- Normalized email to `.toLowerCase().trim()` at register and credentials authorize
+- Build and all 28 tests pass
+
+### 2026-04-10 — Collection Create
+
+- Added `createCollection(userId, input)` to `src/lib/db/collections.ts` — Prisma create with select, returns `CollectionBasic`
+- Created `src/actions/collections.ts` with `createCollection` server action — Zod schema (name required, max 100, trimmed; description nullable), auth check, `{ success, data, error }` contract
+- Created `src/components/dashboard/CollectionCreateDialog.tsx` — shadcn Dialog with name + description fields, pending state, toast on success/error, `router.refresh()` after create
+- Wired "New Collection" button in `DashboardShell.tsx` to open the dialog
+- Added 6 Vitest cases to `src/actions/collections.test.ts`: unauthorized, empty name, name too long, trim + null description, happy path with description, query throw
+- Build and all 34 tests pass
+
+### 2026-04-13 — Collection Actions (Edit, Delete, Favorite)
+
+- Added `updateCollection(userId, collectionId, input)` and `deleteCollection(userId, collectionId)` to `src/lib/db/collections.ts` — ownership check, delete removes `CollectionItem` join rows + `Collection` row
+- Added `updateCollection` and `deleteCollection` server actions to `src/actions/collections.ts` — Zod validation for update (name required, max 100, trimmed), auth + not-found checks, `{ success, data, error }` contract
+- Created `src/components/dashboard/CollectionEditDialog.tsx` — reuses `CollectionCreateDialog` pattern, pre-fills name + description, sonner toast + `router.refresh()` on save
+- Created `src/components/dashboard/CollectionDeleteDialog.tsx` — `AlertDialog` with destructive styling, explains items are kept, optional `redirectTo` prop
+- Created `src/components/dashboard/CollectionActions.tsx` — edit/delete/favorite icon buttons for the collection detail page header
+- Created `src/components/dashboard/CollectionCard.tsx` — reusable card with 3-dot `DropdownMenu` (favorite, edit, delete), `stopPropagation` on menu so card click navigates to `/collections/[id]`
+- Updated `/collections/[id]` page header — added `CollectionActions` with redirect to `/collections` on delete
+- Updated `/collections` page and dashboard `CollectionsSection` to use the new `CollectionCard` component
+- Favorite button is visual-only placeholder (local state toggle, no server mutation)
+- Added 9 Vitest cases to `src/actions/collections.test.ts`: 5 for `updateCollection`, 4 for `deleteCollection`
+- Build and all 43 tests pass
+
+### 2026-04-13 — Global Search / Command Palette
+
+- Installed shadcn `command` component (wraps `cmdk`) with `CommandDialog`, `CommandInput`, `CommandList`, `CommandGroup`, `CommandItem`
+- Added `getSearchItems(userId)` to `src/lib/db/items.ts` — lightweight query returning `id`, `title`, `typeIcon`, `typeColor`, `typeName`
+- Added `getSearchCollections(userId)` to `src/lib/db/collections.ts` — lightweight query returning `id`, `name`, `itemCount`
+- Created `src/components/dashboard/CommandPalette.tsx` — `CommandDialog` with grouped Items and Collections sections, type icons, item counts
+- Custom word-based substring filter on `Command` — replaces cmdk's default loose fuzzy match; each search word must appear as a substring
+- Updated `DashboardShell.tsx` — `Cmd+K` / `Ctrl+K` keyboard shortcut toggles palette; top bar search replaced with button showing `⌘K` badge
+- All 5 pages (dashboard, collections, collection detail, items by type, profile) updated to fetch and pass `searchItems` + `searchCollections` props
+- Selecting an item opens the item drawer; selecting a collection navigates to `/collections/[id]`
+- Build and all 43 tests pass

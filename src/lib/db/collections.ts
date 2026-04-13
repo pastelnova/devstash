@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { DASHBOARD_COLLECTIONS_LIMIT } from '@/lib/constants'
 
 export type CollectionBasic = {
   id: string
@@ -113,26 +114,40 @@ export async function getCollections(userId: string): Promise<CollectionWithMeta
       },
     },
     orderBy: { createdAt: 'desc' },
-    take: 6,
+    take: DASHBOARD_COLLECTIONS_LIMIT,
   })
 
   return collections.map(toCollectionWithMeta)
 }
 
-export async function getAllCollections(userId: string): Promise<CollectionWithMeta[]> {
-  const collections = await prisma.collection.findMany({
-    where: { userId },
-    include: {
-      _count: { select: { items: true } },
-      items: {
-        include: { item: { include: { type: true } } },
-        take: 20,
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+export type PaginatedCollections = {
+  data: CollectionWithMeta[]
+  total: number
+}
 
-  return collections.map(toCollectionWithMeta)
+export async function getAllCollections(
+  userId: string,
+  page: number = 1,
+  perPage: number = 21,
+): Promise<PaginatedCollections> {
+  const [collections, total] = await Promise.all([
+    prisma.collection.findMany({
+      where: { userId },
+      include: {
+        _count: { select: { items: true } },
+        items: {
+          include: { item: { include: { type: true } } },
+          take: 20,
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.collection.count({ where: { userId } }),
+  ])
+
+  return { data: collections.map(toCollectionWithMeta), total }
 }
 
 export type CollectionDetail = {

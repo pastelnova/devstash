@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { DASHBOARD_RECENT_ITEMS_LIMIT } from '@/lib/constants'
 import type { PrismaClient } from '../../../generated/prisma/client'
 
 type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0]
@@ -104,7 +105,7 @@ export async function getRecentItems(userId: string): Promise<ItemWithMeta[]> {
       tags: { include: { tag: { select: { name: true } } } },
     },
     orderBy: { createdAt: 'desc' },
-    take: 10,
+    take: DASHBOARD_RECENT_ITEMS_LIMIT,
   })
 
   return items.map(toItemWithMeta)
@@ -158,17 +159,32 @@ export async function getSystemItemTypeBySlug(slug: string): Promise<ItemTypeInf
   return type
 }
 
-export async function getItemsByType(userId: string, typeId: string): Promise<ItemWithMeta[]> {
-  const items = await prisma.item.findMany({
-    where: { userId, typeId },
-    include: {
-      type: { select: { icon: true, color: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+export type PaginatedResult<T> = {
+  data: T[]
+  total: number
+}
 
-  return items.map(toItemWithMeta)
+export async function getItemsByType(
+  userId: string,
+  typeId: string,
+  page: number = 1,
+  perPage: number = 21,
+): Promise<PaginatedResult<ItemWithMeta>> {
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where: { userId, typeId },
+      include: {
+        type: { select: { icon: true, color: true } },
+        tags: { include: { tag: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.item.count({ where: { userId, typeId } }),
+  ])
+
+  return { data: items.map(toItemWithMeta), total }
 }
 
 export type CollectionItemWithMeta = ItemWithMeta & {
@@ -180,25 +196,37 @@ export type CollectionItemWithMeta = ItemWithMeta & {
 export async function getItemsByCollection(
   userId: string,
   collectionId: string,
-): Promise<CollectionItemWithMeta[]> {
-  const items = await prisma.item.findMany({
-    where: {
-      userId,
-      collections: { some: { collectionId } },
-    },
-    include: {
-      type: { select: { name: true, icon: true, color: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  page: number = 1,
+  perPage: number = 21,
+): Promise<PaginatedResult<CollectionItemWithMeta>> {
+  const where = {
+    userId,
+    collections: { some: { collectionId } },
+  }
 
-  return items.map((item) => ({
-    ...toItemWithMeta(item),
-    typeName: item.type.name,
-    fileName: item.fileName,
-    fileSize: item.fileSize,
-  }))
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      include: {
+        type: { select: { name: true, icon: true, color: true } },
+        tags: { include: { tag: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.item.count({ where }),
+  ])
+
+  return {
+    data: items.map((item) => ({
+      ...toItemWithMeta(item),
+      typeName: item.type.name,
+      fileName: item.fileName,
+      fileSize: item.fileSize,
+    })),
+    total,
+  }
 }
 
 export type FileItemMeta = {
@@ -213,21 +241,31 @@ export type FileItemMeta = {
   }
 }
 
-export async function getFileItemsByType(userId: string, typeId: string): Promise<FileItemMeta[]> {
-  const items = await prisma.item.findMany({
-    where: { userId, typeId },
-    select: {
-      id: true,
-      title: true,
-      fileName: true,
-      fileSize: true,
-      createdAt: true,
-      type: { select: { icon: true, color: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+export async function getFileItemsByType(
+  userId: string,
+  typeId: string,
+  page: number = 1,
+  perPage: number = 21,
+): Promise<PaginatedResult<FileItemMeta>> {
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where: { userId, typeId },
+      select: {
+        id: true,
+        title: true,
+        fileName: true,
+        fileSize: true,
+        createdAt: true,
+        type: { select: { icon: true, color: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.item.count({ where: { userId, typeId } }),
+  ])
 
-  return items
+  return { data: items, total }
 }
 
 export type ItemDetail = {
