@@ -1,26 +1,27 @@
-# Current Feature: Global Search / Command Palette
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Open command palette with Cmd+K (Mac) / Ctrl+K (Windows)
-- Fuzzy search across all items and collections
-- Grouped results: Items section, Collections section
-- Keyboard navigation (arrow keys, Enter to select)
-- Show item type icon and collection item count
-- Navigate to item drawer or collection page on select
-- TopBar search input opens palette on click
-- Show ⌘K hint in search input placeholder
+<!-- Goals will be populated by /feature load -->
 
 ## Notes
-- Use shadcn `cmdk` component (Command)
-- Client-side fuzzy search (no server round-trips)
-- Pre-fetch searchable data on app load
-- Search data: items (id, title, type, content preview), collections (id, name, itemCount)
-- Reuse existing data fetching functions
+<!-- Notes will be populated by /feature load -->
 
 ## History
+
+### 2026-04-13 — Global Search / Command Palette
+
+- Installed shadcn `command` component (wraps `cmdk`) with `CommandDialog`, `CommandInput`, `CommandList`, `CommandGroup`, `CommandItem`
+- Added `getSearchItems(userId)` to `src/lib/db/items.ts` — lightweight query returning `id`, `title`, `typeIcon`, `typeColor`, `typeName`
+- Added `getSearchCollections(userId)` to `src/lib/db/collections.ts` — lightweight query returning `id`, `name`, `itemCount`
+- Created `src/components/dashboard/CommandPalette.tsx` — `CommandDialog` with grouped Items and Collections sections, type icons, item counts
+- Custom word-based substring filter on `Command` — replaces cmdk's default loose fuzzy match; each search word must appear as a substring
+- Updated `DashboardShell.tsx` — `Cmd+K` / `Ctrl+K` keyboard shortcut toggles palette; top bar search replaced with button showing `⌘K` badge
+- All 5 pages (dashboard, collections, collection detail, items by type, profile) updated to fetch and pass `searchItems` + `searchCollections` props
+- Selecting an item opens the item drawer; selecting a collection navigates to `/collections/[id]`
+- Build and all 43 tests pass
 
 ### 2026-04-13 — Collection Actions (Edit, Delete, Favorite)
 
