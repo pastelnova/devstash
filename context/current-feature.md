@@ -1,26 +1,13 @@
-# Current Feature: Editor Preferences Settings
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add `editorPreferences` JSON column to User model with migration
-- Create server action to update editor preferences
-- Build `EditorPreferencesSection` UI on settings page with dropdowns/toggles for: font size, tab size, word wrap, minimap, theme
-- Auto-save on change (no save button) with success toast
-- Create `EditorPreferencesContext` to provide preferences to client components
-- Apply preferences to all Monaco `CodeEditor` instances
+<!-- goals will be filled when a feature is loaded -->
 
 ## Notes
-- Defaults: word wrap on, minimap off, theme vs-dark
-- Font size dropdown (range TBD — e.g. 12, 14, 16, 18, 20)
-- Tab size dropdown (2, 4, 8)
-- Theme options: vs-dark, monokai, github-dark
-- Store as JSON column on User model — requires Prisma migration (never db push)
-- Settings page already exists at `/settings` — add new section there
-- `CodeEditor` component is at `src/components/items/CodeEditor.tsx`
-- Context needs to be available in `DashboardShell` so all editor instances pick up preferences
-
+<!-- notes will be filled when a feature is loaded -->
 
 ## History
 
@@ -488,3 +475,18 @@ In Progress
 - Updated profile page to show only `ProfileInfo` and `ProfileStats`; removed `hasPassword` fetch and password/delete imports
 - Components remain in `src/components/profile/` (no directory move needed)
 - Build and all 43 tests pass
+
+### 2026-04-13 — Editor Preferences Settings
+
+- Added `editorPreferences Json?` column to User model; migration `20260413150831_add_editor_preferences`
+- Created `src/types/editor-preferences.ts` with `EditorPreferences` interface, `EDITOR_DEFAULTS`, and option constants
+- Added `getEditorPreferences(userId)` and `updateEditorPreferences(userId, preferences)` to `src/lib/db/profile.ts`
+- Created `src/actions/editor-preferences.ts` server action with Zod validation (fontSize 10-24, tabSize 2/4/8, theme enum, booleans)
+- Created `src/components/settings/EditorPreferencesSection.tsx` — dropdowns for font size, tab size, theme; switches for word wrap and minimap; auto-saves on change with optimistic update and sonner toast
+- Created `src/components/settings/EditorPreferencesContext.tsx` — provider + `useEditorPreferences()` hook for client components
+- Updated `DashboardShell.tsx` to wrap children with `EditorPreferencesProvider`
+- All 6 pages (dashboard, items, collections, collection detail, profile, settings) fetch and pass `editorPreferences` to `DashboardShell`
+- Updated `CodeEditor.tsx` — applies all preferences (fontSize, tabSize, wordWrap, minimap, theme) to Monaco Editor options
+- Created `src/lib/monaco-themes.ts` with Monokai and GitHub Dark custom theme definitions; registered via `beforeMount` in CodeEditor
+- Installed shadcn `select` and `switch` components
+- Build and all 49 tests pass
