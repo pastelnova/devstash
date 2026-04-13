@@ -1,15 +1,26 @@
 # Current Feature
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be populated when a feature is loaded -->
+- Add edit, delete, and favorite buttons on `/collections/[id]` detail page header
+- Edit opens a modal to update collection name and description
+- Delete shows a confirmation dialog, then removes the collection (items remain, just unlinked)
+- Favorite button is visual only (no mutation yet)
+- Add 3-dot dropdown menu on collection cards at `/collections` and dashboard with edit, delete, and favorite options
+- Clicking the card (outside the 3-dot menu) navigates to the collection detail page
+- Deleting a collection does NOT delete its items
 
 ## Notes
 
-<!-- Notes will be populated when a feature is loaded -->
+- Reuse existing `CollectionCreateDialog` pattern for the edit modal (similar fields: name, description)
+- Favorite icon/button is a placeholder — no server action or DB mutation needed yet
+- Items stay in the system after collection delete; only `CollectionItem` join rows and the `Collection` row are removed
+- 3-dot menu on cards needs `stopPropagation` so it doesn't trigger navigation
+- Need server actions: `updateCollection`, `deleteCollection`
+- Need DB helpers: `updateCollection`, `deleteCollection` in `src/lib/db/collections.ts`
 
 ## History
 

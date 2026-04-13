@@ -4,6 +4,8 @@ import { z } from 'zod'
 import { auth } from '@/auth'
 import {
   createCollection as createCollectionQuery,
+  updateCollection as updateCollectionQuery,
+  deleteCollection as deleteCollectionQuery,
   type CollectionBasic,
 } from '@/lib/db/collections'
 
@@ -46,5 +48,66 @@ export async function createCollection(
     return { success: true, data: created }
   } catch {
     return { success: false, error: 'Failed to create collection' }
+  }
+}
+
+const updateCollectionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1, 'Name is required').max(100),
+  description: z
+    .string()
+    .trim()
+    .transform((v) => (v.length === 0 ? null : v))
+    .nullable()
+    .optional()
+    .default(null),
+})
+
+export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>
+
+export async function updateCollection(
+  input: UpdateCollectionInput,
+): Promise<ActionResult<CollectionBasic>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const parsed = updateCollectionSchema.safeParse(input)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    return { success: false, error: first?.message ?? 'Invalid input' }
+  }
+
+  try {
+    const updated = await updateCollectionQuery(session.user.id, parsed.data.id, {
+      name: parsed.data.name,
+      description: parsed.data.description ?? null,
+    })
+    if (!updated) {
+      return { success: false, error: 'Collection not found' }
+    }
+    return { success: true, data: updated }
+  } catch {
+    return { success: false, error: 'Failed to update collection' }
+  }
+}
+
+export async function deleteCollection(
+  id: string,
+): Promise<ActionResult<{ id: string }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const result = await deleteCollectionQuery(session.user.id, id)
+    if (!result) {
+      return { success: false, error: 'Collection not found' }
+    }
+    return { success: true, data: result }
+  } catch {
+    return { success: false, error: 'Failed to delete collection' }
   }
 }

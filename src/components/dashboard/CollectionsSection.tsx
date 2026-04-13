@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { Star, MoreHorizontal, File } from 'lucide-react'
-import { typeIconMap } from '@/lib/item-type-icons'
+import { CollectionCard } from './CollectionCard'
 import type { CollectionWithMeta } from '@/lib/db/collections'
 
 interface Props {
@@ -21,38 +20,7 @@ export function CollectionsSection({ collections }: Props) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {collections.map((col) => (
-          <Link
-            key={col.id}
-            href={`/collections/${col.id}`}
-            className="rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors"
-            style={{ borderLeftColor: col.dominantColor ?? undefined }}
-          >
-            <div className="flex items-start justify-between mb-1">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="font-medium text-sm truncate">{col.name}</span>
-                {col.isFavorite && (
-                  <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
-                )}
-              </div>
-              <button className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 -mr-1">
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-2">{col.itemCount} items</p>
-            <p className="text-xs text-muted-foreground/70 mb-4 line-clamp-2">{col.description}</p>
-            <div className="flex items-center gap-1.5">
-              {col.typeIcons.map((t) => {
-                const Icon = typeIconMap[t.icon] ?? File
-                return (
-                  <Icon
-                    key={t.icon}
-                    className="h-3.5 w-3.5"
-                    style={{ color: t.color || undefined }}
-                  />
-                )
-              })}
-            </div>
-          </Link>
+          <CollectionCard key={col.id} collection={col} />
         ))}
       </div>
     </section>
