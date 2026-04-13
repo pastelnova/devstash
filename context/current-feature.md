@@ -1,28 +1,27 @@
 # Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add edit, delete, and favorite buttons on `/collections/[id]` detail page header
-- Edit opens a modal to update collection name and description
-- Delete shows a confirmation dialog, then removes the collection (items remain, just unlinked)
-- Favorite button is visual only (no mutation yet)
-- Add 3-dot dropdown menu on collection cards at `/collections` and dashboard with edit, delete, and favorite options
-- Clicking the card (outside the 3-dot menu) navigates to the collection detail page
-- Deleting a collection does NOT delete its items
-
 ## Notes
 
-- Reuse existing `CollectionCreateDialog` pattern for the edit modal (similar fields: name, description)
-- Favorite icon/button is a placeholder — no server action or DB mutation needed yet
-- Items stay in the system after collection delete; only `CollectionItem` join rows and the `Collection` row are removed
-- 3-dot menu on cards needs `stopPropagation` so it doesn't trigger navigation
-- Need server actions: `updateCollection`, `deleteCollection`
-- Need DB helpers: `updateCollection`, `deleteCollection` in `src/lib/db/collections.ts`
-
 ## History
+
+### 2026-04-13 — Collection Actions (Edit, Delete, Favorite)
+
+- Added `updateCollection(userId, collectionId, input)` and `deleteCollection(userId, collectionId)` to `src/lib/db/collections.ts` — ownership check, delete removes `CollectionItem` join rows + `Collection` row
+- Added `updateCollection` and `deleteCollection` server actions to `src/actions/collections.ts` — Zod validation for update (name required, max 100, trimmed), auth + not-found checks, `{ success, data, error }` contract
+- Created `src/components/dashboard/CollectionEditDialog.tsx` — reuses `CollectionCreateDialog` pattern, pre-fills name + description, sonner toast + `router.refresh()` on save
+- Created `src/components/dashboard/CollectionDeleteDialog.tsx` — `AlertDialog` with destructive styling, explains items are kept, optional `redirectTo` prop
+- Created `src/components/dashboard/CollectionActions.tsx` — edit/delete/favorite icon buttons for the collection detail page header
+- Created `src/components/dashboard/CollectionCard.tsx` — reusable card with 3-dot `DropdownMenu` (favorite, edit, delete), `stopPropagation` on menu so card click navigates to `/collections/[id]`
+- Updated `/collections/[id]` page header — added `CollectionActions` with redirect to `/collections` on delete
+- Updated `/collections` page and dashboard `CollectionsSection` to use the new `CollectionCard` component
+- Favorite button is visual-only placeholder (local state toggle, no server mutation)
+- Added 9 Vitest cases to `src/actions/collections.test.ts`: 5 for `updateCollection`, 4 for `deleteCollection`
+- Build and all 43 tests pass
 
 ### 2026-04-10 — Collection Create
 
