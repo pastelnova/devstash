@@ -1,32 +1,25 @@
-# Current Feature: Homepage Mockup
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create a marketing homepage for DevStash at `prototypes/homepage/` with `index.html`, `styles.css`, `script.js`
-- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
-- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview (right)
-- Chaos icons animate with requestAnimationFrame: drift, bounce off walls, repel from mouse cursor
-- Fixed navbar that gets more opaque on scroll
-- Hero text with gradient headline, subheadline, CTA buttons
-- Features section: 6 cards in a grid with item type accent colors
-- AI section: two-column with Pro badge, checklist, and code editor mockup
-- Pricing section: Free ($0) vs Pro ($8/mo) with yearly $72 toggle, Pro card highlighted
-- CTA section and footer with link columns
-- Scroll-triggered fade-in animations
-- Responsive: stack hero vertically on mobile, single column grids, arrow rotates 90°
-
 ## Notes
 
-- Output is a standalone prototype (plain HTML/CSS/JS), not part of the Next.js app
-- Color palette: Snippet `#3b82f6`, Prompt `#f59e0b`, Command `#06b6d4`, Note `#22c55e`, File `#64748b`, Image `#ec4899`, URL `#6366f1`
-- Chaos container icons: Notion, GitHub, Slack, VS Code, Browser tabs, Terminal, Text file, Bookmark
-- Pricing: Free = 50 items, 3 collections; Pro = $8/mo or $72/yr, unlimited, AI features
-- No unit tests needed (standalone HTML prototype)
-
 ## History
+
+### 2026-04-14 — Homepage Mockup
+
+- Created standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
+- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
+- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview with topbar and content lines (right)
+- Chaos icons animated with requestAnimationFrame: drift, bounce off walls, gentle mouse cursor repulsion
+- Fixed navbar with scroll-based opacity, gradient headline, CTA buttons
+- Features grid (6 cards), AI section with Pro badge and code editor mockup, pricing with monthly/yearly toggle, CTA and footer
+- Scroll-triggered fade-in animations via IntersectionObserver
+- Responsive: vertical stack on mobile, single column grids, arrow rotates 90°
+- Added feature spec at `context/features/homepage-mockup-spec.md`
 
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
 
