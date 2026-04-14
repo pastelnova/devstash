@@ -1,23 +1,13 @@
-# Current Feature — Favorites Page
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add star icon button to TopBar linking to /favorites
-- Create /favorites route with protection
-- Fetch all user favorited items and collections
-- Compact list view (VS Code/terminal style, not cards)
-- Each row: type icon, title, type badge, date added
-- Separate sections for items and collections with counts
-- Click item opens ItemDrawer, click collection navigates to /collections/[id]
-- Empty state when no favorites
-- Sort by most recently favorited (updatedAt)
+<!-- Goals will be populated by /feature load -->
 
 ## Notes
-- UI Style: monospace or semi-monospace font, minimal padding, high density
-- Subtle hover states, no cards or heavy borders, clean lines only
-- Source spec: context/features/favorites-spec.md
+<!-- Additional context and constraints -->
 
 ## History
 
@@ -499,4 +489,19 @@ In Progress
 - Updated `CodeEditor.tsx` — applies all preferences (fontSize, tabSize, wordWrap, minimap, theme) to Monaco Editor options
 - Created `src/lib/monaco-themes.ts` with Monokai and GitHub Dark custom theme definitions; registered via `beforeMount` in CodeEditor
 - Installed shadcn `select` and `switch` components
+- Build and all 49 tests pass
+
+### 2026-04-14 — Favorites Page
+
+- Added `getFavoriteItems(userId)` to `src/lib/db/items.ts` — fetches favorited items with type name/icon/color, sorted by `updatedAt` desc
+- Added `getFavoriteCollections(userId)` to `src/lib/db/collections.ts` — fetches favorited collections with item count, sorted by `updatedAt` desc
+- Added `isFavorite` field to `ItemWithMeta` and `FileItemMeta` types; updated `toItemWithMeta` mapper and `getFileItemsByType` select
+- Added star icon button to TopBar in `DashboardShell.tsx` linking to `/favorites` with yellow hover state
+- Created `/favorites` route (`src/app/favorites/page.tsx`) — protected server component fetching favorites in parallel
+- Created `src/components/favorites/FavoritesList.tsx` — compact, terminal-style list with monospace font, minimal padding, high density rows
+- Items section: type icon (colored), title, type badge with colored left border, date; click opens ItemDrawer
+- Collections section: folder icon, name, item count, date; click navigates to `/collections/[id]`
+- Empty state with star icon and prompt to favorite items
+- Added filled yellow star indicator to `ItemCard.tsx`, `ImageCard.tsx`, and `FileRow.tsx` for all favorited items
+- Updated `collections/[id]/page.tsx` to pass `isFavorite` to FileRow
 - Build and all 49 tests pass
