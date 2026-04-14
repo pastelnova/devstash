@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   File,
   Download,
+  Pin,
   Star,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -117,6 +118,7 @@ export function FileRow({ item }: { item: FileItemMeta }) {
         >
           <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
         </span>
+        {item.isPinned && <Pin className="h-3.5 w-3.5 shrink-0 fill-current text-muted-foreground" />}
       </span>
 
       {/* Meta: size, date, download — hidden on small screens, stacked on md */}

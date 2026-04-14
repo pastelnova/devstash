@@ -11,6 +11,7 @@ export type ItemWithMeta = {
   url: string | null
   description: string | null
   isFavorite: boolean
+  isPinned: boolean
   type: {
     icon: string | null
     color: string | null
@@ -27,6 +28,7 @@ function toItemWithMeta(item: {
   url: string | null
   description: string | null
   isFavorite: boolean
+  isPinned: boolean
   type: { icon: string | null; color: string | null }
   tags: { tag: { name: string } }[]
   createdAt: Date
@@ -38,6 +40,7 @@ function toItemWithMeta(item: {
     url: item.url,
     description: item.description,
     isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
     type: { icon: item.type.icon, color: item.type.color },
     tags: item.tags.map((t) => t.tag.name),
     createdAt: item.createdAt,
@@ -180,7 +183,7 @@ export async function getItemsByType(
         type: { select: { icon: true, color: true } },
         tags: { include: { tag: { select: { name: true } } } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
       skip: (page - 1) * perPage,
       take: perPage,
     }),
@@ -214,7 +217,7 @@ export async function getItemsByCollection(
         type: { select: { name: true, icon: true, color: true } },
         tags: { include: { tag: { select: { name: true } } } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
       skip: (page - 1) * perPage,
       take: perPage,
     }),
@@ -238,6 +241,7 @@ export type FileItemMeta = {
   fileName: string | null
   fileSize: number | null
   isFavorite: boolean
+  isPinned: boolean
   createdAt: Date
   type: {
     icon: string | null
@@ -260,10 +264,11 @@ export async function getFileItemsByType(
         fileName: true,
         fileSize: true,
         isFavorite: true,
+        isPinned: true,
         createdAt: true,
         type: { select: { icon: true, color: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
       skip: (page - 1) * perPage,
       take: perPage,
     }),
@@ -546,6 +551,28 @@ export async function toggleItemFavorite(
     select: { isFavorite: true },
   })
   return updated.isFavorite
+}
+
+/**
+ * Toggle isPinned on an item. Returns the new value.
+ * Caller must have verified ownership.
+ */
+export async function toggleItemPin(
+  userId: string,
+  itemId: string,
+): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { isPinned: true },
+  })
+  if (!item) return null
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isPinned: !item.isPinned },
+    select: { isPinned: true },
+  })
+  return updated.isPinned
 }
 
 export async function getSearchItems(userId: string): Promise<SearchItem[]> {

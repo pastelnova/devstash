@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Copy, File, Star } from 'lucide-react'
+import { Check, Copy, File, Pin, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { toggleItemFavorite } from '@/actions/items'
@@ -67,6 +67,7 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
             >
               <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
             </span>
+            {item.isPinned && <Pin className="h-3.5 w-3.5 shrink-0 fill-current text-muted-foreground" />}
           </p>
           {item.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>

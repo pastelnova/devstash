@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { DrawerViewBody } from '@/components/items/DrawerViewBody'
 import { DrawerEditBody } from '@/components/items/DrawerEditBody'
-import { deleteItem, toggleItemFavorite } from '@/actions/items'
+import { deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import type { CollectionOption } from '@/components/items/CollectionSelect'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -25,6 +25,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
   const [editing, setEditing] = useState(false)
   const [deletePending, startDeleteTransition] = useTransition()
   const [favoritePending, startFavoriteTransition] = useTransition()
+  const [pinPending, startPinTransition] = useTransition()
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -78,6 +79,20 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
     })
   }
 
+  const handleTogglePin = () => {
+    if (!item) return
+    startPinTransition(async () => {
+      const result = await toggleItemPin(item.id)
+      if (result.success) {
+        setItem({ ...item, isPinned: result.data.isPinned })
+        toast.success(result.data.isPinned ? 'Item pinned' : 'Item unpinned')
+        router.refresh()
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
   const handleDelete = () => {
     if (!item) return
     startDeleteTransition(async () => {
@@ -106,8 +121,10 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
             onEdit={() => setEditing(true)}
             onDelete={handleDelete}
             onToggleFavorite={handleToggleFavorite}
+            onTogglePin={handleTogglePin}
             deletePending={deletePending}
             favoritePending={favoritePending}
+            pinPending={pinPending}
           />
         )}
         {item && !loading && editing && (

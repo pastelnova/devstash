@@ -143,6 +143,7 @@ export default async function CollectionDetailPage({
                       fileName: item.fileName,
                       fileSize: item.fileSize,
                       isFavorite: item.isFavorite,
+                      isPinned: item.isPinned,
                       createdAt: item.createdAt,
                       type: item.type,
                     }}

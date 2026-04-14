@@ -27,8 +27,10 @@ interface DrawerViewBodyProps {
   onEdit: () => void
   onDelete: () => void
   onToggleFavorite: () => void
+  onTogglePin: () => void
   deletePending: boolean
   favoritePending: boolean
+  pinPending: boolean
 }
 
 export function DrawerViewBody({
@@ -37,8 +39,10 @@ export function DrawerViewBody({
   onEdit,
   onDelete,
   onToggleFavorite,
+  onTogglePin,
   deletePending,
   favoritePending,
+  pinPending,
 }: DrawerViewBodyProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
@@ -84,9 +88,11 @@ export function DrawerViewBody({
             size="sm"
             className="gap-1.5"
             aria-label={item.isPinned ? 'Unpin' : 'Pin'}
+            onClick={onTogglePin}
+            disabled={pinPending}
           >
             <Pin className={item.isPinned ? 'h-4 w-4 fill-current' : 'h-4 w-4'} />
-            <span className="text-xs">Pin</span>
+            <span className="text-xs">{item.isPinned ? 'Unpin' : 'Pin'}</span>
           </Button>
           {FILE_VIEW_TYPES.has(item.type.name.toLowerCase()) && item.fileUrl && (
             <a

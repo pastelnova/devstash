@@ -9,6 +9,7 @@ import {
   deleteItem as deleteItemQuery,
   updateItem as updateItemQuery,
   toggleItemFavorite as toggleItemFavoriteQuery,
+  toggleItemPin as toggleItemPinQuery,
   type ItemDetail,
 } from '@/lib/db/items'
 import { deleteFromR2 } from '@/lib/r2'
@@ -244,5 +245,24 @@ export async function toggleItemFavorite(
     return { success: true, data: { isFavorite: result } }
   } catch {
     return { success: false, error: 'Failed to toggle favorite' }
+  }
+}
+
+export async function toggleItemPin(
+  itemId: string,
+): Promise<ActionResult<{ isPinned: boolean }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const result = await toggleItemPinQuery(session.user.id, itemId)
+    if (result === null) {
+      return { success: false, error: 'Item not found' }
+    }
+    return { success: true, data: { isPinned: result } }
+  } catch {
+    return { success: false, error: 'Failed to toggle pin' }
   }
 }

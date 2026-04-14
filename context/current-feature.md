@@ -1,11 +1,26 @@
-# Current Feature
+# Current Feature: Pinned Items
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Create `toggleItemPin` server action (follow toggle favorite pattern)
+- Wire Pin button in ItemDrawer to call the action (currently exists but no onClick)
+- Optimistic UI updates for instant pin/unpin feedback
+- Toast notification on success/error
+- Pinned items sort to top of item listings
+- Dashboard pinned items section reflects changes
+- Pin icon on ItemCard remains a static indicator (no click handler on cards)
+
 ## Notes
+
+- Items only — collections do not have pinning
+- Follow the same pattern as `toggleItemFavorite` / `toggleCollectionFavorite`
+- Pin button already exists in `DrawerViewBody.tsx` action bar but has no mutation wired
+- `isPinned` field already exists on the `Item` model
+- Pinned items section on dashboard (`PinnedItems.tsx`) already fetches from DB via `getPinnedItems`
+- Relevant files: `src/lib/db/items.ts`, `src/actions/items.ts`, `src/components/items/DrawerViewBody.tsx`, `src/components/items/ItemDrawer.tsx`
 
 ## History
 
