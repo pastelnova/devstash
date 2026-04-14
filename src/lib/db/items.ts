@@ -526,6 +526,28 @@ export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> 
   return items
 }
 
+/**
+ * Toggle isFavorite on an item. Returns the new value.
+ * Caller must have verified ownership.
+ */
+export async function toggleItemFavorite(
+  userId: string,
+  itemId: string,
+): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { isFavorite: true },
+  })
+  if (!item) return null
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isFavorite: !item.isFavorite },
+    select: { isFavorite: true },
+  })
+  return updated.isFavorite
+}
+
 export async function getSearchItems(userId: string): Promise<SearchItem[]> {
   const items = await prisma.item.findMany({
     where: { userId },

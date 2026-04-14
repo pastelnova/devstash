@@ -1,22 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, Copy, File, Star } from 'lucide-react'
+import { toast } from 'sonner'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { toggleItemFavorite } from '@/actions/items'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from './ItemDrawerContext'
 
 export function ItemCard({ item }: { item: ItemWithMeta }) {
   const { openItem } = useItemDrawer()
+  const router = useRouter()
   const [copied, setCopied] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(item.isFavorite)
+  useEffect(() => setIsFavorite(item.isFavorite), [item.isFavorite])
+  const [favPending, startFavTransition] = useTransition()
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
   const iconColor = item.type.color ?? '#94a3b8'
-
-  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -24,6 +25,19 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    startFavTransition(async () => {
+      const result = await toggleItemFavorite(item.id)
+      if (result.success) {
+        setIsFavorite(result.data.isFavorite)
+        router.refresh()
+      } else {
+        toast.error(result.error)
+      }
+    })
   }
 
   return (
@@ -41,26 +55,33 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
           <Icon className="h-4 w-4" style={{ color: iconColor }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium leading-snug">{item.title}</p>
+          <p className="text-sm font-medium leading-snug flex items-center gap-1">
+            <span className="truncate">{item.title}</span>
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={handleToggleFavorite}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleToggleFavorite(e as unknown as React.MouseEvent) }}
+              className={`shrink-0 rounded-md p-0.5 hover:bg-muted transition-all ${isFavorite ? '' : 'opacity-0 group-hover:opacity-100'}`}
+              title={isFavorite ? 'Unfavorite' : 'Favorite'}
+            >
+              <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
+            </span>
+          </p>
           {item.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {item.isFavorite && (
-            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-          )}
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={handleCopy}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
-            className="rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
-            title="Copy"
-          >
-            {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
-          </span>
-        </div>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={handleCopy}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
+          className="shrink-0 rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+          title="Copy"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+        </span>
       </div>
       {item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">

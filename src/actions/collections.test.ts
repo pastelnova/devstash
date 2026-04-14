@@ -8,13 +8,15 @@ vi.mock('@/auth', () => ({
 const createCollectionQueryMock = vi.fn()
 const updateCollectionQueryMock = vi.fn()
 const deleteCollectionQueryMock = vi.fn()
+const toggleCollectionFavoriteQueryMock = vi.fn()
 vi.mock('@/lib/db/collections', () => ({
   createCollection: (...args: unknown[]) => createCollectionQueryMock(...args),
   updateCollection: (...args: unknown[]) => updateCollectionQueryMock(...args),
   deleteCollection: (...args: unknown[]) => deleteCollectionQueryMock(...args),
+  toggleCollectionFavorite: (...args: unknown[]) => toggleCollectionFavoriteQueryMock(...args),
 }))
 
-import { createCollection, updateCollection, deleteCollection } from './collections'
+import { createCollection, updateCollection, deleteCollection, toggleCollectionFavorite } from './collections'
 
 const sampleCollection = {
   id: 'col_1',
@@ -161,5 +163,40 @@ describe('deleteCollection', () => {
 
     const result = await deleteCollection('col_1')
     expect(result).toEqual({ success: false, error: 'Failed to delete collection' })
+  })
+})
+
+describe('toggleCollectionFavorite', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns Unauthorized when not authenticated', async () => {
+    authMock.mockResolvedValue(null)
+    const result = await toggleCollectionFavorite('col_1')
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+    expect(toggleCollectionFavoriteQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('returns Collection not found when query returns null', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1' } })
+    toggleCollectionFavoriteQueryMock.mockResolvedValue(null)
+    const result = await toggleCollectionFavorite('col_missing')
+    expect(result).toEqual({ success: false, error: 'Collection not found' })
+  })
+
+  it('returns new isFavorite value on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1' } })
+    toggleCollectionFavoriteQueryMock.mockResolvedValue(true)
+    const result = await toggleCollectionFavorite('col_1')
+    expect(result).toEqual({ success: true, data: { isFavorite: true } })
+    expect(toggleCollectionFavoriteQueryMock).toHaveBeenCalledWith('u1', 'col_1')
+  })
+
+  it('returns generic error when query throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1' } })
+    toggleCollectionFavoriteQueryMock.mockRejectedValue(new Error('DB error'))
+    const result = await toggleCollectionFavorite('col_1')
+    expect(result).toEqual({ success: false, error: 'Failed to toggle favorite' })
   })
 })

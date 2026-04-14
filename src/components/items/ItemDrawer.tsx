@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { DrawerViewBody } from '@/components/items/DrawerViewBody'
 import { DrawerEditBody } from '@/components/items/DrawerEditBody'
-import { deleteItem } from '@/actions/items'
+import { deleteItem, toggleItemFavorite } from '@/actions/items'
 import type { CollectionOption } from '@/components/items/CollectionSelect'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -24,6 +24,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [deletePending, startDeleteTransition] = useTransition()
+  const [favoritePending, startFavoriteTransition] = useTransition()
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -64,6 +65,19 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
     }
   }
 
+  const handleToggleFavorite = () => {
+    if (!item) return
+    startFavoriteTransition(async () => {
+      const result = await toggleItemFavorite(item.id)
+      if (result.success) {
+        setItem({ ...item, isFavorite: result.data.isFavorite })
+        router.refresh()
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
   const handleDelete = () => {
     if (!item) return
     startDeleteTransition(async () => {
@@ -91,7 +105,9 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
             onCopy={handleCopy}
             onEdit={() => setEditing(true)}
             onDelete={handleDelete}
+            onToggleFavorite={handleToggleFavorite}
             deletePending={deletePending}
+            favoritePending={favoritePending}
           />
         )}
         {item && !loading && editing && (

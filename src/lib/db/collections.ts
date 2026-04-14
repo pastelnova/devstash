@@ -243,6 +243,28 @@ export type SearchCollection = {
   itemCount: number
 }
 
+/**
+ * Toggle isFavorite on a collection. Returns the new value.
+ * Caller must have verified ownership.
+ */
+export async function toggleCollectionFavorite(
+  userId: string,
+  collectionId: string,
+): Promise<boolean | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { isFavorite: true },
+  })
+  if (!collection) return null
+
+  const updated = await prisma.collection.update({
+    where: { id: collectionId },
+    data: { isFavorite: !collection.isFavorite },
+    select: { isFavorite: true },
+  })
+  return updated.isFavorite
+}
+
 export async function getSearchCollections(userId: string): Promise<SearchCollection[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },

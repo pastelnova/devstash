@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Star, MoreHorizontal, Pencil, Trash2, File } from 'lucide-react'
+import { toast } from 'sonner'
+import { toggleCollectionFavorite } from '@/actions/collections'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,8 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [isFavorite, setIsFavorite] = useState(col.isFavorite)
+  useEffect(() => setIsFavorite(col.isFavorite), [col.isFavorite])
+  const [favPending, startFavTransition] = useTransition()
 
   return (
     <>
@@ -51,7 +55,20 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem onClick={() => setIsFavorite(!isFavorite)}>
+              <DropdownMenuItem
+                disabled={favPending}
+                onClick={() => {
+                  startFavTransition(async () => {
+                    const result = await toggleCollectionFavorite(col.id)
+                    if (result.success) {
+                      setIsFavorite(result.data.isFavorite)
+                      router.refresh()
+                    } else {
+                      toast.error(result.error)
+                    }
+                  })
+                }}
+              >
                 <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : ''}`} />
                 {isFavorite ? 'Unfavorite' : 'Favorite'}
               </DropdownMenuItem>

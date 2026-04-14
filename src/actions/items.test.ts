@@ -25,11 +25,13 @@ const updateItemQueryMock = vi.fn()
 const deleteItemQueryMock = vi.fn()
 const createItemQueryMock = vi.fn()
 const createFileItemQueryMock = vi.fn()
+const toggleItemFavoriteQueryMock = vi.fn()
 vi.mock('@/lib/db/items', () => ({
   updateItem: (...args: unknown[]) => updateItemQueryMock(...args),
   deleteItem: (...args: unknown[]) => deleteItemQueryMock(...args),
   createItem: (...args: unknown[]) => createItemQueryMock(...args),
   createFileItem: (...args: unknown[]) => createFileItemQueryMock(...args),
+  toggleItemFavorite: (...args: unknown[]) => toggleItemFavoriteQueryMock(...args),
 }))
 
 // Mock R2
@@ -38,7 +40,7 @@ vi.mock('@/lib/r2', () => ({
   deleteFromR2: (...args: unknown[]) => deleteFromR2Mock(...args),
 }))
 
-import { createItem, createFileItem, deleteItem, updateItem } from './items'
+import { createItem, createFileItem, deleteItem, updateItem, toggleItemFavorite } from './items'
 import type { ItemDetail } from '@/lib/db/items'
 
 const sampleDetail: ItemDetail = {
@@ -444,5 +446,41 @@ describe('deleteItem server action', () => {
 
     const result = await deleteItem('item_1')
     expect(result).toEqual({ success: false, error: 'Failed to delete item' })
+  })
+})
+
+describe('toggleItemFavorite server action', () => {
+  beforeEach(() => {
+    authMock.mockReset()
+    toggleItemFavoriteQueryMock.mockReset()
+  })
+
+  it('returns Unauthorized when no session', async () => {
+    authMock.mockResolvedValue(null)
+    const result = await toggleItemFavorite('item_1')
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+    expect(toggleItemFavoriteQueryMock).not.toHaveBeenCalled()
+  })
+
+  it('returns Item not found when query returns null', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    toggleItemFavoriteQueryMock.mockResolvedValue(null)
+    const result = await toggleItemFavorite('item_1')
+    expect(result).toEqual({ success: false, error: 'Item not found' })
+  })
+
+  it('returns new isFavorite value on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    toggleItemFavoriteQueryMock.mockResolvedValue(true)
+    const result = await toggleItemFavorite('item_1')
+    expect(result).toEqual({ success: true, data: { isFavorite: true } })
+    expect(toggleItemFavoriteQueryMock).toHaveBeenCalledWith('user_1', 'item_1')
+  })
+
+  it('returns generic error when query throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    toggleItemFavoriteQueryMock.mockRejectedValue(new Error('db down'))
+    const result = await toggleItemFavorite('item_1')
+    expect(result).toEqual({ success: false, error: 'Failed to toggle favorite' })
   })
 })

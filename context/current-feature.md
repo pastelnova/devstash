@@ -1,13 +1,26 @@
 # Current Feature
 
 ## Status
-Not Started
+In Progress
+
+## Feature: Toggle Favorite (Items & Collections)
 
 ## Goals
-<!-- Goals will be populated by /feature load -->
+- Create `toggleItemFavorite` server action in `src/actions/items.ts` — flips `isFavorite` on the item, returns updated value
+- Create `toggleCollectionFavorite` server action in `src/actions/collections.ts` — flips `isFavorite` on the collection, returns updated value
+- Wire the favorite button in `DrawerViewBody.tsx` to call `toggleItemFavorite` (currently visual-only)
+- Wire the favorite button in `CollectionCard.tsx` dropdown to call `toggleCollectionFavorite` (currently local state only)
+- Wire the favorite button in `CollectionActions.tsx` (collection detail page) to call `toggleCollectionFavorite` (currently local state only)
+- Add favorite toggle to `ItemCard.tsx`, `ImageCard.tsx`, and `FileRow.tsx` cards (star icon button)
+- All toggles should use `useTransition` for pending state and `router.refresh()` after mutation
+- Add Vitest unit tests for both server actions
+- Sidebar favorite collections and `/favorites` page should reflect changes after refresh
 
 ## Notes
-<!-- Additional context and constraints -->
+- `isFavorite` field already exists on both `Item` and `Collection` models in Prisma schema
+- Favorite buttons already exist in drawer, CollectionCard, and CollectionActions but only toggle local state — no server call
+- `ItemCard`, `ImageCard`, `FileRow` already show a filled star indicator when `isFavorite` is true (read-only) — need to add clickable toggle
+- DB helpers needed: `toggleItemFavorite(userId, itemId)` and `toggleCollectionFavorite(userId, collectionId)` in their respective `src/lib/db/` files
 
 ## History
 

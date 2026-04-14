@@ -26,7 +26,9 @@ interface DrawerViewBodyProps {
   onCopy: () => void
   onEdit: () => void
   onDelete: () => void
+  onToggleFavorite: () => void
   deletePending: boolean
+  favoritePending: boolean
 }
 
 export function DrawerViewBody({
@@ -34,7 +36,9 @@ export function DrawerViewBody({
   onCopy,
   onEdit,
   onDelete,
+  onToggleFavorite,
   deletePending,
+  favoritePending,
 }: DrawerViewBodyProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
@@ -63,6 +67,8 @@ export function DrawerViewBody({
             size="sm"
             className="gap-1.5"
             aria-label={item.isFavorite ? 'Unfavorite' : 'Favorite'}
+            onClick={onToggleFavorite}
+            disabled={favoritePending}
           >
             <Star
               className={

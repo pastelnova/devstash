@@ -8,6 +8,7 @@ import {
   createFileItem as createFileItemQuery,
   deleteItem as deleteItemQuery,
   updateItem as updateItemQuery,
+  toggleItemFavorite as toggleItemFavoriteQuery,
   type ItemDetail,
 } from '@/lib/db/items'
 import { deleteFromR2 } from '@/lib/r2'
@@ -224,5 +225,24 @@ export async function deleteItem(itemId: string): Promise<ActionResult<{ id: str
     return { success: true, data: { id: itemId } }
   } catch {
     return { success: false, error: 'Failed to delete item' }
+  }
+}
+
+export async function toggleItemFavorite(
+  itemId: string,
+): Promise<ActionResult<{ isFavorite: boolean }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const result = await toggleItemFavoriteQuery(session.user.id, itemId)
+    if (result === null) {
+      return { success: false, error: 'Item not found' }
+    }
+    return { success: true, data: { isFavorite: result } }
+  } catch {
+    return { success: false, error: 'Failed to toggle favorite' }
   }
 }
