@@ -10,6 +10,7 @@ export type ItemWithMeta = {
   content: string | null
   url: string | null
   description: string | null
+  isFavorite: boolean
   type: {
     icon: string | null
     color: string | null
@@ -25,6 +26,7 @@ function toItemWithMeta(item: {
   content: string | null
   url: string | null
   description: string | null
+  isFavorite: boolean
   type: { icon: string | null; color: string | null }
   tags: { tag: { name: string } }[]
   createdAt: Date
@@ -35,6 +37,7 @@ function toItemWithMeta(item: {
     content: item.content,
     url: item.url,
     description: item.description,
+    isFavorite: item.isFavorite,
     type: { icon: item.type.icon, color: item.type.color },
     tags: item.tags.map((t) => t.tag.name),
     createdAt: item.createdAt,
@@ -234,6 +237,7 @@ export type FileItemMeta = {
   title: string
   fileName: string | null
   fileSize: number | null
+  isFavorite: boolean
   createdAt: Date
   type: {
     icon: string | null
@@ -255,6 +259,7 @@ export async function getFileItemsByType(
         title: true,
         fileName: true,
         fileSize: true,
+        isFavorite: true,
         createdAt: true,
         type: { select: { icon: true, color: true } },
       },
@@ -493,6 +498,32 @@ export type SearchItem = {
   typeIcon: string | null
   typeColor: string | null
   typeName: string
+}
+
+export type FavoriteItem = {
+  id: string
+  title: string
+  type: {
+    name: string
+    icon: string | null
+    color: string | null
+  }
+  updatedAt: Date
+}
+
+export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    select: {
+      id: true,
+      title: true,
+      type: { select: { name: true, icon: true, color: true } },
+      updatedAt: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return items
 }
 
 export async function getSearchItems(userId: string): Promise<SearchItem[]> {

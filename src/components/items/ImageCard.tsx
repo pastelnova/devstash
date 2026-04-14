@@ -1,5 +1,6 @@
 'use client'
 
+import { Star } from 'lucide-react'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from './ItemDrawerContext'
 
@@ -21,7 +22,12 @@ export function ImageCard({ item }: { item: ItemWithMeta }) {
         />
       </div>
       <div className="p-3">
-        <p className="text-sm font-medium leading-snug truncate">{item.title}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-medium leading-snug truncate flex-1">{item.title}</p>
+          {item.isFavorite && (
+            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
+          )}
+        </div>
         {item.description && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.description}</p>
         )}

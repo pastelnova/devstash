@@ -8,6 +8,7 @@ import {
   FileSpreadsheet,
   File,
   Download,
+  Star,
 } from 'lucide-react'
 import type { FileItemMeta } from '@/lib/db/items'
 import { formatFileSize } from '@/lib/utils'
@@ -83,8 +84,11 @@ export function FileRow({ item }: { item: FileItemMeta }) {
       <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
 
       {/* Name — takes remaining space */}
-      <span className="flex-1 min-w-0 truncate text-sm font-medium">
-        {item.fileName ?? item.title}
+      <span className="flex-1 min-w-0 flex items-center gap-1.5">
+        <span className="truncate text-sm font-medium">{item.fileName ?? item.title}</span>
+        {item.isFavorite && (
+          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
+        )}
       </span>
 
       {/* Meta: size, date, download — hidden on small screens, stacked on md */}

@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Search, Plus, FolderPlus, Menu } from 'lucide-react'
+import { Search, Plus, FolderPlus, Menu, Star } from 'lucide-react'
 import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType, SearchItem } from '@/lib/db/items'
 import type { SidebarCollection, SearchCollection } from '@/lib/db/collections'
@@ -90,6 +90,12 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
           </button>
 
           <div className="ml-auto flex items-center gap-2">
+          <Link href="/favorites">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-yellow-400">
+              <Star className="h-4 w-4" />
+              <span className="sr-only">Favorites</span>
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCollectionCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">New Collection</span>

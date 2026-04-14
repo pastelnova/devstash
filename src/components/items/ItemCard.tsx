@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Copy, File } from 'lucide-react'
+import { Check, Copy, File, Star } from 'lucide-react'
 import { typeIconMap } from '@/lib/item-type-icons'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from './ItemDrawerContext'
@@ -46,16 +46,21 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
           )}
         </div>
-        <span
-          role="button"
-          tabIndex={0}
-          onClick={handleCopy}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
-          className="shrink-0 rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
-          title="Copy"
-        >
-          {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
-        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          {item.isFavorite && (
+            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+          )}
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={handleCopy}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
+            className="rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+            title="Copy"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+          </span>
+        </div>
       </div>
       {item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
