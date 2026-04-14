@@ -1,11 +1,30 @@
-# Current Feature
+# Current Feature: Homepage Mockup
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Create a marketing homepage for DevStash at `prototypes/homepage/` with `index.html`, `styles.css`, `script.js`
+- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
+- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview (right)
+- Chaos icons animate with requestAnimationFrame: drift, bounce off walls, repel from mouse cursor
+- Fixed navbar that gets more opaque on scroll
+- Hero text with gradient headline, subheadline, CTA buttons
+- Features section: 6 cards in a grid with item type accent colors
+- AI section: two-column with Pro badge, checklist, and code editor mockup
+- Pricing section: Free ($0) vs Pro ($8/mo) with yearly $72 toggle, Pro card highlighted
+- CTA section and footer with link columns
+- Scroll-triggered fade-in animations
+- Responsive: stack hero vertically on mobile, single column grids, arrow rotates 90°
+
 ## Notes
+
+- Output is a standalone prototype (plain HTML/CSS/JS), not part of the Next.js app
+- Color palette: Snippet `#3b82f6`, Prompt `#f59e0b`, Command `#06b6d4`, Note `#22c55e`, File `#64748b`, Image `#ec4899`, URL `#6366f1`
+- Chaos container icons: Notion, GitHub, Slack, VS Code, Browser tabs, Terminal, Text file, Bookmark
+- Pricing: Free = 50 items, 3 collections; Pro = $8/mo or $72/yr, unlimited, AI features
+- No unit tests needed (standalone HTML prototype)
 
 ## History
 
