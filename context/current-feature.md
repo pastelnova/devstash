@@ -1,23 +1,11 @@
-# Current Feature: Client-Side Sorting on Favorites Page
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add client-side sorting controls to the favorites page
-- Support sorting by: Name (A-Z / Z-A), Date (newest / oldest), Item Type (grouped alphabetically)
-- Sorting applies independently to the Items and Collections sections
-- No server-side changes needed — sort the data already fetched on the client
-- Persist sort selection in local component state (no need to persist across sessions)
-
 ## Notes
-
-- The favorites page is at `/favorites` (`src/app/favorites/page.tsx`)
-- Items are rendered by `FavoritesList.tsx` (`src/components/favorites/FavoritesList.tsx`)
-- Currently items are sorted by `updatedAt` desc from the server
-- This is a UI-only feature — no new server actions or DB queries needed
-- No unit tests required (component-only change, out of test scope)
 
 ## History
 
@@ -530,4 +518,14 @@ In Progress
 - Added `useEffect` sync on `isFavorite` prop in all card components so state updates when server data changes (e.g. after toggling in the drawer)
 - Added 8 Vitest tests: 4 for `toggleItemFavorite`, 4 for `toggleCollectionFavorite`
 - Sidebar favorite collections and `/favorites` page reflect changes after refresh
+- Build and all 57 tests pass
+
+### 2026-04-14 — Client-Side Sorting on Favorites Page
+
+- Added `SortControl` dropdown component to `FavoritesList.tsx` — native `<select>` styled with monospace font to match terminal aesthetic
+- Items section supports 5 sort options: Name A–Z, Name Z–A, Newest first, Oldest first, Item Type (grouped alphabetically, then by title)
+- Collections section supports 4 sort options: Name A–Z, Name Z–A, Newest first, Oldest first
+- Sorting is independent per section via separate `useState` hooks; default is "Newest first" (matching server order)
+- Sorted lists memoized with `useMemo` to avoid re-sorting on every render
+- Pure UI-only change — no server actions, DB queries, or unit tests needed
 - Build and all 57 tests pass
