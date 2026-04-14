@@ -1,11 +1,59 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { FolderOpen } from 'lucide-react'
+import { FolderOpen, ArrowUpDown } from 'lucide-react'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { useItemDrawer } from '@/components/items/ItemDrawerContext'
 import type { FavoriteItem } from '@/lib/db/items'
 import type { FavoriteCollection } from '@/lib/db/collections'
+
+type SortOption = 'name-asc' | 'name-desc' | 'date-newest' | 'date-oldest' | 'type'
+
+const SORT_LABELS: Record<SortOption, string> = {
+  'name-asc': 'Name A–Z',
+  'name-desc': 'Name Z–A',
+  'date-newest': 'Newest first',
+  'date-oldest': 'Oldest first',
+  'type': 'Item type',
+}
+
+const ITEM_SORT_OPTIONS: SortOption[] = ['name-asc', 'name-desc', 'date-newest', 'date-oldest', 'type']
+const COLLECTION_SORT_OPTIONS: SortOption[] = ['name-asc', 'name-desc', 'date-newest', 'date-oldest']
+
+function sortItems(items: FavoriteItem[], sort: SortOption): FavoriteItem[] {
+  const sorted = [...items]
+  switch (sort) {
+    case 'name-asc':
+      return sorted.sort((a, b) => a.title.localeCompare(b.title))
+    case 'name-desc':
+      return sorted.sort((a, b) => b.title.localeCompare(a.title))
+    case 'date-newest':
+      return sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    case 'date-oldest':
+      return sorted.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
+    case 'type':
+      return sorted.sort((a, b) => a.type.name.localeCompare(b.type.name) || a.title.localeCompare(b.title))
+    default:
+      return sorted
+  }
+}
+
+function sortCollections(collections: FavoriteCollection[], sort: SortOption): FavoriteCollection[] {
+  const sorted = [...collections]
+  switch (sort) {
+    case 'name-asc':
+      return sorted.sort((a, b) => a.name.localeCompare(b.name))
+    case 'name-desc':
+      return sorted.sort((a, b) => b.name.localeCompare(a.name))
+    case 'date-newest':
+      return sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    case 'date-oldest':
+      return sorted.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
+    default:
+      return sorted
+  }
+}
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -13,6 +61,23 @@ function formatDate(date: Date) {
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+function SortControl({ value, onChange, options }: { value: SortOption; onChange: (v: SortOption) => void; options: SortOption[] }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as SortOption)}
+        className="text-xs font-mono bg-transparent text-muted-foreground border-none outline-none cursor-pointer hover:text-foreground transition-colors"
+      >
+        {options.map((opt) => (
+          <option key={opt} value={opt}>{SORT_LABELS[opt]}</option>
+        ))}
+      </select>
+    </div>
+  )
 }
 
 function ItemRow({ item }: { item: FavoriteItem }) {
@@ -70,15 +135,24 @@ interface FavoritesListProps {
 }
 
 export function FavoritesList({ items, collections }: FavoritesListProps) {
+  const [itemSort, setItemSort] = useState<SortOption>('date-newest')
+  const [collectionSort, setCollectionSort] = useState<SortOption>('date-newest')
+
+  const sortedItems = useMemo(() => sortItems(items, itemSort), [items, itemSort])
+  const sortedCollections = useMemo(() => sortCollections(collections, collectionSort), [collections, collectionSort])
+
   return (
     <div className="space-y-6">
       {items.length > 0 && (
         <section>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2 px-3">
-            Items ({items.length})
-          </h2>
+          <div className="flex items-center justify-between mb-2 px-3">
+            <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+              Items ({items.length})
+            </h2>
+            <SortControl value={itemSort} onChange={setItemSort} options={ITEM_SORT_OPTIONS} />
+          </div>
           <div className="border rounded-md divide-y divide-border">
-            {items.map((item) => (
+            {sortedItems.map((item) => (
               <ItemRow key={item.id} item={item} />
             ))}
           </div>
@@ -87,11 +161,14 @@ export function FavoritesList({ items, collections }: FavoritesListProps) {
 
       {collections.length > 0 && (
         <section>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2 px-3">
-            Collections ({collections.length})
-          </h2>
+          <div className="flex items-center justify-between mb-2 px-3">
+            <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+              Collections ({collections.length})
+            </h2>
+            <SortControl value={collectionSort} onChange={setCollectionSort} options={COLLECTION_SORT_OPTIONS} />
+          </div>
           <div className="border rounded-md divide-y divide-border">
-            {collections.map((collection) => (
+            {sortedCollections.map((collection) => (
               <CollectionRow key={collection.id} collection={collection} />
             ))}
           </div>

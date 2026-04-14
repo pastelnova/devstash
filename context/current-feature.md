@@ -1,11 +1,23 @@
-# Current Feature
+# Current Feature: Client-Side Sorting on Favorites Page
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Add client-side sorting controls to the favorites page
+- Support sorting by: Name (A-Z / Z-A), Date (newest / oldest), Item Type (grouped alphabetically)
+- Sorting applies independently to the Items and Collections sections
+- No server-side changes needed — sort the data already fetched on the client
+- Persist sort selection in local component state (no need to persist across sessions)
+
 ## Notes
+
+- The favorites page is at `/favorites` (`src/app/favorites/page.tsx`)
+- Items are rendered by `FavoritesList.tsx` (`src/components/favorites/FavoritesList.tsx`)
+- Currently items are sorted by `updatedAt` desc from the server
+- This is a UI-only feature — no new server actions or DB queries needed
+- No unit tests required (component-only change, out of test scope)
 
 ## History
 
