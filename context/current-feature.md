@@ -1,26 +1,11 @@
-# Current Feature: Pinned Items
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create `toggleItemPin` server action (follow toggle favorite pattern)
-- Wire Pin button in ItemDrawer to call the action (currently exists but no onClick)
-- Optimistic UI updates for instant pin/unpin feedback
-- Toast notification on success/error
-- Pinned items sort to top of item listings
-- Dashboard pinned items section reflects changes
-- Pin icon on ItemCard remains a static indicator (no click handler on cards)
-
 ## Notes
-
-- Items only — collections do not have pinning
-- Follow the same pattern as `toggleItemFavorite` / `toggleCollectionFavorite`
-- Pin button already exists in `DrawerViewBody.tsx` action bar but has no mutation wired
-- `isPinned` field already exists on the `Item` model
-- Pinned items section on dashboard (`PinnedItems.tsx`) already fetches from DB via `getPinnedItems`
-- Relevant files: `src/lib/db/items.ts`, `src/actions/items.ts`, `src/components/items/DrawerViewBody.tsx`, `src/components/items/ItemDrawer.tsx`
 
 ## History
 
@@ -544,3 +529,16 @@ In Progress
 - Sorted lists memoized with `useMemo` to avoid re-sorting on every render
 - Pure UI-only change — no server actions, DB queries, or unit tests needed
 - Build and all 57 tests pass
+
+### 2026-04-14 — Pinned Items
+
+- Added `toggleItemPin` DB helper to `src/lib/db/items.ts` — mirrors `toggleItemFavorite` pattern (find with ownership check, flip `isPinned`)
+- Added `toggleItemPin` server action to `src/actions/items.ts` — auth check, `{ success, data: { isPinned }, error }` contract
+- Wired Pin button in `DrawerViewBody.tsx` with `onTogglePin` + `pinPending` props; label toggles "Pin"/"Unpin"
+- `ItemDrawer.tsx` handles pin mutation with `useTransition`, optimistic local state update, toast on success/error, `router.refresh()`
+- Added `isPinned` to `ItemWithMeta` and `FileItemMeta` types; updated `toItemWithMeta` mapper and `getFileItemsByType` select
+- Pinned items sort to top: `getItemsByType`, `getFileItemsByType`, `getItemsByCollection` use `orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }]`
+- Pin icon (filled) shown after star icon on `ItemCard`, `ImageCard`, `FileRow`, and `ItemRow` when `isPinned` is true
+- Updated `collections/[id]/page.tsx` to pass `isPinned` through to `FileRow`
+- Added 4 Vitest tests for `toggleItemPin`: unauthorized, not found, success, query throw
+- Build and all 61 tests pass
