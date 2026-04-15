@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Search, Plus, FolderPlus, Menu, Star } from 'lucide-react'
+import { Search, Plus, FolderPlus, Menu, Star, Package } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,9 +75,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <div className="flex h-6 w-6 rounded bg-primary items-center justify-center text-primary-foreground text-xs font-bold">
-              S
-            </div>
+            <Package className="h-5 w-5" />
             <span className="hidden sm:inline font-semibold text-sm">DevStash</span>
           </Link>
         </div>
