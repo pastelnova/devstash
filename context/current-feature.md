@@ -9,6 +9,20 @@ Not Started
 
 ## History
 
+### 2026-04-15 — UI Review Fixes
+
+- Used Playwright to visually inspect homepage and dashboard at mobile (375px), tablet (768px), and desktop (1280px)
+- **FadeIn** (`FadeIn.tsx`): sections no longer start invisible — elements in viewport stay visible, off-screen elements animate on scroll, respects `prefers-reduced-motion`
+- **Mobile nav** (`Navbar.tsx`): added hamburger menu with Features/Pricing links and Sign In/Get Started buttons for mobile (<md)
+- **Mobile hero** (`page.tsx`): hid chaos-icons + arrow on mobile, show only compact dashboard preview; full visual on md+
+- **CTA gradient**: changed endpoint from `slate-300` to `blue-300` across page.tsx, Navbar.tsx, PricingSection.tsx for better white text contrast
+- **Sidebar** (`Sidebar.tsx`): capitalized type names via `capitalize` class; empty "Favorites" heading hidden when no favorited collections
+- **Stats cards** (`StatsCards.tsx`): 4-col grid at `md` breakpoint (was `lg`); shortened "Favorite Collections" to "Fav. Collections"
+- **Collection cards** (`CollectionCard.tsx`): fixed "1 items" → "1 item" grammar; equalized card heights with `h-full flex flex-col` + `mt-auto`; conditional description render
+- **Favorites mobile** (`FavoritesList.tsx`): type badge replaced with small colored icon on mobile to reduce title truncation
+- **Mobile brand** (`DashboardShell.tsx`): show "S" badge on all sizes instead of "DS" text on mobile
+- Build passes
+
 ### 2026-04-15 — Mobile Top Bar
 
 - Decluttered dashboard top bar for small screens (< 640px) in `DashboardShell.tsx`
