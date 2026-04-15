@@ -1,23 +1,24 @@
 # Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-Declutter the dashboard top bar on small screens (≤640px) so it's usable on mobile.
-
-### Changes
-1. **Logo → "DS" on mobile** — Hide "DevStash" text, show compact "DS" label on small screens
-2. **Search bar → icon only on mobile** — Replace the full search button with a Search icon button; tapping opens the ⌘K command palette (same behavior)
-3. **Collapse create buttons into a single "+" dropdown** — One `+` icon button on mobile that opens a dropdown with "New Item" and "New Collection" options; keep full buttons on `sm:` and up
-4. **Keep favorites star** — Remains as-is in the top bar
 
 ## Notes
-- Only affects `DashboardShell.tsx` top bar section
-- No new components needed — use existing shadcn DropdownMenu
-- No server-side changes, no tests needed (UI-only)
 
 ## History
+
+### 2026-04-15 — Mobile Top Bar
+
+- Decluttered dashboard top bar for small screens (< 640px) in `DashboardShell.tsx`
+- Logo: "S" icon + "DevStash" hidden on mobile, replaced with compact "DS" text
+- Search: full search bar hidden on mobile, replaced with Search icon button (opens same ⌘K command palette)
+- Create: "New Collection" and "New Item" buttons hidden on mobile, replaced with single "+" icon button opening a DropdownMenu with both options
+- Favorites star kept in top bar at all sizes
+- Desktop layout (≥ 640px) unchanged
+- Used existing shadcn DropdownMenu (base-ui); `render` prop on trigger (no `asChild` in base-ui)
+- Build and all 61 tests pass
 
 ### 2026-04-15 — Homepage
 
