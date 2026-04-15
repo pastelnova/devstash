@@ -1,26 +1,28 @@
-# Current Feature: Homepage
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Convert `prototypes/homepage/` HTML mockup into a real Next.js page at `/`
-- Server components by default; client components only for Navbar (scroll state), ChaosIcons (animation), PricingSection (billing toggle), FadeIn (IntersectionObserver)
-- All styling via Tailwind CSS + shadcn/ui — no custom CSS files
-- Buttons/links wired to correct routes: Sign In → `/sign-in`, Get Started → `/register`, nav anchors → `#features`/`#pricing`
-- Responsive: 3-col → 1-col grids, stacked hero visual on mobile
-- No data fetching, no unit tests (UI-only feature)
-
 ## Notes
 
-- Spec: `context/features/homepage-spec.md`
-- Prototype reference: `prototypes/homepage/` (index.html, styles.css, script.js)
-- Components in `src/components/homepage/`: Navbar, ChaosIcons, DashboardPreview, PricingSection, FadeIn
-- Reuse existing `@theme` accent colors from `globals.css`
-- ChaosIcons: 8 floating icons with requestAnimationFrame, mouse repulsion, wall bounce (port from prototype script.js)
-
 ## History
+
+### 2026-04-15 — Homepage
+
+- Converted `prototypes/homepage/` HTML mockup into a real Next.js page at `/` (root route)
+- Created 5 components in `src/components/homepage/`: Navbar (client, scroll-based border), ChaosIcons (client, 8 floating icons with rAF animation, mouse repulsion, wall bounce), DashboardPreview (server, static mockup window), PricingSection (client, monthly/yearly toggle), FadeIn (client, IntersectionObserver wrapper)
+- Hero section with "chaos to order" concept: animated icons → pulsing arrow → dashboard preview
+- Features grid (6 cards with colored icons), AI section with code editor mockup and AI-generated tag pills, pricing with Free/Pro cards
+- CTA section and 4-column footer with Product/Resources/Company links
+- All buttons/links wired: Sign In → `/sign-in`, Get Started → `/register`, nav anchors → `#features`/`#pricing`
+- Responsive: 3-col → 1-col grids, stacked hero visual on mobile, arrow rotates 90°
+- Blue-to-slate gradient theme (`blue-600 → blue-400 → slate-300`) for buttons and gradient text
+- Added `scroll-smooth` to `<html>` in layout.tsx
+- Used `buttonVariants` for Link-based buttons (base-ui Button has no `asChild`)
+- Added feature spec at `context/features/homepage-spec.md`
+- Build and all 61 tests pass
 
 ### 2026-04-14 — Homepage Mockup
 
