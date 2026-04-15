@@ -1,11 +1,24 @@
-# Current Feature
+# Current Feature: Homepage
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Convert `prototypes/homepage/` HTML mockup into a real Next.js page at `/`
+- Server components by default; client components only for Navbar (scroll state), ChaosIcons (animation), PricingSection (billing toggle), FadeIn (IntersectionObserver)
+- All styling via Tailwind CSS + shadcn/ui — no custom CSS files
+- Buttons/links wired to correct routes: Sign In → `/sign-in`, Get Started → `/register`, nav anchors → `#features`/`#pricing`
+- Responsive: 3-col → 1-col grids, stacked hero visual on mobile
+- No data fetching, no unit tests (UI-only feature)
+
 ## Notes
+
+- Spec: `context/features/homepage-spec.md`
+- Prototype reference: `prototypes/homepage/` (index.html, styles.css, script.js)
+- Components in `src/components/homepage/`: Navbar, ChaosIcons, DashboardPreview, PricingSection, FadeIn
+- Reuse existing `@theme` accent colors from `globals.css`
+- ChaosIcons: 8 floating icons with requestAnimationFrame, mouse repulsion, wall bounce (port from prototype script.js)
 
 ## History
 
