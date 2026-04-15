@@ -34,7 +34,7 @@ export function PricingSection() {
         <FadeIn>
           <h2 className="mb-4 text-center text-4xl font-extrabold tracking-tight">
             Simple, Developer-Friendly{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 bg-clip-text text-transparent">
               Pricing
             </span>
           </h2>
@@ -120,7 +120,7 @@ export function PricingSection() {
               </ul>
               <Link
                 href="/register"
-                className={buttonVariants({ className: "w-full bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 text-white hover:opacity-90" })}
+                className={buttonVariants({ className: "w-full bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 text-white hover:opacity-90" })}
               >
                 Upgrade to Pro
               </Link>

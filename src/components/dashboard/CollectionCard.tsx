@@ -37,7 +37,7 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') router.push(`/collections/${col.id}`)
         }}
-        className="rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors cursor-pointer"
+        className="rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors cursor-pointer h-full flex flex-col"
         style={{ borderLeftColor: col.dominantColor ?? undefined }}
       >
         <div className="flex items-start justify-between mb-1">
@@ -86,9 +86,11 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p className="text-xs text-muted-foreground mb-2">{col.itemCount} items</p>
-        <p className="text-xs text-muted-foreground/70 mb-4 line-clamp-2">{col.description}</p>
-        <div className="flex items-center gap-1.5">
+        <p className="text-xs text-muted-foreground mb-2">{col.itemCount} {col.itemCount === 1 ? 'item' : 'items'}</p>
+        {col.description && (
+          <p className="text-xs text-muted-foreground/70 line-clamp-2">{col.description}</p>
+        )}
+        <div className="flex items-center gap-1.5 mt-auto pt-3">
           {col.typeIcons.map((t) => {
             const Icon = typeIconMap[t.icon] ?? File
             return (

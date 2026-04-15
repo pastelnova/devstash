@@ -95,12 +95,18 @@ function ItemRow({ item }: { item: FavoriteItem }) {
       >
         {IconComponent && <IconComponent className="h-3.5 w-3.5" />}
       </span>
-      <span className="flex-1 text-sm font-mono truncate">{item.title}</span>
+      <span className="flex-1 text-sm font-mono truncate min-w-0">{item.title}</span>
       <span
-        className="text-[11px] font-mono px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground shrink-0"
+        className="text-[11px] font-mono px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground shrink-0 hidden sm:inline-block"
         style={{ borderLeft: `2px solid ${item.type.color ?? 'transparent'}` }}
       >
         {item.type.name}
+      </span>
+      <span
+        className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm sm:hidden"
+        style={{ color: item.type.color ?? undefined }}
+      >
+        {IconComponent && <IconComponent className="h-3 w-3" />}
       </span>
       <span className="text-xs font-mono text-muted-foreground shrink-0 hidden sm:block">
         {formatDate(item.updatedAt)}

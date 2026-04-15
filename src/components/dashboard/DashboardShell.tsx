@@ -75,11 +75,10 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <div className="hidden sm:flex h-6 w-6 rounded bg-primary items-center justify-center text-primary-foreground text-xs font-bold">
+            <div className="flex h-6 w-6 rounded bg-primary items-center justify-center text-primary-foreground text-xs font-bold">
               S
             </div>
             <span className="hidden sm:inline font-semibold text-sm">DevStash</span>
-            <span className="sm:hidden font-bold text-sm">DS</span>
           </Link>
         </div>
 

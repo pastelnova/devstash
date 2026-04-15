@@ -118,7 +118,7 @@ export function Sidebar({
                       <Icon className="h-4 w-4 shrink-0" style={{ color: type.color ?? undefined }} />
                       {!collapsed && (
                         <>
-                          <span className="flex-1 flex items-center gap-1.5">
+                          <span className="flex-1 flex items-center gap-1.5 capitalize">
                             {type.name}
                             {(type.name === 'file' || type.name === 'image') && (
                               <Badge variant="outline" className="h-4 px-1 text-[10px] font-semibold text-muted-foreground border-muted-foreground/30">
@@ -153,22 +153,26 @@ export function Sidebar({
             {collectionsExpanded && (
               <>
                 {/* Favorites */}
-                <p className="px-2 mb-1 text-xs text-muted-foreground/60 uppercase tracking-wider">
-                  Favorites
-                </p>
-                <ul className="space-y-0.5 mb-3">
-                  {favoriteCollections.map((col) => (
-                    <li key={col.id}>
-                      <Link
-                        href={`/collections/${col.id}`}
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      >
-                        <Star className="h-3.5 w-3.5 shrink-0 text-yellow-400 fill-yellow-400" />
-                        <span className="truncate">{col.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                {favoriteCollections.length > 0 && (
+                  <>
+                    <p className="px-2 mb-1 text-xs text-muted-foreground/60 uppercase tracking-wider">
+                      Favorites
+                    </p>
+                    <ul className="space-y-0.5 mb-3">
+                      {favoriteCollections.map((col) => (
+                        <li key={col.id}>
+                          <Link
+                            href={`/collections/${col.id}`}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          >
+                            <Star className="h-3.5 w-3.5 shrink-0 text-yellow-400 fill-yellow-400" />
+                            <span className="truncate">{col.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
                 {/* All collections */}
                 <p className="px-2 mb-1 text-xs text-muted-foreground/60 uppercase tracking-wider">

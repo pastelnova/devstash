@@ -73,7 +73,7 @@ export default function HomePage() {
         <div className="mb-16 text-center">
           <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tighter sm:text-5xl lg:text-6xl">
             Stop Losing Your{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 bg-clip-text text-transparent">
               Developer Knowledge
             </span>
           </h1>
@@ -84,7 +84,7 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/register"
-              className={buttonVariants({ size: "lg", className: "bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 text-white hover:opacity-90" })}
+              className={buttonVariants({ size: "lg", className: "bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 text-white hover:opacity-90" })}
             >
               Get Started Free
             </Link>
@@ -97,28 +97,33 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Hero visual */}
-        <div className="flex w-full max-w-[960px] flex-col items-center gap-6 md:flex-row md:gap-8">
+        {/* Hero visual — hidden on mobile, full layout on md+ */}
+        <div className="hidden w-full max-w-[960px] flex-col items-center gap-6 md:flex md:flex-row md:gap-8">
           {/* Chaos side */}
           <div className="min-w-0 flex-1">
-            <p className="mb-3 text-center text-xs font-medium tracking-wide text-white/30">
+            <p className="mb-3 text-center text-xs font-medium tracking-wide text-white/40">
               Your knowledge today...
             </p>
             <ChaosIcons />
           </div>
 
           {/* Arrow */}
-          <div className="flex shrink-0 items-center justify-center text-white/30 md:w-16">
-            <ArrowRight className="h-12 w-12 animate-pulse rotate-90 md:rotate-0" />
+          <div className="flex shrink-0 items-center justify-center text-white/40 md:w-16">
+            <ArrowRight className="h-12 w-12 animate-pulse" />
           </div>
 
           {/* Dashboard side */}
           <div className="min-w-0 flex-1">
-            <p className="mb-3 text-center text-xs font-medium tracking-wide text-white/30">
+            <p className="mb-3 text-center text-xs font-medium tracking-wide text-white/40">
               ...with DevStash
             </p>
             <DashboardPreview />
           </div>
+        </div>
+
+        {/* Mobile hero — just the dashboard preview */}
+        <div className="w-full max-w-sm md:hidden">
+          <DashboardPreview />
         </div>
       </section>
 
@@ -128,7 +133,7 @@ export default function HomePage() {
           <FadeIn>
             <h2 className="mb-4 text-center text-4xl font-extrabold tracking-tight">
               Everything You Need,{" "}
-              <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 bg-clip-text text-transparent">
                 One Place
               </span>
             </h2>
@@ -177,7 +182,7 @@ export default function HomePage() {
                 </span>
                 <h2 className="mb-4 text-4xl font-extrabold tracking-tight md:text-left">
                   AI-Powered{" "}
-                  <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 bg-clip-text text-transparent">
                     Superpowers
                   </span>
                 </h2>
@@ -305,7 +310,7 @@ export default function HomePage() {
             <div className="mx-auto max-w-xl text-center">
               <h2 className="mb-4 text-4xl font-extrabold tracking-tight">
                 Ready to Organize Your{" "}
-                <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 bg-clip-text text-transparent">
                   Knowledge
                 </span>
                 ?
@@ -315,7 +320,7 @@ export default function HomePage() {
               </p>
               <Link
                 href="/register"
-                className={buttonVariants({ size: "lg", className: "bg-gradient-to-r from-blue-600 via-blue-400 to-slate-300 text-white hover:opacity-90" })}
+                className={buttonVariants({ size: "lg", className: "bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 text-white hover:opacity-90" })}
               >
                 Get Started Free
               </Link>
