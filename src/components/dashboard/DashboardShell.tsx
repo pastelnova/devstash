@@ -4,6 +4,12 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Search, Plus, FolderPlus, Menu, Star } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Sidebar, type SidebarUser } from './Sidebar'
 import type { SystemItemType, SearchItem } from '@/lib/db/items'
 import type { SidebarCollection, SearchCollection } from '@/lib/db/collections'
@@ -69,41 +75,66 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <div className="h-6 w-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <div className="hidden sm:flex h-6 w-6 rounded bg-primary items-center justify-center text-primary-foreground text-xs font-bold">
               S
             </div>
-            <span className="font-semibold text-sm">DevStash</span>
+            <span className="hidden sm:inline font-semibold text-sm">DevStash</span>
+            <span className="sm:hidden font-bold text-sm">DS</span>
           </Link>
         </div>
 
         {/* Main area — aligns with dashboard content */}
-        <div className="flex-1 flex items-center gap-3 px-6 min-w-0">
+        <div className="flex-1 flex items-center gap-3 px-4 sm:px-6 min-w-0">
+          {/* Search — full bar on sm+, icon-only on mobile */}
           <button
-            className="relative flex-1 max-w-md flex items-center gap-2 h-8 rounded-md bg-muted px-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="hidden sm:flex relative flex-1 max-w-md items-center gap-2 h-8 rounded-md bg-muted px-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             onClick={() => setCommandOpen(true)}
           >
             <Search className="h-4 w-4 shrink-0" />
             <span className="flex-1 text-left">Search items...</span>
-            <kbd className="pointer-events-none hidden sm:inline-flex h-5 items-center rounded bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground border border-border">
+            <kbd className="pointer-events-none inline-flex h-5 items-center rounded bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground border border-border">
               ⌘K
             </kbd>
           </button>
-
           <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="sm:hidden h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setCommandOpen(true)}>
+            <Search className="h-4 w-4" />
+            <span className="sr-only">Search</span>
+          </Button>
           <Link href="/favorites">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-yellow-400">
               <Star className="h-4 w-4" />
               <span className="sr-only">Favorites</span>
             </Button>
           </Link>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCollectionCreateOpen(true)}>
-            <FolderPlus className="h-4 w-4" />
-            <span className="hidden sm:inline">New Collection</span>
-          </Button>
-          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New Item</span>
-          </Button>
+
+          {/* Create buttons — full on sm+, dropdown on mobile */}
+          <div className="hidden sm:flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setCollectionCreateOpen(true)}>
+              <FolderPlus className="h-4 w-4" />
+              New Collection
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              New Item
+            </Button>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button size="icon" className="sm:hidden h-8 w-8" />}>
+              <Plus className="h-4 w-4" />
+              <span className="sr-only">Create new</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Item
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCollectionCreateOpen(true)}>
+                <FolderPlus className="h-4 w-4 mr-2" />
+                New Collection
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           </div>
         </div>
       </header>
