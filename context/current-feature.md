@@ -1,19 +1,21 @@
-# Current Feature — Auth Pages Nav & Dashboard Logo
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add the homepage `Navbar` component to the sign-in and register pages
-- Replace the dashboard top bar logo (the `S` box + "DevStash") with the `Package` icon from the homepage navbar
-- Remove the "DS" / `S` box div from the dashboard logo area
+
 
 ## Notes
-- Homepage `Navbar`: `src/components/homepage/Navbar.tsx` — fixed, scroll-based border, `Package` icon logo
-- Auth pages need top padding (`pt-16`) since navbar is `fixed top-0`
-- Dashboard logo: `DashboardShell.tsx` lines 77-83 — replace the `div` box with `Package` icon (h-5 w-5 or h-6 w-6)
+
 
 ## History
+
+### 2026-04-15 — Auth Pages Nav & Dashboard Logo
+
+- Added homepage `Navbar` component to `/sign-in` and `/register` pages with `pt-16` top padding for fixed navbar offset
+- Replaced dashboard top bar logo (the `S` box div) with `Package` icon from lucide-react (`h-5 w-5`), matching the homepage navbar logo
+- Build and all 61 tests pass
 
 ### 2026-04-15 — UI Review Fixes
 
