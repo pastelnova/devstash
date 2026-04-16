@@ -1,25 +1,13 @@
-# Current Feature: Stripe Integration — Phase 1 (Core Infrastructure)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Install Stripe SDK
-- Add `isPro` to JWT session so all components/actions can check Pro status without extra DB queries
-- Create Stripe client singleton (`src/lib/stripe.ts`)
-- Create billing DB helpers (`src/lib/db/billing.ts`): `getOrCreateStripeCustomer`, `syncSubscriptionStatus`, `getUserBillingInfo`
-- Create checkout API route (`POST /api/stripe/checkout`) and portal API route (`POST /api/stripe/portal`)
-- Create plan-limits module (`src/lib/plan-limits.ts`): `canCreateItem`, `canCreateCollection`, `getUserLimits`
-- Unit tests for plan-limits and billing DB helpers
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
-- Spec: `context/features/stripe-phase-1-spec.md`
-- Session enhancement: always query DB for `isPro` in JWT callback (not just on `trigger === "update"`)
-- Plan limits: FREE_PLAN_ITEM_LIMIT = 50, FREE_PLAN_COLLECTION_LIMIT = 3
-- Pro users get unlimited items and collections
-- Plan limits module is pure logic + Prisma counts — no Stripe dependency, fully testable
-- Env vars needed: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY`, `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
-
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
 
@@ -614,3 +602,17 @@ In Progress
 - Updated `collections/[id]/page.tsx` to pass `isPinned` through to `FileRow`
 - Added 4 Vitest tests for `toggleItemPin`: unauthorized, not found, success, query throw
 - Build and all 61 tests pass
+
+### 2026-04-16 — Stripe Integration Phase 1 (Core Infrastructure)
+
+- Installed `stripe` package
+- Added `isPro: boolean` to `Session.user` and `JWT` types in `src/types/next-auth.d.ts`
+- Updated JWT callback in `src/auth.ts` to always query DB for `isPro` (one indexed SELECT per session validation); session callback exposes `token.isPro`
+- Created `src/lib/stripe.ts` — Stripe client singleton with `STRIPE_SECRET_KEY` env guard
+- Created `src/lib/db/billing.ts` with `getOrCreateStripeCustomer` (finds or creates Stripe customer, stores ID on User), `syncSubscriptionStatus` (updates `isPro` and `stripeSubscriptionId` via findFirst + update), `getUserBillingInfo` (returns billing fields)
+- Created `POST /api/stripe/checkout` — auth check, validates `priceId` against env vars, creates Stripe Checkout Session with success/cancel URLs
+- Created `POST /api/stripe/portal` — auth check, creates Stripe Customer Portal session
+- Created `src/lib/plan-limits.ts` with `canCreateItem`, `canCreateCollection`, `getUserLimits`; FREE_PLAN_ITEM_LIMIT = 50, FREE_PLAN_COLLECTION_LIMIT = 3; Pro users get unlimited
+- Added `.env.example` with `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY`, `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
+- 8 unit tests for plan-limits, 5 unit tests for billing DB helpers
+- Build and all 74 tests pass
