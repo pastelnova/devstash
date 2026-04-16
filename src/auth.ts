@@ -18,15 +18,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+      }
+      // Always sync isPro from DB so webhook updates are reflected on next request
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { isPro: true },
+        })
+        token.isPro = dbUser?.isPro ?? false
       }
       return token
     },
     session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string
+        session.user.isPro = token.isPro ?? false
       }
       return session
     },

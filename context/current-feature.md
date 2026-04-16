@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Stripe Integration — Phase 1 (Core Infrastructure)
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-
+- Install Stripe SDK
+- Add `isPro` to JWT session so all components/actions can check Pro status without extra DB queries
+- Create Stripe client singleton (`src/lib/stripe.ts`)
+- Create billing DB helpers (`src/lib/db/billing.ts`): `getOrCreateStripeCustomer`, `syncSubscriptionStatus`, `getUserBillingInfo`
+- Create checkout API route (`POST /api/stripe/checkout`) and portal API route (`POST /api/stripe/portal`)
+- Create plan-limits module (`src/lib/plan-limits.ts`): `canCreateItem`, `canCreateCollection`, `getUserLimits`
+- Unit tests for plan-limits and billing DB helpers
 
 ## Notes
+- Spec: `context/features/stripe-phase-1-spec.md`
+- Session enhancement: always query DB for `isPro` in JWT callback (not just on `trigger === "update"`)
+- Plan limits: FREE_PLAN_ITEM_LIMIT = 50, FREE_PLAN_COLLECTION_LIMIT = 3
+- Pro users get unlimited items and collections
+- Plan limits module is pure logic + Prisma counts — no Stripe dependency, fully testable
+- Env vars needed: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY`, `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
 
 
 ## History
