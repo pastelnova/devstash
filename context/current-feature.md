@@ -1,25 +1,13 @@
-# Current Feature: Stripe Integration Phase 2 — Webhooks, Feature Gating & UI
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Webhook handler for Stripe subscription events (created, updated, deleted)
-- Feature gating in server actions: free plan limits on items (50), collections (3), file uploads (Pro only)
-- Billing UI on settings page: upgrade flow for free users, manage subscription for Pro users
-- Upgrade prompt component shown when users approach or hit limits
-- Plan badge (Free/Pro) in sidebar
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
-- Phase 1 complete: session has `isPro`, Stripe client exists, checkout/portal routes exist, plan-limits module exists
-- Webhook must verify signature with `STRIPE_WEBHOOK_SECRET`
-- `syncSubscriptionStatus` from `src/lib/db/billing.ts` handles DB updates
-- Free users can upload images but not files
-- Use constants from `src/lib/plan-limits.ts` (`FREE_PLAN_ITEM_LIMIT`, `FREE_PLAN_COLLECTION_LIMIT`)
-- Homepage pricing CTA stays as `/register` link (no changes needed)
-- Files to create: webhook route, BillingSection, UpgradePrompt
-- Files to modify: items actions, collections actions, upload route, settings page, Sidebar
-- 7 new unit tests needed across items and collections actions
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
 
@@ -628,3 +616,18 @@ In Progress
 - Added `.env.example` with `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY`, `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
 - 8 unit tests for plan-limits, 5 unit tests for billing DB helpers
 - Build and all 74 tests pass
+
+### 2026-04-16 — Stripe Integration Phase 2 (Webhooks, Feature Gating & UI)
+
+- Created `POST /api/webhooks/stripe` route — verifies Stripe signature via `STRIPE_WEBHOOK_SECRET`, handles `customer.subscription.created/updated/deleted` events, calls `syncSubscriptionStatus` to update `isPro` and `stripeSubscriptionId`
+- Added feature gating to `createItem` and `createFileItem` server actions — checks `canCreateItem` from `plan-limits.ts`; free plan capped at 50 items
+- Added feature gating to `createFileItem` — file uploads (`type: 'file'`) require Pro plan; image uploads allowed for all users
+- Added feature gating to `createCollection` server action — checks `canCreateCollection`; free plan capped at 3 collections
+- Added feature gating to `POST /api/upload` route — returns 403 for file uploads by free users
+- Created `src/components/settings/BillingSection.tsx` — settings card showing current plan badge, usage progress bars (items/collections), monthly/yearly toggle for upgrade, "Manage Subscription" portal link for Pro users
+- Updated `/settings` page to fetch `getUserLimits` and render `BillingSection` above editor preferences
+- Created `src/components/dashboard/UpgradePrompt.tsx` — dismissable alert shown at 80% or 100% of limits, with direct Stripe checkout CTA
+- Added FREE/PRO plan badge next to user name in `Sidebar.tsx` — blue badge for Pro, grey for Free
+- Added `isPro` to `SidebarUser` interface
+- 5 new unit tests: item limit on createItem, file-Pro-only on createFileItem, image-allowed-for-free, item limit on createFileItem, collection limit on createCollection
+- Build and all 79 tests pass
