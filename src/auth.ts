@@ -28,7 +28,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { id: token.id as string },
           select: { isPro: true },
         })
-        token.isPro = dbUser?.isPro ?? false
+        if (!dbUser) {
+          // User was deleted — invalidate the token so the session ends
+          return { ...token, id: undefined }
+        }
+        token.isPro = dbUser.isPro
       }
       return token
     },

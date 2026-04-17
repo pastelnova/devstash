@@ -18,6 +18,7 @@ import { ItemCard } from '@/components/items/ItemCard'
 import { ImageCard } from '@/components/items/ImageCard'
 import { FileRow } from '@/components/items/FileRow'
 import { NewItemByTypeButton } from '@/components/items/NewItemByTypeButton'
+import { ProTypeGate } from '@/components/items/ProTypeGate'
 import { typeIconMap } from '@/lib/item-type-icons'
 import type { CreatableType } from '@/components/items/ItemCreateDialog'
 
@@ -42,6 +43,33 @@ export default async function ItemsByTypePage({
 
   const itemType = await getSystemItemTypeBySlug(typeSlug)
   if (!itemType) notFound()
+
+  const isPro = session.user.isPro ?? false
+  const typeLowerName = itemType.name.toLowerCase()
+  const isProOnlyType = typeLowerName === 'file' || typeLowerName === 'image'
+
+  if (!isPro && isProOnlyType) {
+    const [itemTypes, sidebarCollections, searchItems, searchCollections, editorPreferences] = await Promise.all([
+      getSystemItemTypes(userId),
+      getSidebarCollections(userId),
+      getSearchItems(userId),
+      getSearchCollections(userId),
+      getEditorPreferences(userId),
+    ])
+
+    return (
+      <DashboardShell
+        itemTypes={itemTypes}
+        sidebarCollections={sidebarCollections}
+        searchItems={searchItems}
+        searchCollections={searchCollections}
+        user={session.user}
+        editorPreferences={editorPreferences}
+      >
+        <ProTypeGate typeName={typeLowerName as 'file' | 'image'} />
+      </DashboardShell>
+    )
+  }
 
   const isFileType = itemType.name.toLowerCase() === 'file'
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)

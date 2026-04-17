@@ -414,25 +414,14 @@ CMD ["node", "server.js"]`,
 
   console.log("✓ DevOps collection")
 
-  // ── Terminal Commands ─────────────────────────────────────────────────────────
-  const terminalCommands = await prisma.collection.upsert({
-    where: { id: "seed-collection-terminal-commands" },
-    update: {},
-    create: {
-      id: "seed-collection-terminal-commands",
-      name: "Terminal Commands",
-      description: "Useful shell commands for everyday development",
-      userId: user.id,
-    },
-  })
-
+  // ── Standalone Commands (no collection) ──────────────────────────────────────
   await createItem({
     title: "Git: Undo Last Commit",
     contentType: "text",
     description: "Undo the last commit while keeping changes staged",
     content: `git reset --soft HEAD~1`,
     typeId: "system-command",
-    collectionId: terminalCommands.id,
+    collectionId: "",
     tagNames: ["git", "cli"],
   })
 
@@ -442,7 +431,7 @@ CMD ["node", "server.js"]`,
     description: "Remove all stopped containers, unused images, networks, and build cache",
     content: `docker system prune -af --volumes`,
     typeId: "system-command",
-    collectionId: terminalCommands.id,
+    collectionId: "",
     tagNames: ["docker", "cli"],
   })
 
@@ -453,7 +442,7 @@ CMD ["node", "server.js"]`,
     content: `lsof -ti tcp:3000 | xargs kill -9`,
     isPinned: true,
     typeId: "system-command",
-    collectionId: terminalCommands.id,
+    collectionId: "",
     tagNames: ["shell", "cli"],
   })
 
@@ -463,31 +452,20 @@ CMD ["node", "server.js"]`,
     description: "Interactively upgrade outdated packages with npx npm-check",
     content: `npx npm-check -u`,
     typeId: "system-command",
-    collectionId: terminalCommands.id,
+    collectionId: "",
     tagNames: ["cli"],
   })
 
-  console.log("✓ Terminal Commands collection")
+  console.log("✓ Standalone commands")
 
-  // ── Design Resources ──────────────────────────────────────────────────────────
-  const designResources = await prisma.collection.upsert({
-    where: { id: "seed-collection-design-resources" },
-    update: {},
-    create: {
-      id: "seed-collection-design-resources",
-      name: "Design Resources",
-      description: "UI/UX resources and references",
-      userId: user.id,
-    },
-  })
-
+  // ── Standalone Links (no collection) ──────────────────────────────────────────
   await createItem({
     title: "Tailwind CSS Docs",
     contentType: "text",
     url: "https://tailwindcss.com/docs",
     description: "Official Tailwind CSS v4 documentation",
     typeId: "system-link",
-    collectionId: designResources.id,
+    collectionId: "",
     tagNames: ["design", "css", "tailwind"],
   })
 
@@ -498,7 +476,7 @@ CMD ["node", "server.js"]`,
     description: "Beautifully designed components built with Radix UI and Tailwind",
     isFavorite: true,
     typeId: "system-link",
-    collectionId: designResources.id,
+    collectionId: "",
     tagNames: ["design", "ui"],
   })
 
@@ -508,7 +486,7 @@ CMD ["node", "server.js"]`,
     url: "https://www.radix-ui.com/primitives/docs/overview/introduction",
     description: "Accessible, unstyled UI component primitives for React",
     typeId: "system-link",
-    collectionId: designResources.id,
+    collectionId: "",
     tagNames: ["design", "ui"],
   })
 
@@ -518,11 +496,11 @@ CMD ["node", "server.js"]`,
     url: "https://lucide.dev/icons/",
     description: "Open-source icon library — search and copy as React components",
     typeId: "system-link",
-    collectionId: designResources.id,
+    collectionId: "",
     tagNames: ["design", "ui"],
   })
 
-  console.log("✓ Design Resources collection")
+  console.log("✓ Standalone links")
 
   console.log("\nSeed complete.")
 }
