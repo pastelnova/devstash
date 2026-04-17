@@ -9,6 +9,7 @@ import {
   toggleCollectionFavorite as toggleCollectionFavoriteQuery,
   type CollectionBasic,
 } from '@/lib/db/collections'
+import { canCreateCollection } from '@/lib/plan-limits'
 
 const createCollectionSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(100),
@@ -39,6 +40,11 @@ export async function createCollection(
   if (!parsed.success) {
     const first = parsed.error.issues[0]
     return { success: false, error: first?.message ?? 'Invalid input' }
+  }
+
+  const allowed = await canCreateCollection(session.user.id, session.user.isPro ?? false)
+  if (!allowed) {
+    return { success: false, error: 'Free plan collection limit reached. Upgrade to Pro for unlimited collections.' }
   }
 
   try {

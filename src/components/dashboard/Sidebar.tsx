@@ -30,6 +30,7 @@ export interface SidebarUser {
   name?: string | null
   email?: string | null
   image?: string | null
+  isPro?: boolean
 }
 
 interface SidebarProps {
@@ -220,7 +221,20 @@ export function Sidebar({
             <UserAvatar name={user?.name} image={user?.image} />
             {!collapsed && (
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium leading-tight truncate">{user?.name ?? 'User'}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium leading-tight truncate">{user?.name ?? 'User'}</p>
+                  <Badge
+                    variant={user?.isPro ? 'default' : 'secondary'}
+                    className={cn(
+                      'h-4 px-1 text-[10px] font-semibold shrink-0',
+                      user?.isPro
+                        ? 'bg-blue-600 hover:bg-blue-600 text-white'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    {user?.isPro ? 'PRO' : 'FREE'}
+                  </Badge>
+                </div>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             )}

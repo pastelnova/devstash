@@ -42,6 +42,12 @@ vi.mock('@/lib/r2', () => ({
   deleteFromR2: (...args: unknown[]) => deleteFromR2Mock(...args),
 }))
 
+// Mock plan limits
+const canCreateItemMock = vi.fn()
+vi.mock('@/lib/plan-limits', () => ({
+  canCreateItem: (...args: unknown[]) => canCreateItemMock(...args),
+}))
+
 import { createItem, createFileItem, deleteItem, updateItem, toggleItemFavorite, toggleItemPin } from './items'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -166,6 +172,8 @@ describe('createItem server action', () => {
     authMock.mockReset()
     itemTypeFindFirstMock.mockReset()
     createItemQueryMock.mockReset()
+    canCreateItemMock.mockReset()
+    canCreateItemMock.mockResolvedValue(true)
   })
 
   it('returns Unauthorized when no session', async () => {
@@ -214,6 +222,19 @@ describe('createItem server action', () => {
     })
     expect(result.success).toBe(false)
     if (!result.success) expect(result.error).toMatch(/url/i)
+  })
+
+  it('rejects when free plan item limit is reached', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1', isPro: false } })
+    canCreateItemMock.mockResolvedValue(false)
+    const result = await createItem({
+      type: 'snippet',
+      title: 'Hello',
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/item limit/i)
+    expect(itemTypeFindFirstMock).not.toHaveBeenCalled()
   })
 
   it('returns error when system item type not found', async () => {
@@ -278,6 +299,8 @@ describe('createFileItem server action', () => {
     authMock.mockReset()
     itemTypeFindFirstMock.mockReset()
     createFileItemQueryMock.mockReset()
+    canCreateItemMock.mockReset()
+    canCreateItemMock.mockResolvedValue(true)
   })
 
   it('returns Unauthorized when no session', async () => {
@@ -318,6 +341,51 @@ describe('createFileItem server action', () => {
       tags: [],
     })
     expect(result.success).toBe(false)
+  })
+
+  it('rejects file upload for free users', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1', isPro: false } })
+    const result = await createFileItem({
+      type: 'file',
+      title: 'Doc',
+      fileUrl: 'key',
+      fileName: 'doc.pdf',
+      fileSize: 500,
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/pro plan/i)
+    expect(canCreateItemMock).not.toHaveBeenCalled()
+  })
+
+  it('allows image upload for free users', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1', isPro: false } })
+    itemTypeFindFirstMock.mockResolvedValue({ id: 'type_image' })
+    createFileItemQueryMock.mockResolvedValue({ ...sampleDetail, contentType: 'file' })
+    const result = await createFileItem({
+      type: 'image',
+      title: 'Photo',
+      fileUrl: 'key',
+      fileName: 'photo.png',
+      fileSize: 1024,
+      tags: [],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects when free plan item limit is reached', async () => {
+    authMock.mockResolvedValue({ user: { id: 'user_1', isPro: false } })
+    canCreateItemMock.mockResolvedValue(false)
+    const result = await createFileItem({
+      type: 'image',
+      title: 'Photo',
+      fileUrl: 'key',
+      fileName: 'photo.png',
+      fileSize: 1024,
+      tags: [],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/item limit/i)
   })
 
   it('returns error when system item type not found', async () => {
@@ -366,7 +434,7 @@ describe('createFileItem server action', () => {
   })
 
   it('returns generic error when query throws', async () => {
-    authMock.mockResolvedValue({ user: { id: 'user_1' } })
+    authMock.mockResolvedValue({ user: { id: 'user_1', isPro: true } })
     itemTypeFindFirstMock.mockResolvedValue({ id: 'type_file' })
     createFileItemQueryMock.mockRejectedValue(new Error('db down'))
 

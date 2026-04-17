@@ -13,6 +13,7 @@ import {
   type ItemDetail,
 } from '@/lib/db/items'
 import { deleteFromR2 } from '@/lib/r2'
+import { canCreateItem } from '@/lib/plan-limits'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
 
@@ -86,6 +87,11 @@ export async function createItem(
     return { success: false, error: first?.message ?? 'Invalid input' }
   }
 
+  const allowed = await canCreateItem(session.user.id, session.user.isPro ?? false)
+  if (!allowed) {
+    return { success: false, error: 'Free plan item limit reached. Upgrade to Pro for unlimited items.' }
+  }
+
   const itemType = await prisma.itemType.findFirst({
     where: { isSystem: true, name: parsed.data.type },
     select: { id: true },
@@ -140,6 +146,16 @@ export async function createFileItem(
   if (!parsed.success) {
     const first = parsed.error.issues[0]
     return { success: false, error: first?.message ?? 'Invalid input' }
+  }
+
+  // File uploads are Pro only; images are allowed for free users
+  if (parsed.data.type === 'file' && !(session.user.isPro ?? false)) {
+    return { success: false, error: 'File uploads require a Pro plan. Upgrade to upload files.' }
+  }
+
+  const allowed = await canCreateItem(session.user.id, session.user.isPro ?? false)
+  if (!allowed) {
+    return { success: false, error: 'Free plan item limit reached. Upgrade to Pro for unlimited items.' }
   }
 
   const itemType = await prisma.itemType.findFirst({

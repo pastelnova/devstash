@@ -1,13 +1,25 @@
-# Current Feature
+# Current Feature: Stripe Integration Phase 2 — Webhooks, Feature Gating & UI
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals will be populated when a feature is loaded -->
+- Webhook handler for Stripe subscription events (created, updated, deleted)
+- Feature gating in server actions: free plan limits on items (50), collections (3), file uploads (Pro only)
+- Billing UI on settings page: upgrade flow for free users, manage subscription for Pro users
+- Upgrade prompt component shown when users approach or hit limits
+- Plan badge (Free/Pro) in sidebar
 
 ## Notes
-<!-- Notes will be populated when a feature is loaded -->
+- Phase 1 complete: session has `isPro`, Stripe client exists, checkout/portal routes exist, plan-limits module exists
+- Webhook must verify signature with `STRIPE_WEBHOOK_SECRET`
+- `syncSubscriptionStatus` from `src/lib/db/billing.ts` handles DB updates
+- Free users can upload images but not files
+- Use constants from `src/lib/plan-limits.ts` (`FREE_PLAN_ITEM_LIMIT`, `FREE_PLAN_COLLECTION_LIMIT`)
+- Homepage pricing CTA stays as `/register` link (no changes needed)
+- Files to create: webhook route, BillingSection, UpgradePrompt
+- Files to modify: items actions, collections actions, upload route, settings page, Sidebar
+- 7 new unit tests needed across items and collections actions
 
 ## History
 

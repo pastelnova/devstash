@@ -49,6 +49,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'File and type are required' }, { status: 400 })
   }
 
+  // File uploads are Pro only; images are allowed for free users
+  if (itemType === 'file' && !(session.user.isPro ?? false)) {
+    return NextResponse.json(
+      { error: 'File uploads require a Pro plan' },
+      { status: 403 },
+    )
+  }
+
   const ext = getExtension(file.name)
   const isImage = itemType === 'image'
 

@@ -16,6 +16,11 @@ vi.mock('@/lib/db/collections', () => ({
   toggleCollectionFavorite: (...args: unknown[]) => toggleCollectionFavoriteQueryMock(...args),
 }))
 
+const canCreateCollectionMock = vi.fn()
+vi.mock('@/lib/plan-limits', () => ({
+  canCreateCollection: (...args: unknown[]) => canCreateCollectionMock(...args),
+}))
+
 import { createCollection, updateCollection, deleteCollection, toggleCollectionFavorite } from './collections'
 
 const sampleCollection = {
@@ -27,6 +32,7 @@ const sampleCollection = {
 describe('createCollection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    canCreateCollectionMock.mockResolvedValue(true)
   })
 
   it('returns Unauthorized when not authenticated', async () => {
@@ -46,6 +52,15 @@ describe('createCollection', () => {
     authMock.mockResolvedValue({ user: { id: 'u1' } })
     const result = await createCollection({ name: 'a'.repeat(101) })
     expect(result.success).toBe(false)
+  })
+
+  it('rejects when free plan collection limit is reached', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: false } })
+    canCreateCollectionMock.mockResolvedValue(false)
+    const result = await createCollection({ name: 'Test' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error).toMatch(/collection limit/i)
+    expect(createCollectionQueryMock).not.toHaveBeenCalled()
   })
 
   it('trims name and converts empty description to null', async () => {
