@@ -1,44 +1,24 @@
 # Current Feature
 
 ## Status
-
-In Progress
+Not Started
 
 ## Goals
-
-Add language dropdown above content editor for syntax highlighting
-
-## Description
-
-Implement a language selection dropdown positioned above the content editor in both:
-
-- New item creation dialog (`ItemCreateDialog.tsx`)
-- Item edit drawer (`DrawerEditBody.tsx`)
-
-When a language is selected, the Monaco code editor will apply syntax highlighting for that language as the user types.
-
-## Implementation
-
-- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages
-- Built `LanguageSelect` component using existing shadcn Select
-- Updated form layouts to show language dropdown above content for code-enabled item types
-- Maintained existing text input fallback for non-content item types
-
-## Files Modified
-
-- `src/lib/programming-languages.ts` (new)
-- `src/components/items/LanguageSelect.tsx` (new)
-- `src/components/items/ItemCreateDialog.tsx`
-- `src/components/items/DrawerEditBody.tsx`
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
-
-- Language selection only appears for item types that support content editing (snippets, commands)
-- Monaco editor already supported language prop, just needed UI to control it
-- Used existing Select component instead of Command+Popover for consistency
-- Maintains backward compatibility with existing language text inputs
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
+
+### 2026-04-21 — Language Dropdown for Syntax Highlighting
+
+- Added language selection dropdown above content editor in both item creation dialog and edit drawer
+- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages for Monaco editor
+- Built `LanguageSelect` component using existing shadcn Select for consistency
+- Updated `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` to conditionally show language dropdown for code-enabled item types
+- Maintains backward compatibility with existing text inputs for non-code content
+- Enables real-time syntax highlighting in Monaco editor based on selected language
 
 ### 2026-04-15 — Auth Pages Nav & Dashboard Logo
 
