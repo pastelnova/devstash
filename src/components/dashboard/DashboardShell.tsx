@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Search, Plus, FolderPlus, Menu, Star, Package } from 'lucide-react'
+import { Search, Plus, FolderPlus, Menu, Star, Package, Zap } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,6 +98,14 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
             <Search className="h-4 w-4" />
             <span className="sr-only">Search</span>
           </Button>
+          {user && !user.isPro && (
+            <Link href="/upgrade">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-blue-400">
+                <Zap className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Upgrade</span>
+              </Button>
+            </Link>
+          )}
           <Link href="/favorites">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-yellow-400">
               <Star className="h-4 w-4" />
