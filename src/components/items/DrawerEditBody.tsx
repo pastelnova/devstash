@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { capitalize } from '@/lib/utils'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
+import { LanguageSelect } from '@/components/items/LanguageSelect'
 import { Field } from '@/components/items/ItemFormField'
 import { updateItem } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
@@ -143,6 +144,15 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerE
           />
         </Field>
 
+        {showContent && showLanguage && (
+          <Field label="Language" htmlFor="item-language">
+            <LanguageSelect
+              value={form.language}
+              onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+            />
+          </Field>
+        )}
+
         {showContent && (
           <Field label="Content" htmlFor="item-content">
             {showLanguage ? (
@@ -160,7 +170,7 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerE
           </Field>
         )}
 
-        {showLanguage && (
+        {showLanguage && !showContent && (
           <Field label="Language" htmlFor="item-language">
             <Input
               id="item-language"

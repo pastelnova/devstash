@@ -19,6 +19,7 @@ import { typeIconMap } from '@/lib/item-type-icons'
 import { Field } from '@/components/items/ItemFormField'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
+import { LanguageSelect } from '@/components/items/LanguageSelect'
 import { FileUpload } from '@/components/items/FileUpload'
 import { createItem, createFileItem, type CreateItemInput, type CreateFileItemInput } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
@@ -214,6 +215,15 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
             />
           </Field>
 
+          {showContent && showLanguage && (
+            <Field label="Language" htmlFor="create-language">
+              <LanguageSelect
+                value={form.language}
+                onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+              />
+            </Field>
+          )}
+
           {showContent && (
             <Field label="Content" htmlFor="create-content">
               {showLanguage ? (
@@ -231,7 +241,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
             </Field>
           )}
 
-          {showLanguage && (
+          {showLanguage && !showContent && (
             <Field label="Language" htmlFor="create-language">
               <Input
                 id="create-language"

@@ -1,13 +1,42 @@
 # Current Feature
 
 ## Status
-Not Started
+
+In Progress
 
 ## Goals
-<!-- Goals will be populated when a feature is loaded -->
+
+Add language dropdown above content editor for syntax highlighting
+
+## Description
+
+Implement a language selection dropdown positioned above the content editor in both:
+
+- New item creation dialog (`ItemCreateDialog.tsx`)
+- Item edit drawer (`DrawerEditBody.tsx`)
+
+When a language is selected, the Monaco code editor will apply syntax highlighting for that language as the user types.
+
+## Implementation
+
+- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages
+- Built `LanguageSelect` component using existing shadcn Select
+- Updated form layouts to show language dropdown above content for code-enabled item types
+- Maintained existing text input fallback for non-content item types
+
+## Files Modified
+
+- `src/lib/programming-languages.ts` (new)
+- `src/components/items/LanguageSelect.tsx` (new)
+- `src/components/items/ItemCreateDialog.tsx`
+- `src/components/items/DrawerEditBody.tsx`
 
 ## Notes
-<!-- Notes will be populated when a feature is loaded -->
+
+- Language selection only appears for item types that support content editing (snippets, commands)
+- Monaco editor already supported language prop, just needed UI to control it
+- Used existing Select component instead of Command+Popover for consistency
+- Maintains backward compatibility with existing language text inputs
 
 ## History
 
