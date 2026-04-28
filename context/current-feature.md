@@ -14,57 +14,14 @@ Not Started
 
 ## History
 
-### 2026-03-27 — Initial Next.js & Tailwind Setup
+### 2026-04-21 — Language Dropdown for Syntax Highlighting
 
-- Scaffolded project with Next.js (App Router, React 19, TypeScript)
-- Configured Tailwind CSS v4 with CSS-based theme in `globals.css`
-- Added `CLAUDE.md` and `context/` documentation files
-- Removed default Next.js placeholder assets from `public/`
-- Committed and pushed to `https://github.com/pastelnova/devstash.git`
-
-### 2026-03-30 — Dashboard UI Phase 1
-
-- Initialized ShadCN UI (Tailwind v4 detected automatically)
-- Installed Button and Input ShadCN components
-- Created `/dashboard` route at `src/app/dashboard/page.tsx`
-- Added dark mode by default (`dark` class on `<html>`)
-- Built top bar with logo, search input, "New Collection" and "+ New Item" buttons (display only)
-- Added sidebar and main area placeholders (h2 "Sidebar" / "Main")
-- Updated root metadata to DevStash
-
-### 2026-03-30 — Dashboard UI Phase 2
-
-- Built collapsible sidebar (`src/components/dashboard/Sidebar.tsx`) with desktop toggle (PanelLeft icon) and mobile X close button
-- Sidebar collapses to icon-only strip (`w-14`) on desktop
-- Item types linked to `/items/[slug]` with colored icons and counts
-- Favorite collections section (starred) and All Collections section in sidebar
-- User avatar, name, email, and settings icon at the bottom of the sidebar
-- Mobile view always uses a drawer overlay (backdrop + fixed panel)
-- Hamburger button in header opens the mobile drawer
-- Extracted `DashboardShell.tsx` as client component managing sidebar state
-- `page.tsx` remains a server component
-
-### 2026-03-30 — Dashboard UI Phase 3
-
-- Added 4 stats cards (`src/components/dashboard/StatsCards.tsx`) for total items, collections, favorite items, and favorite collections
-- Built collections grid (`src/components/dashboard/CollectionsSection.tsx`) with 3-column layout, star badge, item count, description, and type icons
-- Created reusable `ItemRow.tsx` with colored type icon circle, title, description, tags, and date
-- Added pinned items section (`src/components/dashboard/PinnedItems.tsx`) using `isPinned` flag
-- Added recent items section (`src/components/dashboard/RecentItems.tsx`) sorted by date, capped at 10
-- Updated `page.tsx` with full dashboard layout: heading, stats, collections, pinned, recent
-- All data sourced from `src/lib/mock-data.ts`
-
-### 2026-04-14 — Homepage Mockup
-
-- Created standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
-- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
-- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview with topbar and content lines (right)
-- Chaos icons animated with requestAnimationFrame: drift, bounce off walls, gentle mouse cursor repulsion
-- Fixed navbar with scroll-based opacity, gradient headline, CTA buttons
-- Features grid (6 cards), AI section with Pro badge and code editor mockup, pricing with monthly/yearly toggle, CTA and footer
-- Scroll-triggered fade-in animations via IntersectionObserver
-- Responsive: vertical stack on mobile, single column grids, arrow rotates 90°
-- Added feature spec at `context/features/homepage-mockup-spec.md`
+- Added language selection dropdown above content editor in both item creation dialog and edit drawer
+- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages for Monaco editor
+- Built `LanguageSelect` component using existing shadcn Select for consistency
+- Updated `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` to conditionally show language dropdown for code-enabled item types
+- Maintains backward compatibility with existing text inputs for non-code content
+- Enables real-time syntax highlighting in Monaco editor based on selected language
 
 ### 2026-04-15 — Auth Pages Nav & Dashboard Logo
 
@@ -112,14 +69,57 @@ Not Started
 - Added feature spec at `context/features/homepage-spec.md`
 - Build and all 61 tests pass
 
-### 2026-04-21 — Language Dropdown for Syntax Highlighting
+### 2026-04-14 — Homepage Mockup
 
-- Added language selection dropdown above content editor in both item creation dialog and edit drawer
-- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages for Monaco editor
-- Built `LanguageSelect` component using existing shadcn Select for consistency
-- Updated `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` to conditionally show language dropdown for code-enabled item types
-- Maintains backward compatibility with existing text inputs for non-code content
-- Enables real-time syntax highlighting in Monaco editor based on selected language
+- Created standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
+- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
+- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview with topbar and content lines (right)
+- Chaos icons animated with requestAnimationFrame: drift, bounce off walls, gentle mouse cursor repulsion
+- Fixed navbar with scroll-based opacity, gradient headline, CTA buttons
+- Features grid (6 cards), AI section with Pro badge and code editor mockup, pricing with monthly/yearly toggle, CTA and footer
+- Scroll-triggered fade-in animations via IntersectionObserver
+- Responsive: vertical stack on mobile, single column grids, arrow rotates 90°
+- Added feature spec at `context/features/homepage-mockup-spec.md`
+
+### 2026-03-27 — Initial Next.js & Tailwind Setup
+
+- Scaffolded project with Next.js (App Router, React 19, TypeScript)
+- Configured Tailwind CSS v4 with CSS-based theme in `globals.css`
+- Added `CLAUDE.md` and `context/` documentation files
+- Removed default Next.js placeholder assets from `public/`
+- Committed and pushed to `https://github.com/pastelnova/devstash.git`
+
+### 2026-03-30 — Dashboard UI Phase 1
+
+- Initialized ShadCN UI (Tailwind v4 detected automatically)
+- Installed Button and Input ShadCN components
+- Created `/dashboard` route at `src/app/dashboard/page.tsx`
+- Added dark mode by default (`dark` class on `<html>`)
+- Built top bar with logo, search input, "New Collection" and "+ New Item" buttons (display only)
+- Added sidebar and main area placeholders (h2 "Sidebar" / "Main")
+- Updated root metadata to DevStash
+
+### 2026-03-30 — Dashboard UI Phase 2
+
+- Built collapsible sidebar (`src/components/dashboard/Sidebar.tsx`) with desktop toggle (PanelLeft icon) and mobile X close button
+- Sidebar collapses to icon-only strip (`w-14`) on desktop
+- Item types linked to `/items/[slug]` with colored icons and counts
+- Favorite collections section (starred) and All Collections section in sidebar
+- User avatar, name, email, and settings icon at the bottom of the sidebar
+- Mobile view always uses a drawer overlay (backdrop + fixed panel)
+- Hamburger button in header opens the mobile drawer
+- Extracted `DashboardShell.tsx` as client component managing sidebar state
+- `page.tsx` remains a server component
+
+### 2026-03-30 — Dashboard UI Phase 3
+
+- Added 4 stats cards (`src/components/dashboard/StatsCards.tsx`) for total items, collections, favorite items, and favorite collections
+- Built collections grid (`src/components/dashboard/CollectionsSection.tsx`) with 3-column layout, star badge, item count, description, and type icons
+- Created reusable `ItemRow.tsx` with colored type icon circle, title, description, tags, and date
+- Added pinned items section (`src/components/dashboard/PinnedItems.tsx`) using `isPinned` flag
+- Added recent items section (`src/components/dashboard/RecentItems.tsx`) sorted by date, capped at 10
+- Updated `page.tsx` with full dashboard layout: heading, stats, collections, pinned, recent
+- All data sourced from `src/lib/mock-data.ts`
 
 ### 2026-04-01 — Prisma + Neon PostgreSQL Setup
 
