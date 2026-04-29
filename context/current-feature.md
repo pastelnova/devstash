@@ -1,16 +1,26 @@
-# Current Feature
+# Current Feature — AI Description Generator
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be populated when a feature is loaded -->
+- Add an icon button next to the description input that generates a concise 1-2 sentence description/summary
+- Works in both ItemCreateDialog and DrawerEditBody (edit mode)
+- Uses whatever info is currently available in the form (title, content, tags, URL, language, type) — no need to save first
+- Works for all content types (snippet, prompt, command, note, link, file, image) using whatever fields are populated
+- Pro-only feature (reuses existing AI gating pattern)
+- Uses OpenAI API (reuses existing `src/lib/openai.ts` client and AI rate limiter)
 
 ## Notes
 
-<!-- Notes will be populated when a feature is loaded -->
+- Similar pattern to SuggestTagsButton — icon button near the description input, calls a server action
+- Server action: `generateDescription` in `src/actions/ai.ts` — accepts title, content, tags, url, language, type; returns a string description
+- Truncate content before API call (reuse 2000 char limit from auto-tagging)
+- Rate limited via existing `ai` rate limiter (20 req/hr per user)
+- Pro gating: only visible/usable for Pro users (reuse `isPro` prop threading)
+- No need to auto-apply — populate the description input field and let the user edit/accept
 
 ## History
 

@@ -15,6 +15,7 @@ import { Field } from '@/components/items/ItemFormField'
 import { updateItem } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
 import { SuggestTagsButton } from '@/components/items/SuggestTagsButton'
+import { GenerateDescriptionButton } from '@/components/items/GenerateDescriptionButton'
 import { TypeIconBadge, CONTENT_TYPES, LANGUAGE_TYPES, URL_TYPES } from '@/components/items/drawer-shared'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -143,6 +144,16 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved, isPro }: 
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             rows={2}
             className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+          />
+          <GenerateDescriptionButton
+            title={form.title}
+            type={typeName}
+            content={form.content}
+            url={form.url}
+            tags={form.tags.split(',').map((t) => t.trim()).filter(Boolean)}
+            language={form.language}
+            onGenerated={(desc) => setForm((f) => ({ ...f, description: desc }))}
+            isPro={!!isPro}
           />
         </Field>
 

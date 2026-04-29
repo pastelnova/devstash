@@ -24,6 +24,7 @@ import { FileUpload } from '@/components/items/FileUpload'
 import { createItem, createFileItem, type CreateItemInput, type CreateFileItemInput } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
 import { SuggestTagsButton } from '@/components/items/SuggestTagsButton'
+import { GenerateDescriptionButton } from '@/components/items/GenerateDescriptionButton'
 import type { SystemItemType } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
@@ -214,6 +215,16 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={2}
               className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+            />
+            <GenerateDescriptionButton
+              title={form.title}
+              type={form.type}
+              content={form.content}
+              url={form.url}
+              tags={form.tags.split(',').map((t) => t.trim()).filter(Boolean)}
+              language={form.language}
+              onGenerated={(desc) => setForm((f) => ({ ...f, description: desc }))}
+              isPro={!!isPro}
             />
           </Field>
 
