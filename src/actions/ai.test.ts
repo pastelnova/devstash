@@ -25,7 +25,7 @@ vi.mock('@/lib/rate-limit', () => ({
   },
 }))
 
-import { generateAutoTags, generateDescription } from './ai'
+import { generateAutoTags, generateDescription, explainCode } from './ai'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -281,5 +281,123 @@ describe('generateDescription', () => {
 
     const result = await generateDescription({ title: 'Test', type: 'snippet' })
     expect(result).toEqual({ success: true, data: { description: 'A test item.' } })
+  })
+})
+
+describe('explainCode', () => {
+  it('returns error when not authenticated', async () => {
+    authMock.mockResolvedValue(null)
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+  })
+
+  it('returns error when user is not Pro', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: false } })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'AI features require a Pro plan' })
+  })
+
+  it('returns error when code is empty', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+
+    const result = await explainCode({ code: '', type: 'snippet' })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns error for invalid type', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'note' as 'snippet' })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns error when rate limited', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    limitMock.mockResolvedValue({ success: false })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'Rate limit exceeded. Please try again later.' })
+  })
+
+  it('returns explanation on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ explanation: '## Overview\nThis declares a constant.' }),
+    })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet', language: 'javascript' })
+    expect(result).toEqual({
+      success: true,
+      data: { explanation: '## Overview\nThis declares a constant.' },
+    })
+  })
+
+  it('includes language and type context in the prompt', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ explanation: 'Explanation here.' }),
+    })
+
+    await explainCode({ code: 'ls -la', type: 'command', language: 'bash' })
+
+    const callArgs = responsesCreateMock.mock.calls[0][0]
+    expect(callArgs.instructions).toContain('terminal command')
+    expect(callArgs.instructions).toContain('bash')
+    expect(callArgs.input).toContain('ls -la')
+  })
+
+  it('truncates code to 2000 chars', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ explanation: 'Test' }),
+    })
+
+    const longCode = 'a'.repeat(5000)
+    await explainCode({ code: longCode, type: 'snippet' })
+
+    const callArgs = responsesCreateMock.mock.calls[0][0]
+    expect(callArgs.input).toContain('a'.repeat(2000))
+    expect(callArgs.input).not.toContain('a'.repeat(2001))
+  })
+
+  it('returns error on unexpected format', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ result: 'wrong key' }),
+    })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'AI returned an unexpected format' })
+  })
+
+  it('returns error on invalid JSON response', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: 'not json',
+    })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'AI returned invalid JSON' })
+  })
+
+  it('returns generic error on API failure', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockRejectedValue(new Error('API down'))
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: false, error: 'Failed to explain code. Please try again.' })
+  })
+
+  it('fails open when rate limiter throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    limitMock.mockRejectedValue(new Error('Redis down'))
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ explanation: 'This code does something.' }),
+    })
+
+    const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
+    expect(result).toEqual({ success: true, data: { explanation: 'This code does something.' } })
   })
 })

@@ -31,6 +31,7 @@ interface DrawerViewBodyProps {
   deletePending: boolean
   favoritePending: boolean
   pinPending: boolean
+  isPro?: boolean
 }
 
 export function DrawerViewBody({
@@ -43,6 +44,7 @@ export function DrawerViewBody({
   deletePending,
   favoritePending,
   pinPending,
+  isPro,
 }: DrawerViewBodyProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const date = new Date(item.createdAt).toLocaleDateString('en-US', {
@@ -227,6 +229,8 @@ export function DrawerViewBody({
                 value={item.content}
                 language={item.language ?? undefined}
                 readOnly
+                showExplain
+                isPro={isPro}
               />
             ) : (
               <MarkdownEditor value={item.content} readOnly />

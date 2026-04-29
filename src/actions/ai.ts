@@ -93,6 +93,87 @@ export async function generateDescription(
   }
 }
 
+const explainCodeSchema = z.object({
+  code: z.string().min(1, 'Code is required'),
+  language: z.string().optional().default(''),
+  type: z.enum(['snippet', 'command']),
+})
+
+export type ExplainCodeInput = z.input<typeof explainCodeSchema>
+
+type ExplainCodeResult =
+  | { success: true; data: { explanation: string } }
+  | { success: false; error: string }
+
+export async function explainCode(
+  input: ExplainCodeInput
+): Promise<ExplainCodeResult> {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    if (!session.user.isPro) {
+      return { success: false, error: 'AI features require a Pro plan' }
+    }
+
+    const parsed = explainCodeSchema.safeParse(input)
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message }
+    }
+
+    // Rate limit by user ID
+    const limiter = rateLimiters.ai
+    if (limiter) {
+      try {
+        const { success } = await limiter.limit(session.user.id)
+        if (!success) {
+          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
+        }
+      } catch {
+        // Fail open if Upstash is down
+      }
+    }
+
+    const { code, language, type } = parsed.data
+
+    // Truncate code to 2000 chars
+    const truncatedCode = code.slice(0, 2000)
+
+    const typeLabel = type === 'command' ? 'terminal command' : 'code snippet'
+    const languageHint = language ? ` written in ${language}` : ''
+
+    const response = await getOpenAIClient().responses.create({
+      model: AI_MODEL,
+      instructions: `You are a developer tool assistant. Explain the given ${typeLabel}${languageHint} in plain English. Cover what it does, key concepts, and any important details. Keep the explanation concise (200-300 words). Use markdown formatting with headings, bullet points, and inline code where appropriate. Return a JSON object with an "explanation" key containing the markdown string.`,
+      input: `Explain this ${typeLabel}. Respond in json format.\n\n\`\`\`${language || ''}\n${truncatedCode}\n\`\`\``,
+      text: {
+        format: { type: 'json_object' },
+      },
+    })
+
+    const text = response.output_text
+    const parsed_json = JSON.parse(text)
+
+    const explanation = typeof parsed_json === 'object' && parsed_json !== null && typeof parsed_json.explanation === 'string'
+      ? parsed_json.explanation.trim()
+      : null
+
+    if (!explanation) {
+      return { success: false, error: 'AI returned an unexpected format' }
+    }
+
+    return { success: true, data: { explanation } }
+  } catch (error) {
+    console.error('[explainCode] Error:', error)
+    if (error instanceof SyntaxError) {
+      return { success: false, error: 'AI returned invalid JSON' }
+    }
+    return { success: false, error: 'Failed to explain code. Please try again.' }
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   content: z.string().optional().default(''),

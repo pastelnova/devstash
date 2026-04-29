@@ -126,6 +126,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
             deletePending={deletePending}
             favoritePending={favoritePending}
             pinPending={pinPending}
+            isPro={isPro}
           />
         )}
         {item && !loading && editing && (

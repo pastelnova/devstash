@@ -2,15 +2,29 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be populated when a feature is loaded -->
+- Create `explainCode` server action with auth, Pro gating, Zod validation, rate limiting
+- Add "Explain" button (Sparkles icon) to code editor header (next to Copy button)
+- Only show for snippet and command types in the item drawer read view (not create/edit)
+- After generating, show Code/Explain tabs in editor header to toggle between views
+- Render explanation as markdown in the same container space as the code editor
+- Concise explanation (~200-300 words) covering what the code does and key concepts
+- Loading state with Loader2 spinner while generating
+- Pro gating in UI: Crown icon + tooltip for free users
+- Error handling via toast (Pro gating, rate limit, AI service errors)
+- Unit tests for the server action
 
 ## Notes
 
-<!-- Notes will be populated when a feature is loaded -->
+- Explanations are not saved to DB — regenerated on each click
+- Not available in create/edit forms, only in item drawer read view
+- `isPro` needs to be passed as a prop to the item drawer / code editor
+- Uses existing OpenAI client (`src/lib/openai.ts`) with `gpt-5-nano` model
+- Uses existing AI rate limiter (20 req/hr per user)
+- Spec: `context/features/ai-explain-spec.md`
 
 ## History
 
