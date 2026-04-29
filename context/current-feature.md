@@ -2,31 +2,33 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `explainCode` server action with auth, Pro gating, Zod validation, rate limiting
-- Add "Explain" button (Sparkles icon) to code editor header (next to Copy button)
-- Only show for snippet and command types in the item drawer read view (not create/edit)
-- After generating, show Code/Explain tabs in editor header to toggle between views
-- Render explanation as markdown in the same container space as the code editor
-- Concise explanation (~200-300 words) covering what the code does and key concepts
-- Loading state with Loader2 spinner while generating
-- Pro gating in UI: Crown icon + tooltip for free users
-- Error handling via toast (Pro gating, rate limit, AI service errors)
-- Unit tests for the server action
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
 
-- Explanations are not saved to DB — regenerated on each click
-- Not available in create/edit forms, only in item drawer read view
-- `isPro` needs to be passed as a prop to the item drawer / code editor
-- Uses existing OpenAI client (`src/lib/openai.ts`) with `gpt-5-nano` model
-- Uses existing AI rate limiter (20 req/hr per user)
-- Spec: `context/features/ai-explain-spec.md`
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
+
+### 2026-04-29 — AI Explain Code
+
+- Added `explainCode` server action to `src/actions/ai.ts` — accepts code, language, type (snippet/command); returns markdown explanation (~200-300 words)
+- Uses OpenAI Responses API with `json_object` format; expects `{"explanation": "..."}` response
+- Truncates code to 2000 chars; includes language hint and type context (snippet vs terminal command)
+- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Updated `src/components/items/CodeEditor.tsx` — added `showExplain` and `isPro` props
+- Explain button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
+- Loader2 spinner while generating; Code/Explain tabs appear after explanation is generated
+- Explanation rendered as markdown with `react-markdown` + `remark-gfm` using `prose prose-invert prose-sm`
+- Only shown for snippet/command types in item drawer read view (not in create/edit forms)
+- Threaded `isPro` prop through `ItemDrawer` → `DrawerViewBody` → `CodeEditor`
+- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty code, invalid type, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 115 tests pass
 
 ### 2026-04-29 — AI Description Generator
 
