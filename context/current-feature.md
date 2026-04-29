@@ -1,28 +1,30 @@
-# Current Feature — AI Description Generator
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add an icon button next to the description input that generates a concise 1-2 sentence description/summary
-- Works in both ItemCreateDialog and DrawerEditBody (edit mode)
-- Uses whatever info is currently available in the form (title, content, tags, URL, language, type) — no need to save first
-- Works for all content types (snippet, prompt, command, note, link, file, image) using whatever fields are populated
-- Pro-only feature (reuses existing AI gating pattern)
-- Uses OpenAI API (reuses existing `src/lib/openai.ts` client and AI rate limiter)
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
 
-- Similar pattern to SuggestTagsButton — icon button near the description input, calls a server action
-- Server action: `generateDescription` in `src/actions/ai.ts` — accepts title, content, tags, url, language, type; returns a string description
-- Truncate content before API call (reuse 2000 char limit from auto-tagging)
-- Rate limited via existing `ai` rate limiter (20 req/hr per user)
-- Pro gating: only visible/usable for Pro users (reuse `isPro` prop threading)
-- No need to auto-apply — populate the description input field and let the user edit/accept
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
+
+### 2026-04-29 — AI Description Generator
+
+- Added `generateDescription` server action to `src/actions/ai.ts` — accepts title, type, content, url, tags, language; returns a concise 1-2 sentence description
+- Uses OpenAI Responses API with `json_object` format; expects `{"description": "..."}` response
+- Builds context string from all available form fields; truncates content to 2000 chars
+- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Created `src/components/items/GenerateDescriptionButton.tsx` — Sparkles icon ghost button matching SuggestTagsButton style; client-side title check before calling action
+- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` below the description textarea; hidden for free users (`isPro` prop gating)
+- Populates the description input field on success — user can edit/accept before saving
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty title, empty type, rate limit, happy path, context inclusion, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 103 tests pass
 
 ### 2026-04-29 — AI Auto-Tagging
 
