@@ -11,7 +11,7 @@ import {
 
 interface LanguageSelectProps {
   value?: string
-  onChange: (value: string) => void
+  onChange: (value: string | null) => void
   placeholder?: string
 }
 

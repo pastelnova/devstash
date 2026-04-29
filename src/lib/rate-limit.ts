@@ -46,6 +46,14 @@ export const rateLimiters = {
         timeout: 3000,
       })
     : null,
+  ai: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(20, "1 h"),
+        prefix: "rl:ai",
+        timeout: 3000,
+      })
+    : null,
 }
 
 export async function getClientIp(): Promise<string> {

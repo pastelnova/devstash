@@ -14,6 +14,7 @@ import { LanguageSelect } from '@/components/items/LanguageSelect'
 import { Field } from '@/components/items/ItemFormField'
 import { updateItem } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
+import { SuggestTagsButton } from '@/components/items/SuggestTagsButton'
 import { TypeIconBadge, CONTENT_TYPES, LANGUAGE_TYPES, URL_TYPES } from '@/components/items/drawer-shared'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -44,9 +45,10 @@ interface DrawerEditBodyProps {
   collections: CollectionOption[]
   onCancel: () => void
   onSaved: (updated: ItemDetail) => void
+  isPro?: boolean
 }
 
-export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerEditBodyProps) {
+export function DrawerEditBody({ item, collections, onCancel, onSaved, isPro }: DrawerEditBodyProps) {
   const router = useRouter()
   const [form, setForm] = useState<EditState>(() => toEditState(item))
   const [pending, startTransition] = useTransition()
@@ -148,7 +150,7 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerE
           <Field label="Language" htmlFor="item-language">
             <LanguageSelect
               value={form.language}
-              onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+              onChange={(value) => setForm((f) => ({ ...f, language: value ?? '' }))}
             />
           </Field>
         )}
@@ -212,6 +214,18 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved }: DrawerE
             value={form.tags}
             onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
             placeholder="react, hooks, ui"
+          />
+          <SuggestTagsButton
+            title={form.title}
+            content={form.content || form.url}
+            existingTags={form.tags.split(',').map((t) => t.trim()).filter(Boolean)}
+            onAcceptTag={(tag) => {
+              setForm((f) => {
+                const current = f.tags.trim()
+                return { ...f, tags: current ? `${current}, ${tag}` : tag }
+              })
+            }}
+            isPro={!!isPro}
           />
         </Field>
       </div>

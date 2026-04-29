@@ -19,9 +19,10 @@ export function useItemDrawer() {
 interface ItemDrawerProviderProps {
   children: React.ReactNode
   collections: CollectionOption[]
+  isPro?: boolean
 }
 
-export function ItemDrawerProvider({ children, collections }: ItemDrawerProviderProps) {
+export function ItemDrawerProvider({ children, collections, isPro }: ItemDrawerProviderProps) {
   const [itemId, setItemId] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -41,7 +42,7 @@ export function ItemDrawerProvider({ children, collections }: ItemDrawerProvider
   return (
     <ItemDrawerContext.Provider value={{ openItem }}>
       {children}
-      <ItemDrawer itemId={itemId} open={open} onOpenChange={handleOpenChange} collections={collections} />
+      <ItemDrawer itemId={itemId} open={open} onOpenChange={handleOpenChange} collections={collections} isPro={isPro} />
     </ItemDrawerContext.Provider>
   )
 }

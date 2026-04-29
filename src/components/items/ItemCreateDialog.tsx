@@ -23,6 +23,7 @@ import { LanguageSelect } from '@/components/items/LanguageSelect'
 import { FileUpload } from '@/components/items/FileUpload'
 import { createItem, createFileItem, type CreateItemInput, type CreateFileItemInput } from '@/actions/items'
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
+import { SuggestTagsButton } from '@/components/items/SuggestTagsButton'
 import type { SystemItemType } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
@@ -39,6 +40,7 @@ interface ItemCreateDialogProps {
   itemTypes: SystemItemType[]
   collections: CollectionOption[]
   defaultType?: CreatableType
+  isPro?: boolean
 }
 
 type UploadedFile = {
@@ -72,7 +74,7 @@ const INITIAL_FORM: FormState = {
   uploadedFile: null,
 }
 
-export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, defaultType }: ItemCreateDialogProps) {
+export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, defaultType, isPro }: ItemCreateDialogProps) {
   const router = useRouter()
   const [form, setForm] = useState<FormState>(() =>
     defaultType ? { ...INITIAL_FORM, type: defaultType } : INITIAL_FORM,
@@ -219,7 +221,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
             <Field label="Language" htmlFor="create-language">
               <LanguageSelect
                 value={form.language}
-                onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+                onChange={(value) => setForm((f) => ({ ...f, language: value ?? '' }))}
               />
             </Field>
           )}
@@ -295,6 +297,18 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
               value={form.tags}
               onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
               placeholder="react, hooks, ui"
+            />
+            <SuggestTagsButton
+              title={form.title}
+              content={form.content || form.url}
+              existingTags={form.tags.split(',').map((t) => t.trim()).filter(Boolean)}
+              onAcceptTag={(tag) => {
+                setForm((f) => {
+                  const current = f.tags.trim()
+                  return { ...f, tags: current ? `${current}, ${tag}` : tag }
+                })
+              }}
+              isPro={!!isPro}
             />
           </Field>
         </div>

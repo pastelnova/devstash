@@ -1,16 +1,34 @@
-# Current Feature
+# Current Feature: AI Auto-Tagging
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be populated when a feature is loaded -->
+- Create OpenAI client utility with `AI_MODEL` constant (foundation for future AI features)
+- Create `generateAutoTags` server action with auth, Pro gating, Zod validation, rate limiting
+- Add AI rate limit config (20 requests/hour per user) to existing rate limit utility
+- Add "Suggest Tags" button (Sparkles icon, ghost variant) near tags input in create dialog and edit drawer
+- Display suggested tags as badges with accept/reject controls
+- Accepted tags added to item's tag list; tags are freeform
+- Truncate content to 2000 chars before API call
+- Hide Suggest Tags button for free users (Pro-only UI gating)
+- Error handling via toast (Pro gating, rate limit, AI service errors)
+- Unit tests for server action
 
 ## Notes
 
-<!-- Notes will be populated when a feature is loaded -->
+- `OPENAI_API_KEY` already in `.env`
+- Must use OpenAI **Responses API** (`client.responses.create`), NOT Chat Completions — gpt-5-nano returns empty content with Chat Completions
+- Use `text: { format: { type: 'json_object' } }` for structured output
+- Access response via `response.output_text`
+- Model may return `{"tags": [...]}` or `[...]` — handle both formats
+- Normalize tags to lowercase
+- `isPro` available server-side via session but needs to be passed as prop for UI gating
+- See `context/features/ai-auto-tag-spec.md` for full spec and SDK gotchas
+- Files to create: `src/lib/openai.ts`, `src/actions/ai.ts`, `src/components/items/SuggestTagsButton.tsx`
+- Files to modify: `src/lib/rate-limit.ts`, `ItemCreateDialog.tsx`, `DrawerEditBody.tsx`
 
 ## History
 

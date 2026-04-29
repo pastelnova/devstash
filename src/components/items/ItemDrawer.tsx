@@ -15,9 +15,10 @@ interface ItemDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   collections: CollectionOption[]
+  isPro?: boolean
 }
 
-export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: ItemDrawerProps) {
   const router = useRouter()
   const [item, setItem] = useState<ItemDetail | null>(null)
   const [loading, setLoading] = useState(false)
@@ -136,6 +137,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections }: ItemDraw
               setItem(updated)
               setEditing(false)
             }}
+            isPro={isPro}
           />
         )}
       </SheetContent>

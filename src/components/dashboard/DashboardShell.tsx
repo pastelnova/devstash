@@ -59,7 +59,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
 
   return (
     <EditorPreferencesProvider initial={editorPreferences}>
-    <ItemDrawerProvider collections={sidebarCollections}>
+    <ItemDrawerProvider collections={sidebarCollections} isPro={user?.isPro}>
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Top Bar */}
       <header className="flex items-center h-14 border-b border-border shrink-0">
@@ -169,6 +169,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
         itemTypes={itemTypes}
         collections={sidebarCollections}
         defaultType={defaultCreateType}
+        isPro={user?.isPro}
       />
       <CollectionCreateDialog
         open={collectionCreateOpen}
