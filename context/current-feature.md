@@ -1,36 +1,32 @@
-# Current Feature: AI Auto-Tagging
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create OpenAI client utility with `AI_MODEL` constant (foundation for future AI features)
-- Create `generateAutoTags` server action with auth, Pro gating, Zod validation, rate limiting
-- Add AI rate limit config (20 requests/hour per user) to existing rate limit utility
-- Add "Suggest Tags" button (Sparkles icon, ghost variant) near tags input in create dialog and edit drawer
-- Display suggested tags as badges with accept/reject controls
-- Accepted tags added to item's tag list; tags are freeform
-- Truncate content to 2000 chars before API call
-- Hide Suggest Tags button for free users (Pro-only UI gating)
-- Error handling via toast (Pro gating, rate limit, AI service errors)
-- Unit tests for server action
+<!-- Goals will be populated when a feature is loaded -->
 
 ## Notes
 
-- `OPENAI_API_KEY` already in `.env`
-- Must use OpenAI **Responses API** (`client.responses.create`), NOT Chat Completions — gpt-5-nano returns empty content with Chat Completions
-- Use `text: { format: { type: 'json_object' } }` for structured output
-- Access response via `response.output_text`
-- Model may return `{"tags": [...]}` or `[...]` — handle both formats
-- Normalize tags to lowercase
-- `isPro` available server-side via session but needs to be passed as prop for UI gating
-- See `context/features/ai-auto-tag-spec.md` for full spec and SDK gotchas
-- Files to create: `src/lib/openai.ts`, `src/actions/ai.ts`, `src/components/items/SuggestTagsButton.tsx`
-- Files to modify: `src/lib/rate-limit.ts`, `ItemCreateDialog.tsx`, `DrawerEditBody.tsx`
+<!-- Notes will be populated when a feature is loaded -->
 
 ## History
+
+### 2026-04-29 — AI Auto-Tagging
+
+- Created `src/lib/openai.ts` — OpenAI client singleton with `AI_MODEL` constant (`gpt-5-nano`), lazy init with env guard
+- Created `src/actions/ai.ts` — `generateAutoTags` server action with auth check, Pro gating, Zod validation, AI rate limiting (20 req/hr per user via Upstash)
+- Uses OpenAI Responses API (`client.responses.create`) with `json_object` format; handles both `{"tags": [...]}` and `[...]` response formats
+- Truncates content to 2000 chars before API call; normalizes tags to lowercase; passes existing tags hint to avoid duplicates
+- Added `ai` rate limiter (20 requests/hour sliding window) to `src/lib/rate-limit.ts`
+- Created `src/components/items/SuggestTagsButton.tsx` — Sparkles icon ghost button, badge suggestions with accept (check) / reject (X) controls
+- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` near tags input; hidden for free users (`isPro` prop gating)
+- Threaded `isPro` prop through `DashboardShell` → `ItemDrawerContext` → `ItemDrawer` → `DrawerEditBody` / `ItemCreateDialog`
+- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, validation, rate limit, both JSON formats, truncation, existing tags hint, invalid JSON, unexpected format, API failure, fail-open
+- Build and all 91 tests pass
 
 ### 2026-04-21 — Language Dropdown for Syntax Highlighting
 
