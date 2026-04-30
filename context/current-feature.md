@@ -2,46 +2,28 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-Refactor `src/actions/` to extract duplicated patterns into shared helpers. Reduces ~147 lines of duplication across 5 action files.
-
-### Extractions
-
-1. **`ActionResult<T>` type** → `src/actions/types.ts`
-   - Defined identically in `items.ts`, `collections.ts`, `editor-preferences.ts`; inlined 4 times in `ai.ts`
-   - Single shared generic type; AI result aliases become `ActionResult<{ description: string }>`, etc.
-
-2. **`requireAuth()` helper** → `src/lib/action-utils.ts`
-   - 15 identical `session = await auth()` + null-check blocks across all 4 action files
-   - Returns discriminated union: `{ ok: true, session }` or `{ ok: false, response }`
-   - Must live in `src/lib/` (not `"use server"` file) since it returns a non-async value
-
-3. **`getFirstZodError()` helper** → `src/lib/action-utils.ts`
-   - 10 identical `safeParse` error extraction blocks across all 4 action files
-   - Two slightly inconsistent variants (with/without `?? 'Invalid input'` fallback) — unify them
-
-4. **`nullableTrimmedString` Zod fragment** → `src/lib/action-utils.ts`
-   - Defined once in `items.ts`, duplicated inline twice in `collections.ts`
-   - Cannot be exported from `"use server"` files, so must live in `src/lib/`
-
-5. **`checkAiRateLimit()` helper** → `src/lib/action-utils.ts`
-   - 4 identical 9-line rate-limit blocks inside `ai.ts`
-   - Returns error string or null; fails open if Upstash is down
-
-6. **`extractAiStringField()` helper** → `src/lib/action-utils.ts`
-   - 3 identical JSON parse + field extraction blocks in `ai.ts` (`description`, `explanation`, `optimized`)
-   - Absorbs the manual `try/catch` for `SyntaxError` (also duplicated 3 times)
-
 ## Notes
 
-- All helpers that return non-async values must live in `src/lib/`, not in `"use server"` files
-- `generateAutoTags` uses array extraction (different shape), stays separate from `extractAiStringField`
-- Update existing tests to ensure nothing breaks after extraction
-
 ## History
+
+### 2026-04-30 — Extract Shared Action Helpers
+
+- Created `src/actions/types.ts` with shared `ActionResult<T>` type — removed 3 duplicate definitions from `items.ts`, `collections.ts`, `editor-preferences.ts` and 4 inline aliases from `ai.ts`
+- Created `src/lib/action-utils.ts` with 5 shared helpers:
+  - `requireAuth()` — discriminated union replacing 15 identical auth+null-check blocks across all 4 action files
+  - `getFirstZodError()` — unified Zod error extraction replacing 10 identical blocks; standardized the inconsistent `?? 'Invalid input'` fallback
+  - `nullableTrimmedString` — shared Zod fragment moved from `items.ts`, removed inline duplicates from `collections.ts`
+  - `checkAiRateLimit()` — replaced 4 identical 9-line rate-limit blocks in `ai.ts`; returns error string or null, fails open
+  - `extractAiStringField()` — replaced 3 identical JSON parse + field extraction blocks in `ai.ts` (`description`, `explanation`, `optimized`)
+- Updated all 4 action files (`items.ts`, `collections.ts`, `editor-preferences.ts`, `ai.ts`) to use shared helpers
+- `generateAutoTags` array extraction left separate (different shape from string field extraction)
+- Net reduction of ~104 lines of duplication
+- 13 new unit tests in `src/lib/action-utils.test.ts` covering all helpers
+- Build and all 139 tests pass
 
 ### 2026-04-30 — UI Review Fixes
 
