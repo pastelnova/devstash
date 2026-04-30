@@ -2,15 +2,28 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals will be populated when a feature is loaded -->
+- Add `optimizePrompt` server action to `src/actions/ai.ts` — accepts the current prompt content; returns an optimized/refined version
+- Add an "Optimize" button to the `MarkdownEditor` header (matching the "Explain" button pattern in `CodeEditor`)
+  - Sparkles icon for Pro users, Crown icon + tooltip for free users
+  - Loader2 spinner while generating
+  - After optimization: show Original/Optimized tabs so user can compare
+  - User can accept (replaces content) or dismiss (stays on original)
+- Only shown for **prompt** type items in the item drawer read view (not in create/edit forms)
+- Thread `showOptimize` and `isPro` props through `MarkdownEditor` → `DrawerViewBody`
+- Auth check, Pro gating, AI rate limiting (shared `ai` limiter)
+- Unit tests for the `optimizePrompt` server action
 
 ## Notes
 
-<!-- Notes will be populated when a feature is loaded -->
+- Follow the exact same pattern as `explainCode` in `CodeEditor.tsx`: button in header, tabs after result, Sparkles/Crown icon, useTransition for pending state
+- The MarkdownEditor currently has no AI features — this is the first one
+- Prompt type uses `MarkdownEditor` (not `CodeEditor`), so the Optimize button goes on the MarkdownEditor header
+- The optimized prompt should be shown in a preview tab; user clicks "Use this" to accept or dismisses to keep original
+- Only show in drawer view mode (readOnly), not in edit mode or create dialog
 
 ## History
 

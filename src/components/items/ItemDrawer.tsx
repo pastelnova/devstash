@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { DrawerViewBody } from '@/components/items/DrawerViewBody'
 import { DrawerEditBody } from '@/components/items/DrawerEditBody'
-import { deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
+import { deleteItem, toggleItemFavorite, toggleItemPin, updateItem } from '@/actions/items'
 import type { CollectionOption } from '@/components/items/CollectionSelect'
 import type { ItemDetail } from '@/lib/db/items'
 
@@ -27,6 +27,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
   const [deletePending, startDeleteTransition] = useTransition()
   const [favoritePending, startFavoriteTransition] = useTransition()
   const [pinPending, startPinTransition] = useTransition()
+  const [, startOptimizeSaveTransition] = useTransition()
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -94,6 +95,27 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
     })
   }
 
+  const handleAcceptOptimized = (optimized: string) => {
+    if (!item) return
+    startOptimizeSaveTransition(async () => {
+      const result = await updateItem(item.id, {
+        title: item.title,
+        content: optimized,
+        description: item.description,
+        tags: item.tags,
+        url: item.url,
+        language: item.language,
+        collectionIds: item.collections.map((c) => c.id),
+      })
+      if (result.success) {
+        setItem(result.data)
+        router.refresh()
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }
+
   const handleDelete = () => {
     if (!item) return
     startDeleteTransition(async () => {
@@ -123,6 +145,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
             onDelete={handleDelete}
             onToggleFavorite={handleToggleFavorite}
             onTogglePin={handleTogglePin}
+            onAcceptOptimized={handleAcceptOptimized}
             deletePending={deletePending}
             favoritePending={favoritePending}
             pinPending={pinPending}

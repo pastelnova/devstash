@@ -25,7 +25,7 @@ vi.mock('@/lib/rate-limit', () => ({
   },
 }))
 
-import { generateAutoTags, generateDescription, explainCode } from './ai'
+import { generateAutoTags, generateDescription, explainCode, optimizePrompt } from './ai'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -399,5 +399,115 @@ describe('explainCode', () => {
 
     const result = await explainCode({ code: 'const x = 1', type: 'snippet' })
     expect(result).toEqual({ success: true, data: { explanation: 'This code does something.' } })
+  })
+})
+
+describe('optimizePrompt', () => {
+  it('returns error when not authenticated', async () => {
+    authMock.mockResolvedValue(null)
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'Unauthorized' })
+  })
+
+  it('returns error when user is not Pro', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: false } })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'AI features require a Pro plan' })
+  })
+
+  it('returns error when content is empty', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+
+    const result = await optimizePrompt({ content: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns error when rate limited', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    limitMock.mockResolvedValue({ success: false })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'Rate limit exceeded. Please try again later.' })
+  })
+
+  it('returns optimized prompt on success', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ optimized: 'Write a creative, evocative poem about nature.' }),
+    })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({
+      success: true,
+      data: { optimized: 'Write a creative, evocative poem about nature.' },
+    })
+  })
+
+  it('includes prompt content in the API input', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ optimized: 'Optimized version' }),
+    })
+
+    await optimizePrompt({ content: 'Summarize this article' })
+
+    const callArgs = responsesCreateMock.mock.calls[0][0]
+    expect(callArgs.input).toContain('Summarize this article')
+    expect(callArgs.instructions).toContain('prompt engineer')
+  })
+
+  it('truncates content to 2000 chars', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ optimized: 'Short result' }),
+    })
+
+    const longContent = 'a'.repeat(5000)
+    await optimizePrompt({ content: longContent })
+
+    const callArgs = responsesCreateMock.mock.calls[0][0]
+    expect(callArgs.input).toContain('a'.repeat(2000))
+    expect(callArgs.input).not.toContain('a'.repeat(2001))
+  })
+
+  it('returns error on unexpected format', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ result: 'wrong key' }),
+    })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'AI returned an unexpected format' })
+  })
+
+  it('returns error on invalid JSON response', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockResolvedValue({
+      output_text: 'not json',
+    })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'AI returned invalid JSON' })
+  })
+
+  it('returns generic error on API failure', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    responsesCreateMock.mockRejectedValue(new Error('API down'))
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: false, error: 'Failed to optimize prompt. Please try again.' })
+  })
+
+  it('fails open when rate limiter throws', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u1', isPro: true } })
+    limitMock.mockRejectedValue(new Error('Redis down'))
+    responsesCreateMock.mockResolvedValue({
+      output_text: JSON.stringify({ optimized: 'Better prompt here.' }),
+    })
+
+    const result = await optimizePrompt({ content: 'Write a poem' })
+    expect(result).toEqual({ success: true, data: { optimized: 'Better prompt here.' } })
   })
 })

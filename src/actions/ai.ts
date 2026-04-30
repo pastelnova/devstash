@@ -174,6 +174,82 @@ export async function explainCode(
   }
 }
 
+const optimizePromptSchema = z.object({
+  content: z.string().min(1, 'Prompt content is required'),
+})
+
+export type OptimizePromptInput = z.input<typeof optimizePromptSchema>
+
+type OptimizePromptResult =
+  | { success: true; data: { optimized: string } }
+  | { success: false; error: string }
+
+export async function optimizePrompt(
+  input: OptimizePromptInput
+): Promise<OptimizePromptResult> {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    if (!session.user.isPro) {
+      return { success: false, error: 'AI features require a Pro plan' }
+    }
+
+    const parsed = optimizePromptSchema.safeParse(input)
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message }
+    }
+
+    // Rate limit by user ID
+    const limiter = rateLimiters.ai
+    if (limiter) {
+      try {
+        const { success } = await limiter.limit(session.user.id)
+        if (!success) {
+          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
+        }
+      } catch {
+        // Fail open if Upstash is down
+      }
+    }
+
+    const { content } = parsed.data
+
+    // Truncate content to 2000 chars
+    const truncatedContent = content.slice(0, 2000)
+
+    const response = await getOpenAIClient().responses.create({
+      model: AI_MODEL,
+      instructions: 'You are an expert prompt engineer. Optimize the given AI prompt to be clearer, more specific, and more effective. Improve structure, add relevant constraints or context, and refine the language. Keep the original intent intact. Return a JSON object with an "optimized" key containing the optimized prompt string.',
+      input: `Optimize this AI prompt. Respond in json format.\n\n${truncatedContent}`,
+      text: {
+        format: { type: 'json_object' },
+      },
+    })
+
+    const text = response.output_text
+    const parsed_json = JSON.parse(text)
+
+    const optimized = typeof parsed_json === 'object' && parsed_json !== null && typeof parsed_json.optimized === 'string'
+      ? parsed_json.optimized.trim()
+      : null
+
+    if (!optimized) {
+      return { success: false, error: 'AI returned an unexpected format' }
+    }
+
+    return { success: true, data: { optimized } }
+  } catch (error) {
+    console.error('[optimizePrompt] Error:', error)
+    if (error instanceof SyntaxError) {
+      return { success: false, error: 'AI returned invalid JSON' }
+    }
+    return { success: false, error: 'Failed to optimize prompt. Please try again.' }
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   content: z.string().optional().default(''),

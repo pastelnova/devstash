@@ -28,6 +28,7 @@ interface DrawerViewBodyProps {
   onDelete: () => void
   onToggleFavorite: () => void
   onTogglePin: () => void
+  onAcceptOptimized?: (optimized: string) => void
   deletePending: boolean
   favoritePending: boolean
   pinPending: boolean
@@ -41,6 +42,7 @@ export function DrawerViewBody({
   onDelete,
   onToggleFavorite,
   onTogglePin,
+  onAcceptOptimized,
   deletePending,
   favoritePending,
   pinPending,
@@ -233,7 +235,13 @@ export function DrawerViewBody({
                 isPro={isPro}
               />
             ) : (
-              <MarkdownEditor value={item.content} readOnly />
+              <MarkdownEditor
+                value={item.content}
+                readOnly
+                showOptimize={item.type.name.toLowerCase() === 'prompt'}
+                isPro={isPro}
+                onAcceptOptimized={onAcceptOptimized}
+              />
             )}
           </div>
         )}
