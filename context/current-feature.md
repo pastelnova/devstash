@@ -2,30 +2,28 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add `optimizePrompt` server action to `src/actions/ai.ts` — accepts the current prompt content; returns an optimized/refined version
-- Add an "Optimize" button to the `MarkdownEditor` header (matching the "Explain" button pattern in `CodeEditor`)
-  - Sparkles icon for Pro users, Crown icon + tooltip for free users
-  - Loader2 spinner while generating
-  - After optimization: show Original/Optimized tabs so user can compare
-  - User can accept (replaces content) or dismiss (stays on original)
-- Only shown for **prompt** type items in the item drawer read view (not in create/edit forms)
-- Thread `showOptimize` and `isPro` props through `MarkdownEditor` → `DrawerViewBody`
-- Auth check, Pro gating, AI rate limiting (shared `ai` limiter)
-- Unit tests for the `optimizePrompt` server action
-
 ## Notes
 
-- Follow the exact same pattern as `explainCode` in `CodeEditor.tsx`: button in header, tabs after result, Sparkles/Crown icon, useTransition for pending state
-- The MarkdownEditor currently has no AI features — this is the first one
-- Prompt type uses `MarkdownEditor` (not `CodeEditor`), so the Optimize button goes on the MarkdownEditor header
-- The optimized prompt should be shown in a preview tab; user clicks "Use this" to accept or dismisses to keep original
-- Only show in drawer view mode (readOnly), not in edit mode or create dialog
-
 ## History
+
+### 2026-04-30 — AI Prompt Optimization
+
+- Added `optimizePrompt` server action to `src/actions/ai.ts` — accepts prompt content; returns an optimized/refined version
+- Uses OpenAI Responses API with `json_object` format; expects `{"optimized": "..."}` response
+- Truncates content to 2000 chars; auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Updated `src/components/items/MarkdownEditor.tsx` — added `showOptimize`, `isPro`, and `onAcceptOptimized` props
+- Optimize button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
+- Loader2 spinner while generating; Original/Optimized tabs appear after optimization is generated
+- "Use this" button accepts optimized content (saves to DB via `updateItem`); "Dismiss" returns to original view
+- Only shown for prompt type items in item drawer read view (not in edit mode or create dialog)
+- Threaded `showOptimize` and `isPro` props through `DrawerViewBody` → `MarkdownEditor`
+- Added `onAcceptOptimized` callback through `DrawerViewBody` → `ItemDrawer` — calls `updateItem` server action to persist optimized content
+- 11 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty content, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 126 tests pass
 
 ### 2026-04-29 — AI Explain Code
 
