@@ -1,9 +1,10 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
 import { updateEditorPreferences as updateEditorPreferencesQuery } from '@/lib/db/profile'
 import type { EditorPreferences } from '@/types/editor-preferences'
+import { requireAuth, getFirstZodError } from '@/lib/action-utils'
+import type { ActionResult } from '@/actions/types'
 
 const editorPreferencesSchema = z.object({
   fontSize: z.number().int().min(10).max(24),
@@ -13,26 +14,19 @@ const editorPreferencesSchema = z.object({
   theme: z.enum(['vs-dark', 'monokai', 'github-dark']),
 })
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
-
 export async function updateEditorPreferences(
   input: EditorPreferences,
 ): Promise<ActionResult<EditorPreferences>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   const parsed = editorPreferencesSchema.safeParse(input)
   if (!parsed.success) {
-    const first = parsed.error.issues[0]
-    return { success: false, error: first?.message ?? 'Invalid input' }
+    return { success: false, error: getFirstZodError(parsed) }
   }
 
   try {
-    const data = await updateEditorPreferencesQuery(session.user.id, parsed.data)
+    const data = await updateEditorPreferencesQuery(authResult.session.user.id, parsed.data)
     return { success: true, data }
   } catch {
     return { success: false, error: 'Failed to update editor preferences' }

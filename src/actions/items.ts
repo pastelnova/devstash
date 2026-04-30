@@ -1,7 +1,6 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import {
   createItem as createItemQuery,
@@ -14,14 +13,10 @@ import {
 } from '@/lib/db/items'
 import { deleteFromR2 } from '@/lib/r2'
 import { canCreateItem } from '@/lib/plan-limits'
+import { requireAuth, getFirstZodError, nullableTrimmedString } from '@/lib/action-utils'
+import type { ActionResult } from '@/actions/types'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
-
-const nullableTrimmedString = z
-  .string()
-  .trim()
-  .transform((v) => (v.length === 0 ? null : v))
-  .nullable()
 
 const updateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
@@ -69,25 +64,18 @@ const createItemSchema = z
 
 export type CreateItemInput = z.input<typeof createItemSchema>
 
-export type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
-
 export async function createItem(
   input: CreateItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   const parsed = createItemSchema.safeParse(input)
   if (!parsed.success) {
-    const first = parsed.error.issues[0]
-    return { success: false, error: first?.message ?? 'Invalid input' }
+    return { success: false, error: getFirstZodError(parsed) }
   }
 
-  const allowed = await canCreateItem(session.user.id, session.user.isPro ?? false)
+  const allowed = await canCreateItem(authResult.session.user.id, authResult.session.user.isPro ?? false)
   if (!allowed) {
     return { success: false, error: 'Free plan item limit reached. Upgrade to Pro for unlimited items.' }
   }
@@ -101,7 +89,7 @@ export async function createItem(
   }
 
   try {
-    const created = await createItemQuery(session.user.id, {
+    const created = await createItemQuery(authResult.session.user.id, {
       title: parsed.data.title,
       description: parsed.data.description,
       content: parsed.data.content,
@@ -137,23 +125,20 @@ export type CreateFileItemInput = z.input<typeof createFileItemSchema>
 export async function createFileItem(
   input: CreateFileItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   const parsed = createFileItemSchema.safeParse(input)
   if (!parsed.success) {
-    const first = parsed.error.issues[0]
-    return { success: false, error: first?.message ?? 'Invalid input' }
+    return { success: false, error: getFirstZodError(parsed) }
   }
 
   // File uploads are Pro only; images are allowed for free users
-  if (parsed.data.type === 'file' && !(session.user.isPro ?? false)) {
+  if (parsed.data.type === 'file' && !(authResult.session.user.isPro ?? false)) {
     return { success: false, error: 'File uploads require a Pro plan. Upgrade to upload files.' }
   }
 
-  const allowed = await canCreateItem(session.user.id, session.user.isPro ?? false)
+  const allowed = await canCreateItem(authResult.session.user.id, authResult.session.user.isPro ?? false)
   if (!allowed) {
     return { success: false, error: 'Free plan item limit reached. Upgrade to Pro for unlimited items.' }
   }
@@ -167,7 +152,7 @@ export async function createFileItem(
   }
 
   try {
-    const created = await createFileItemQuery(session.user.id, {
+    const created = await createFileItemQuery(authResult.session.user.id, {
       title: parsed.data.title,
       description: parsed.data.description,
       typeId: itemType.id,
@@ -187,19 +172,16 @@ export async function updateItem(
   itemId: string,
   input: UpdateItemInput,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   const parsed = updateItemSchema.safeParse(input)
   if (!parsed.success) {
-    const first = parsed.error.issues[0]
-    return { success: false, error: first?.message ?? 'Invalid input' }
+    return { success: false, error: getFirstZodError(parsed) }
   }
 
   const existing = await prisma.item.findFirst({
-    where: { id: itemId, userId: session.user.id },
+    where: { id: itemId, userId: authResult.session.user.id },
     select: { id: true },
   })
   if (!existing) {
@@ -207,7 +189,7 @@ export async function updateItem(
   }
 
   try {
-    const updated = await updateItemQuery(session.user.id, itemId, {
+    const updated = await updateItemQuery(authResult.session.user.id, itemId, {
       ...parsed.data,
       collectionIds: parsed.data.collectionIds,
     })
@@ -218,13 +200,11 @@ export async function updateItem(
 }
 
 export async function deleteItem(itemId: string): Promise<ActionResult<{ id: string }>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   const existing = await prisma.item.findFirst({
-    where: { id: itemId, userId: session.user.id },
+    where: { id: itemId, userId: authResult.session.user.id },
     select: { id: true },
   })
   if (!existing) {
@@ -248,13 +228,11 @@ export async function deleteItem(itemId: string): Promise<ActionResult<{ id: str
 export async function toggleItemFavorite(
   itemId: string,
 ): Promise<ActionResult<{ isFavorite: boolean }>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   try {
-    const result = await toggleItemFavoriteQuery(session.user.id, itemId)
+    const result = await toggleItemFavoriteQuery(authResult.session.user.id, itemId)
     if (result === null) {
       return { success: false, error: 'Item not found' }
     }
@@ -267,13 +245,11 @@ export async function toggleItemFavorite(
 export async function toggleItemPin(
   itemId: string,
 ): Promise<ActionResult<{ isPinned: boolean }>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
-  }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return authResult.response
 
   try {
-    const result = await toggleItemPinQuery(session.user.id, itemId)
+    const result = await toggleItemPinQuery(authResult.session.user.id, itemId)
     if (result === null) {
       return { success: false, error: 'Item not found' }
     }

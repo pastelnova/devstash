@@ -1,9 +1,9 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
 import { getOpenAIClient, AI_MODEL } from '@/lib/openai'
-import { rateLimiters } from '@/lib/rate-limit'
+import { requireAuth, checkAiRateLimit, extractAiStringField } from '@/lib/action-utils'
+import type { ActionResult } from '@/actions/types'
 
 const generateDescriptionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -16,20 +16,14 @@ const generateDescriptionSchema = z.object({
 
 export type GenerateDescriptionInput = z.input<typeof generateDescriptionSchema>
 
-type GenerateDescriptionResult =
-  | { success: true; data: { description: string } }
-  | { success: false; error: string }
-
 export async function generateDescription(
   input: GenerateDescriptionInput
-): Promise<GenerateDescriptionResult> {
+): Promise<ActionResult<{ description: string }>> {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const authResult = await requireAuth()
+    if (!authResult.ok) return authResult.response
 
-    if (!session.user.isPro) {
+    if (!authResult.session.user.isPro) {
       return { success: false, error: 'AI features require a Pro plan' }
     }
 
@@ -38,18 +32,8 @@ export async function generateDescription(
       return { success: false, error: parsed.error.issues[0].message }
     }
 
-    // Rate limit by user ID
-    const limiter = rateLimiters.ai
-    if (limiter) {
-      try {
-        const { success } = await limiter.limit(session.user.id)
-        if (!success) {
-          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
-        }
-      } catch {
-        // Fail open if Upstash is down
-      }
-    }
+    const rateLimitError = await checkAiRateLimit(authResult.session.user.id)
+    if (rateLimitError) return { success: false, error: rateLimitError }
 
     const { title, type, content, url, tags, language } = parsed.data
 
@@ -72,13 +56,7 @@ export async function generateDescription(
       },
     })
 
-    const text = response.output_text
-    const parsed_json = JSON.parse(text)
-
-    const description = typeof parsed_json === 'object' && parsed_json !== null && typeof parsed_json.description === 'string'
-      ? parsed_json.description.trim()
-      : null
-
+    const description = extractAiStringField(response.output_text, 'description')
     if (!description) {
       return { success: false, error: 'AI returned an unexpected format' }
     }
@@ -101,20 +79,14 @@ const explainCodeSchema = z.object({
 
 export type ExplainCodeInput = z.input<typeof explainCodeSchema>
 
-type ExplainCodeResult =
-  | { success: true; data: { explanation: string } }
-  | { success: false; error: string }
-
 export async function explainCode(
   input: ExplainCodeInput
-): Promise<ExplainCodeResult> {
+): Promise<ActionResult<{ explanation: string }>> {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const authResult = await requireAuth()
+    if (!authResult.ok) return authResult.response
 
-    if (!session.user.isPro) {
+    if (!authResult.session.user.isPro) {
       return { success: false, error: 'AI features require a Pro plan' }
     }
 
@@ -123,18 +95,8 @@ export async function explainCode(
       return { success: false, error: parsed.error.issues[0].message }
     }
 
-    // Rate limit by user ID
-    const limiter = rateLimiters.ai
-    if (limiter) {
-      try {
-        const { success } = await limiter.limit(session.user.id)
-        if (!success) {
-          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
-        }
-      } catch {
-        // Fail open if Upstash is down
-      }
-    }
+    const rateLimitError = await checkAiRateLimit(authResult.session.user.id)
+    if (rateLimitError) return { success: false, error: rateLimitError }
 
     const { code, language, type } = parsed.data
 
@@ -153,13 +115,7 @@ export async function explainCode(
       },
     })
 
-    const text = response.output_text
-    const parsed_json = JSON.parse(text)
-
-    const explanation = typeof parsed_json === 'object' && parsed_json !== null && typeof parsed_json.explanation === 'string'
-      ? parsed_json.explanation.trim()
-      : null
-
+    const explanation = extractAiStringField(response.output_text, 'explanation')
     if (!explanation) {
       return { success: false, error: 'AI returned an unexpected format' }
     }
@@ -180,20 +136,14 @@ const optimizePromptSchema = z.object({
 
 export type OptimizePromptInput = z.input<typeof optimizePromptSchema>
 
-type OptimizePromptResult =
-  | { success: true; data: { optimized: string } }
-  | { success: false; error: string }
-
 export async function optimizePrompt(
   input: OptimizePromptInput
-): Promise<OptimizePromptResult> {
+): Promise<ActionResult<{ optimized: string }>> {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const authResult = await requireAuth()
+    if (!authResult.ok) return authResult.response
 
-    if (!session.user.isPro) {
+    if (!authResult.session.user.isPro) {
       return { success: false, error: 'AI features require a Pro plan' }
     }
 
@@ -202,18 +152,8 @@ export async function optimizePrompt(
       return { success: false, error: parsed.error.issues[0].message }
     }
 
-    // Rate limit by user ID
-    const limiter = rateLimiters.ai
-    if (limiter) {
-      try {
-        const { success } = await limiter.limit(session.user.id)
-        if (!success) {
-          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
-        }
-      } catch {
-        // Fail open if Upstash is down
-      }
-    }
+    const rateLimitError = await checkAiRateLimit(authResult.session.user.id)
+    if (rateLimitError) return { success: false, error: rateLimitError }
 
     const { content } = parsed.data
 
@@ -229,13 +169,7 @@ export async function optimizePrompt(
       },
     })
 
-    const text = response.output_text
-    const parsed_json = JSON.parse(text)
-
-    const optimized = typeof parsed_json === 'object' && parsed_json !== null && typeof parsed_json.optimized === 'string'
-      ? parsed_json.optimized.trim()
-      : null
-
+    const optimized = extractAiStringField(response.output_text, 'optimized')
     if (!optimized) {
       return { success: false, error: 'AI returned an unexpected format' }
     }
@@ -258,20 +192,14 @@ const generateAutoTagsSchema = z.object({
 
 export type GenerateAutoTagsInput = z.input<typeof generateAutoTagsSchema>
 
-type GenerateAutoTagsResult =
-  | { success: true; data: { tags: string[] } }
-  | { success: false; error: string }
-
 export async function generateAutoTags(
   input: GenerateAutoTagsInput
-): Promise<GenerateAutoTagsResult> {
+): Promise<ActionResult<{ tags: string[] }>> {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const authResult = await requireAuth()
+    if (!authResult.ok) return authResult.response
 
-    if (!session.user.isPro) {
+    if (!authResult.session.user.isPro) {
       return { success: false, error: 'AI features require a Pro plan' }
     }
 
@@ -280,18 +208,8 @@ export async function generateAutoTags(
       return { success: false, error: parsed.error.issues[0].message }
     }
 
-    // Rate limit by user ID
-    const limiter = rateLimiters.ai
-    if (limiter) {
-      try {
-        const { success } = await limiter.limit(session.user.id)
-        if (!success) {
-          return { success: false, error: 'Rate limit exceeded. Please try again later.' }
-        }
-      } catch {
-        // Fail open if Upstash is down
-      }
-    }
+    const rateLimitError = await checkAiRateLimit(authResult.session.user.id)
+    if (rateLimitError) return { success: false, error: rateLimitError }
 
     const { title, content, existingTags } = parsed.data
 
