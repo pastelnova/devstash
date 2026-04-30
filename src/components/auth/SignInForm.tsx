@@ -6,6 +6,7 @@ import { signInWithGitHub } from '@/actions/auth'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -131,6 +132,7 @@ export function SignInForm({ callbackUrl, registered }: SignInFormProps) {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>

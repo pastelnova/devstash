@@ -173,7 +173,7 @@ export function ItemCreateDialog({ open, onOpenChange, itemTypes, collections, d
           {/* Type selector */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">Type</Label>
-            <div className="grid grid-cols-7 gap-1.5">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
               {typeOptions.map((opt) => {
                 const Icon = opt.icon ? (typeIconMap[opt.icon] ?? File) : File
                 const active = form.type === opt.name

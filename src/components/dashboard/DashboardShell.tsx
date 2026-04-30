@@ -74,7 +74,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
             <Menu className="h-5 w-5" />
           </button>
 
-          <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity" aria-label="DevStash home">
             <Package className="h-5 w-5" />
             <span className="hidden sm:inline font-semibold text-sm">DevStash</span>
           </Link>
@@ -98,7 +98,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
             <Search className="h-4 w-4" />
             <span className="sr-only">Search</span>
           </Button>
-          {user && !user.isPro && (
+          {user && !user.isPro && process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY && (
             <Link href="/upgrade">
               <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-blue-400">
                 <Zap className="h-3.5 w-3.5" />

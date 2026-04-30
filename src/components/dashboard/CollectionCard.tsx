@@ -51,6 +51,7 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
             <DropdownMenuTrigger
               onClick={(e) => e.stopPropagation()}
               className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 -mr-1"
+              aria-label="Collection actions"
             >
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>

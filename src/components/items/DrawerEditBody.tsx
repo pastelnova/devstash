@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
@@ -46,13 +46,27 @@ interface DrawerEditBodyProps {
   collections: CollectionOption[]
   onCancel: () => void
   onSaved: (updated: ItemDetail) => void
+  onDirtyChange?: (dirty: boolean) => void
   isPro?: boolean
 }
 
-export function DrawerEditBody({ item, collections, onCancel, onSaved, isPro }: DrawerEditBodyProps) {
+export function DrawerEditBody({ item, collections, onCancel, onSaved, onDirtyChange, isPro }: DrawerEditBodyProps) {
   const router = useRouter()
   const [form, setForm] = useState<EditState>(() => toEditState(item))
   const [pending, startTransition] = useTransition()
+  const initialFormRef = useRef(toEditState(item))
+
+  useEffect(() => {
+    const initial = initialFormRef.current
+    const dirty = form.title !== initial.title ||
+      form.description !== initial.description ||
+      form.content !== initial.content ||
+      form.url !== initial.url ||
+      form.language !== initial.language ||
+      form.tags !== initial.tags ||
+      form.collectionIds.join(',') !== initial.collectionIds.join(',')
+    onDirtyChange?.(dirty)
+  }, [form, onDirtyChange])
 
   const typeName = item.type.name.toLowerCase()
   const showContent = CONTENT_TYPES.has(typeName)

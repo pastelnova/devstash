@@ -85,7 +85,7 @@ export function DrawerViewBody({
                   : 'h-4 w-4'
               }
             />
-            <span className="text-xs">Favorite</span>
+            <span className="text-xs hidden sm:inline">Favorite</span>
           </Button>
           <Button
             variant="ghost"
@@ -96,7 +96,7 @@ export function DrawerViewBody({
             disabled={pinPending}
           >
             <Pin className={item.isPinned ? 'h-4 w-4 fill-current' : 'h-4 w-4'} />
-            <span className="text-xs">{item.isPinned ? 'Unpin' : 'Pin'}</span>
+            <span className="text-xs hidden sm:inline">{item.isPinned ? 'Unpin' : 'Pin'}</span>
           </Button>
           {FILE_VIEW_TYPES.has(item.type.name.toLowerCase()) && item.fileUrl && (
             <a
@@ -106,13 +106,13 @@ export function DrawerViewBody({
               className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <Download className="h-4 w-4" />
-              <span className="text-xs">Download</span>
+              <span className="text-xs hidden sm:inline">Download</span>
             </a>
           )}
           {!FILE_VIEW_TYPES.has(item.type.name.toLowerCase()) && (
             <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCopy} aria-label="Copy">
               <Copy className="h-4 w-4" />
-              <span className="text-xs">Copy</span>
+              <span className="text-xs hidden sm:inline">Copy</span>
             </Button>
           )}
           <Button
@@ -123,7 +123,7 @@ export function DrawerViewBody({
             aria-label="Edit"
           >
             <Pencil className="h-4 w-4" />
-            <span className="text-xs">Edit</span>
+            <span className="text-xs hidden sm:inline">Edit</span>
           </Button>
           <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
             <AlertDialogTrigger

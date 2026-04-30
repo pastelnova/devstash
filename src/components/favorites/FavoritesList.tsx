@@ -3,6 +3,13 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { FolderOpen, ArrowUpDown } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { typeIconMap } from '@/lib/item-type-icons'
 import { useItemDrawer } from '@/components/items/ItemDrawerContext'
 import type { FavoriteItem } from '@/lib/db/items'
@@ -65,18 +72,19 @@ function formatDate(date: Date) {
 
 function SortControl({ value, onChange, options }: { value: SortOption; onChange: (v: SortOption) => void; options: SortOption[] }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as SortOption)}
-        className="text-xs font-mono bg-transparent text-muted-foreground border-none outline-none cursor-pointer hover:text-foreground transition-colors"
-      >
+    <Select value={value} onValueChange={(v) => onChange(v as SortOption)}>
+      <SelectTrigger className="h-7 w-auto gap-1.5 border-none bg-transparent px-2 text-xs font-mono text-muted-foreground hover:text-foreground">
+        <ArrowUpDown className="h-3 w-3" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
         {options.map((opt) => (
-          <option key={opt} value={opt}>{SORT_LABELS[opt]}</option>
+          <SelectItem key={opt} value={opt} className="text-xs font-mono">
+            {SORT_LABELS[opt]}
+          </SelectItem>
         ))}
-      </select>
-    </div>
+      </SelectContent>
+    </Select>
   )
 }
 

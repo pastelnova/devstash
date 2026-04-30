@@ -97,10 +97,12 @@ export function FileRow({ item }: { item: FileItemMeta }) {
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => openItem(item.id)}
-      className="group flex items-center gap-3 rounded-lg border border-l-4 bg-card px-4 py-3 hover:bg-muted/30 transition-colors text-left w-full cursor-pointer"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(item.id) } }}
+      className="group flex items-center gap-3 rounded-lg border border-l-4 bg-card px-4 py-3 hover:bg-muted/30 transition-colors text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{ borderLeftColor: color }}
     >
       <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -108,16 +110,14 @@ export function FileRow({ item }: { item: FileItemMeta }) {
       {/* Name — takes remaining space */}
       <span className="flex-1 min-w-0 flex items-center gap-1.5">
         <span className="truncate text-sm font-medium">{item.fileName ?? item.title}</span>
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={handleToggleFavorite}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleToggleFavorite(e as unknown as React.MouseEvent) }}
-          className={`shrink-0 rounded-md p-0.5 hover:bg-muted transition-all ${isFavorite ? '' : 'opacity-0 group-hover:opacity-100'}`}
+          className={`shrink-0 rounded-md p-0.5 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isFavorite ? '' : 'sm:opacity-0 sm:group-hover:opacity-100'}`}
           title={isFavorite ? 'Unfavorite' : 'Favorite'}
         >
           <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
-        </span>
+        </button>
         {item.isPinned && <Pin className="h-3.5 w-3.5 shrink-0 fill-current text-muted-foreground" />}
       </span>
 
@@ -136,6 +136,6 @@ export function FileRow({ item }: { item: FileItemMeta }) {
       >
         <Download className="h-4 w-4 text-muted-foreground" />
       </a>
-    </button>
+    </div>
   )
 }

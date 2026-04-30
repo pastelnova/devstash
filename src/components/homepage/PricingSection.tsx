@@ -56,7 +56,9 @@ export function PricingSection() {
               className={`relative h-[26px] w-12 rounded-full transition-colors ${
                 yearly ? "bg-blue-500" : "bg-white/10"
               }`}
-              aria-label="Toggle billing period"
+              role="switch"
+              aria-checked={yearly}
+              aria-label="Yearly billing"
             >
               <span
                 className={`absolute top-[3px] left-[3px] h-5 w-5 rounded-full bg-white transition-transform ${

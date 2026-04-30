@@ -29,10 +29,12 @@ export function ImageCard({ item }: { item: ItemWithMeta }) {
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => openItem(item.id)}
-      className="group overflow-hidden rounded-lg border bg-card text-left w-full cursor-pointer"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(item.id) } }}
+      className="group overflow-hidden rounded-lg border bg-card text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="aspect-video overflow-hidden bg-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -45,22 +47,20 @@ export function ImageCard({ item }: { item: ItemWithMeta }) {
       <div className="p-3">
         <div className="flex items-center gap-1.5">
           <p className="text-sm font-medium leading-snug truncate flex-1">{item.title}</p>
-          <span
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
             onClick={handleToggleFavorite}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleToggleFavorite(e as unknown as React.MouseEvent) }}
-            className="shrink-0 rounded-md p-0.5 hover:bg-muted transition-all"
+            className="shrink-0 rounded-md p-0.5 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             title={isFavorite ? 'Unfavorite' : 'Favorite'}
           >
-            <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity'}`} />
-          </span>
+            <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'}`} />
+          </button>
           {item.isPinned && <Pin className="h-3.5 w-3.5 shrink-0 fill-current text-muted-foreground" />}
         </div>
         {item.description && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.description}</p>
         )}
       </div>
-    </button>
+    </div>
   )
 }

@@ -27,14 +27,17 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
         {stats.itemsByType.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Items by type</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-wrap gap-3">
               {stats.itemsByType.map((t) => {
                 const Icon = t.icon ? typeIconMap[t.icon] : null
                 return (
-                  <div key={t.name} className="flex items-center gap-2 text-sm">
-                    {Icon && <Icon className="h-4 w-4" style={{ color: t.color ?? undefined }} />}
-                    <span className="text-muted-foreground">{t.name}</span>
-                    <span className="ml-auto font-medium">{t.count}</span>
+                  <div
+                    key={t.name}
+                    className="flex items-center gap-1.5 rounded-md bg-muted/50 px-2.5 py-1.5 text-sm"
+                  >
+                    {Icon && <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: t.color ?? undefined }} />}
+                    <span className="text-muted-foreground capitalize">{t.name}</span>
+                    <span className="font-semibold tabular-nums">{t.count}</span>
                   </div>
                 )
               })}

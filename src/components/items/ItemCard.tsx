@@ -41,10 +41,12 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => openItem(item.id)}
-      className="group flex flex-col gap-3 rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors h-full text-left w-full cursor-pointer"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(item.id) } }}
+      className="group flex flex-col gap-3 rounded-lg border border-l-4 bg-card p-4 hover:bg-muted/30 transition-colors h-full text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{ borderLeftColor: iconColor }}
     >
       <div className="flex items-start gap-3">
@@ -57,45 +59,46 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-snug flex items-center gap-1">
             <span className="truncate">{item.title}</span>
-            <span
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               onClick={handleToggleFavorite}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleToggleFavorite(e as unknown as React.MouseEvent) }}
-              className={`shrink-0 rounded-md p-0.5 hover:bg-muted transition-all ${isFavorite ? '' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`shrink-0 rounded-md p-0.5 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isFavorite ? '' : 'sm:opacity-0 sm:group-hover:opacity-100'}`}
               title={isFavorite ? 'Unfavorite' : 'Favorite'}
             >
               <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
-            </span>
+            </button>
             {item.isPinned && <Pin className="h-3.5 w-3.5 shrink-0 fill-current text-muted-foreground" />}
           </p>
           {item.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
           )}
         </div>
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={handleCopy}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleCopy(e as unknown as React.MouseEvent) }}
-          className="shrink-0 rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+          className="shrink-0 rounded-md p-1 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Copy"
         >
           {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
-        </span>
+        </button>
       </div>
-      {item.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {item.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-1.5 py-0.5 rounded text-xs bg-muted text-muted-foreground"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-    </button>
+      <div className="flex items-center justify-between mt-auto pt-1">
+        {item.tags.length > 0 ? (
+          <div className="flex flex-wrap gap-1 flex-1 min-w-0">
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-1.5 py-0.5 rounded text-xs bg-muted text-muted-foreground"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : <div />}
+        <time className="text-xs text-muted-foreground shrink-0 ml-2">
+          {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+        </time>
+      </div>
+    </div>
   )
 }

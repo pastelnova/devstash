@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   File,
@@ -52,6 +53,7 @@ export function Sidebar({
   sidebarCollections,
   user,
 }: SidebarProps) {
+  const pathname = usePathname()
   const [typesExpanded, setTypesExpanded] = useState(true)
   const [collectionsExpanded, setCollectionsExpanded] = useState(true)
 
@@ -106,12 +108,14 @@ export function Sidebar({
               {itemTypes.map((type) => {
                 const Icon = typeIconMap[type.icon ?? ''] ?? File
                 const slug = type.name.toLowerCase()
+                const isActive = pathname === `/items/${slug}` || pathname === `/items/${slug}s`
                 return (
                   <li key={type.id}>
                     <Link
                       href={`/items/${slug}`}
                       className={cn(
-                        'flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors group',
+                        'flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm transition-colors group',
+                        isActive ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                         collapsed && 'justify-center'
                       )}
                       title={collapsed ? type.name : undefined}
@@ -160,17 +164,23 @@ export function Sidebar({
                       Favorites
                     </p>
                     <ul className="space-y-0.5 mb-3">
-                      {favoriteCollections.map((col) => (
+                      {favoriteCollections.map((col) => {
+                        const isActive = pathname === `/collections/${col.id}`
+                        return (
                         <li key={col.id}>
                           <Link
                             href={`/collections/${col.id}`}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            className={cn(
+                              'flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors',
+                              isActive ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            )}
                           >
                             <Star className="h-3.5 w-3.5 shrink-0 text-yellow-400 fill-yellow-400" />
                             <span className="truncate">{col.name}</span>
                           </Link>
                         </li>
-                      ))}
+                        )
+                      })}
                     </ul>
                   </>
                 )}
@@ -180,11 +190,16 @@ export function Sidebar({
                   All
                 </p>
                 <ul className="space-y-0.5 mb-2">
-                  {otherCollections.map((col) => (
+                  {otherCollections.map((col) => {
+                    const isActive = pathname === `/collections/${col.id}`
+                    return (
                     <li key={col.id}>
                       <Link
                         href={`/collections/${col.id}`}
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        className={cn(
+                          'flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors',
+                          isActive ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        )}
                       >
                         <span
                           className="h-3.5 w-3.5 rounded-full shrink-0"
@@ -193,13 +208,14 @@ export function Sidebar({
                         <span className="truncate flex-1">{col.name}</span>
                       </Link>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
 
                 {/* View all collections */}
                 <Link
                   href="/collections"
-                  className="flex items-center px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center px-2 py-2 text-xs text-muted-foreground/80 hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 >
                   View all collections →
                 </Link>

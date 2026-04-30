@@ -2,9 +2,39 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
+
+Fix UI issues identified in the UI review.
+
+### Critical
+
+1. **Nested interactive elements** — `ItemCard.tsx`, `ItemRow.tsx` have `<span role="button">` inside `<button>`, invalid HTML breaking keyboard/screen reader behavior
+2. **Invisible favorite stars** — `opacity-0` by default in item cards; keyboard/touch users can never discover or use them
+3. **Missing focus rings** — Many interactive `<span>` elements lack visible `:focus-visible` styling
+
+### Moderate
+
+4. **No sidebar active link highlighting** — Current route has no visual distinction in the sidebar
+5. **No GitHub button on Register page** — Only email/password; sign-in has GitHub but register doesn't
+6. **Logo link missing `aria-label`** — Package icon on mobile has no accessible name
+7. **Billing button renders when unconfigured** — Upgrade CTA silently fails without Stripe env vars; should show disabled state
+8. **Item type selector wraps inconsistently** — 7 buttons in `ItemCreateDialog` produce uneven rows on mobile
+9. **Drawer action bar overflows on mobile** — 5 buttons with labels cramped at 375px, no responsive fallback
+10. **Homepage mobile hero lacks context** — Dashboard preview shown without the explanatory label
+11. **Pricing toggle missing `aria-pressed`** — Screen readers can't determine Monthly vs Yearly state
+
+### Minor
+
+12. **Footer links all `href="#"`** — Dead placeholder links hurt credibility
+13. **`CollectionCard` 3-dot menu has no `aria-label`**
+14. **`ItemCard` shows no date** — Only visible by opening the drawer
+15. **"Fav. Collections" abbreviation** — Could use full label on desktop
+16. **"View all collections" link** — Small text, borderline contrast, tiny touch target
+17. **Favorites sort uses native `<select>`** — Clashes with dark theme on macOS
+18. **No unsaved changes warning** — Closing drawer in edit mode loses edits silently
+19. **Inconsistent loading spinners** — Some forms use `Loader2`, others just change text
 
 ## Notes
 

@@ -121,8 +121,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile hero — just the dashboard preview */}
+        {/* Mobile hero — dashboard preview with context label */}
         <div className="w-full max-w-sm md:hidden">
+          <p className="mb-3 text-center text-xs font-medium tracking-wide text-white/40">
+            ...with DevStash
+          </p>
           <DashboardPreview />
         </div>
       </section>
@@ -350,8 +353,8 @@ export default function HomePage() {
               <div className="flex flex-col gap-2">
                 <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
                 <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Changelog</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Roadmap</a>
+                <span className="text-sm text-muted-foreground/50">Changelog</span>
+                <span className="text-sm text-muted-foreground/50">Roadmap</span>
               </div>
             </div>
 
@@ -361,10 +364,10 @@ export default function HomePage() {
                 Resources
               </h4>
               <div className="flex flex-col gap-2">
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Documentation</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">API Reference</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Blog</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Community</a>
+                <span className="text-sm text-muted-foreground/50">Documentation</span>
+                <span className="text-sm text-muted-foreground/50">API Reference</span>
+                <span className="text-sm text-muted-foreground/50">Blog</span>
+                <span className="text-sm text-muted-foreground/50">Community</span>
               </div>
             </div>
 
@@ -374,10 +377,10 @@ export default function HomePage() {
                 Company
               </h4>
               <div className="flex flex-col gap-2">
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">About</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Privacy</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Terms</a>
-                <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</a>
+                <span className="text-sm text-muted-foreground/50">About</span>
+                <span className="text-sm text-muted-foreground/50">Privacy</span>
+                <span className="text-sm text-muted-foreground/50">Terms</span>
+                <span className="text-sm text-muted-foreground/50">Contact</span>
               </div>
             </div>
           </div>

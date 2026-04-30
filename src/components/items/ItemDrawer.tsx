@@ -1,9 +1,19 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { DrawerViewBody } from '@/components/items/DrawerViewBody'
 import { DrawerEditBody } from '@/components/items/DrawerEditBody'
 import { deleteItem, toggleItemFavorite, toggleItemPin, updateItem } from '@/actions/items'
@@ -28,6 +38,8 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
   const [favoritePending, startFavoriteTransition] = useTransition()
   const [pinPending, startPinTransition] = useTransition()
   const [, startOptimizeSaveTransition] = useTransition()
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
+  const editDirtyRef = useRef(false)
 
   useEffect(() => {
     if (!open || !itemId) return
@@ -130,42 +142,80 @@ export function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: I
     })
   }
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next && editing && editDirtyRef.current) {
+      setDiscardDialogOpen(true)
+      return
+    }
+    onOpenChange(next)
+  }
+
+  const handleDiscardConfirm = () => {
+    setDiscardDialogOpen(false)
+    editDirtyRef.current = false
+    setEditing(false)
+    onOpenChange(false)
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl flex flex-col gap-0 p-0">
-        {loading && <DrawerSkeleton />}
-        {error && !loading && (
-          <div className="p-6 text-sm text-destructive">{error}</div>
-        )}
-        {item && !loading && !editing && (
-          <DrawerViewBody
-            item={item}
-            onCopy={handleCopy}
-            onEdit={() => setEditing(true)}
-            onDelete={handleDelete}
-            onToggleFavorite={handleToggleFavorite}
-            onTogglePin={handleTogglePin}
-            onAcceptOptimized={handleAcceptOptimized}
-            deletePending={deletePending}
-            favoritePending={favoritePending}
-            pinPending={pinPending}
-            isPro={isPro}
-          />
-        )}
-        {item && !loading && editing && (
-          <DrawerEditBody
-            item={item}
-            collections={collections}
-            onCancel={() => setEditing(false)}
-            onSaved={(updated) => {
-              setItem(updated)
-              setEditing(false)
-            }}
-            isPro={isPro}
-          />
-        )}
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent className="w-full sm:max-w-xl flex flex-col gap-0 p-0">
+          {loading && <DrawerSkeleton />}
+          {error && !loading && (
+            <div className="p-6 text-sm text-destructive">{error}</div>
+          )}
+          {item && !loading && !editing && (
+            <DrawerViewBody
+              item={item}
+              onCopy={handleCopy}
+              onEdit={() => setEditing(true)}
+              onDelete={handleDelete}
+              onToggleFavorite={handleToggleFavorite}
+              onTogglePin={handleTogglePin}
+              onAcceptOptimized={handleAcceptOptimized}
+              deletePending={deletePending}
+              favoritePending={favoritePending}
+              pinPending={pinPending}
+              isPro={isPro}
+            />
+          )}
+          {item && !loading && editing && (
+            <DrawerEditBody
+              item={item}
+              collections={collections}
+              onCancel={() => {
+                editDirtyRef.current = false
+                setEditing(false)
+              }}
+              onSaved={(updated) => {
+                editDirtyRef.current = false
+                setItem(updated)
+                setEditing(false)
+              }}
+              onDirtyChange={(dirty) => { editDirtyRef.current = dirty }}
+              isPro={isPro}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+      <AlertDialog open={discardDialogOpen} onOpenChange={setDiscardDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved edits. Closing will discard your changes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDiscardConfirm}>
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

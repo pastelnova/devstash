@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -101,6 +102,7 @@ export function CollectionEditDialog({ open, onOpenChange, collection }: Collect
               Cancel
             </Button>
             <Button type="submit" disabled={pending || !name.trim()}>
+              {pending && <Loader2 className="h-4 w-4 animate-spin" />}
               {pending ? 'Saving...' : 'Save'}
             </Button>
           </DialogFooter>
