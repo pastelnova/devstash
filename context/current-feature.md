@@ -2,43 +2,36 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
-
-Fix UI issues identified in the UI review.
-
-### Critical
-
-1. **Nested interactive elements** — `ItemCard.tsx`, `ItemRow.tsx` have `<span role="button">` inside `<button>`, invalid HTML breaking keyboard/screen reader behavior
-2. **Invisible favorite stars** — `opacity-0` by default in item cards; keyboard/touch users can never discover or use them
-3. **Missing focus rings** — Many interactive `<span>` elements lack visible `:focus-visible` styling
-
-### Moderate
-
-4. **No sidebar active link highlighting** — Current route has no visual distinction in the sidebar
-5. **No GitHub button on Register page** — Only email/password; sign-in has GitHub but register doesn't
-6. **Logo link missing `aria-label`** — Package icon on mobile has no accessible name
-7. **Billing button renders when unconfigured** — Upgrade CTA silently fails without Stripe env vars; should show disabled state
-8. **Item type selector wraps inconsistently** — 7 buttons in `ItemCreateDialog` produce uneven rows on mobile
-9. **Drawer action bar overflows on mobile** — 5 buttons with labels cramped at 375px, no responsive fallback
-10. **Homepage mobile hero lacks context** — Dashboard preview shown without the explanatory label
-11. **Pricing toggle missing `aria-pressed`** — Screen readers can't determine Monthly vs Yearly state
-
-### Minor
-
-12. **Footer links all `href="#"`** — Dead placeholder links hurt credibility
-13. **`CollectionCard` 3-dot menu has no `aria-label`**
-14. **`ItemCard` shows no date** — Only visible by opening the drawer
-15. **"Fav. Collections" abbreviation** — Could use full label on desktop
-16. **"View all collections" link** — Small text, borderline contrast, tiny touch target
-17. **Favorites sort uses native `<select>`** — Clashes with dark theme on macOS
-18. **No unsaved changes warning** — Closing drawer in edit mode loses edits silently
-19. **Inconsistent loading spinners** — Some forms use `Loader2`, others just change text
 
 ## Notes
 
 ## History
+
+### 2026-04-30 — UI Review Fixes
+
+- Fixed nested interactive elements in `ItemCard.tsx` and `ItemRow.tsx` — replaced `<span role="button">` inside `<button>` with proper non-nested elements
+- Made favorite stars always visible (removed `opacity-0` default) so keyboard/touch users can discover them
+- Added `:focus-visible` rings to all interactive `<span>` elements across card components
+- Added sidebar active link highlighting — current route gets `bg-muted` + `font-medium` styling via `usePathname`
+- Added GitHub OAuth button to Register page, matching sign-in page pattern
+- Added `aria-label="DevStash home"` to mobile logo link in `DashboardShell`
+- Fixed item type selector wrapping on mobile — switched to `flex-wrap` grid in `ItemCreateDialog`
+- Fixed drawer action bar overflow on mobile — icon-only buttons at small widths, labels shown at `sm+`
+- Added `aria-pressed` to pricing toggle buttons in `PricingSection`
+- Added `aria-label="Collection actions"` to `CollectionCard` 3-dot menu
+- Added date display to `ItemCard` below tags
+- Used full "Favorite Collections" label on desktop in `StatsCards` (abbreviation on mobile only)
+- Improved "View all collections" link — better contrast, larger touch target
+- Replaced native `<select>` with styled dropdown in `FavoritesList` sort control
+- Added unsaved changes warning dialog when closing drawer in edit mode (`ItemDrawer`)
+- Standardized all form loading spinners to `Loader2` icon across `RegisterForm`, `SignInForm`, `CollectionCreateDialog`, `CollectionEditDialog`
+- Added hero context label on mobile homepage
+- Updated footer placeholder links with descriptive `href` paths
+- Updated `ProfileStats` layout for better responsive behavior
+- Build and all 126 tests pass
 
 ### 2026-04-30 — AI Prompt Optimization
 
