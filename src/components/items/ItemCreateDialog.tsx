@@ -25,15 +25,11 @@ import { createItem, createFileItem, type CreateItemInput, type CreateFileItemIn
 import { CollectionSelect, type CollectionOption } from '@/components/items/CollectionSelect'
 import { SuggestTagsButton } from '@/components/items/SuggestTagsButton'
 import { GenerateDescriptionButton } from '@/components/items/GenerateDescriptionButton'
+import { CONTENT_TYPES, LANGUAGE_TYPES, URL_TYPES, FILE_TYPES } from '@/components/items/drawer-shared'
 import type { SystemItemType } from '@/lib/db/items'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
 export type CreatableType = (typeof CREATABLE_TYPES)[number]
-
-const CONTENT_TYPES = new Set<CreatableType>(['snippet', 'prompt', 'command', 'note'])
-const LANGUAGE_TYPES = new Set<CreatableType>(['snippet', 'command'])
-const URL_TYPES = new Set<CreatableType>(['link'])
-const FILE_TYPES = new Set<CreatableType>(['file', 'image'])
 
 interface ItemCreateDialogProps {
   open: boolean

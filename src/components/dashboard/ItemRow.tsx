@@ -1,28 +1,21 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Check, Copy, File, Pin, Star } from 'lucide-react'
-import { toast } from 'sonner'
 import { typeIconMap } from '@/lib/item-type-icons'
-import { toggleItemFavorite } from '@/actions/items'
+import { useToggleFavoriteItem } from '@/hooks/useToggleFavoriteItem'
+import { formatShortDate } from '@/lib/utils'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from '@/components/items/ItemDrawerContext'
 
 export function ItemRow({ item }: { item: ItemWithMeta }) {
   const { openItem } = useItemDrawer()
-  const router = useRouter()
   const [copied, setCopied] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(item.isFavorite)
-  useEffect(() => setIsFavorite(item.isFavorite), [item.isFavorite])
-  const [, startFavTransition] = useTransition()
+  const { isFavorite, handleToggleFavorite } = useToggleFavoriteItem(item.id, item.isFavorite)
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File
   const iconColor = item.type.color ?? '#94a3b8'
 
-  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
+  const date = formatShortDate(item.createdAt)
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -30,19 +23,6 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
-  }
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    startFavTransition(async () => {
-      const result = await toggleItemFavorite(item.id)
-      if (result.success) {
-        setIsFavorite(result.data.isFavorite)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
   }
 
   return (

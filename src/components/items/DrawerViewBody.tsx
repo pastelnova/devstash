@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { capitalize, formatFileSize } from '@/lib/utils'
+import { capitalize, formatDate, formatFileSize } from '@/lib/utils'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { TypeIconBadge, MetaRow, LANGUAGE_TYPES, FILE_VIEW_TYPES } from '@/components/items/drawer-shared'
@@ -49,11 +49,7 @@ export function DrawerViewBody({
   isPro,
 }: DrawerViewBodyProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const date = formatDate(item.createdAt)
 
   return (
     <>

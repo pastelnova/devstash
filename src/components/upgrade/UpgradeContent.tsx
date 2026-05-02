@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Check, Zap } from 'lucide-react'
-import { toast } from 'sonner'
+import { useStripeCheckout } from '@/hooks/useStripeCheckout'
 
 const FREE_FEATURES = [
   'Up to 50 items',
@@ -28,35 +28,13 @@ const PRO_FEATURES = [
 
 export function UpgradeContent() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
-  const [isPending, startTransition] = useTransition()
+  const { startCheckout, isPending } = useStripeCheckout()
 
   function handleUpgrade() {
     const priceId = billingPeriod === 'monthly'
       ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY
       : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY
-
-    if (!priceId) {
-      toast.error('Billing is not configured')
-      return
-    }
-
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/stripe/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId }),
-        })
-        const data = await res.json()
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          toast.error(data.error ?? 'Failed to start checkout')
-        }
-      } catch {
-        toast.error('Failed to start checkout')
-      }
-    })
+    startCheckout(priceId ?? '')
   }
 
   return (

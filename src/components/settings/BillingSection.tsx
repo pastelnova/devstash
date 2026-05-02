@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CreditCard, ExternalLink, Zap } from 'lucide-react'
 import { toast } from 'sonner'
+import { useStripeCheckout } from '@/hooks/useStripeCheckout'
 
 interface BillingSectionProps {
   isPro: boolean
@@ -22,40 +23,20 @@ export function BillingSection({
   collectionCount,
   collectionLimit,
 }: BillingSectionProps) {
-  const [isPending, startTransition] = useTransition()
   const [billingType, setBillingType] = useState<'monthly' | 'yearly'>('monthly')
+  const { startCheckout, isPending: checkoutPending } = useStripeCheckout()
+  const [portalPending, startPortalTransition] = useTransition()
+  const isPending = checkoutPending || portalPending
 
   function handleUpgrade() {
     const priceId = billingType === 'monthly'
       ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY
       : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY
-
-    if (!priceId) {
-      toast.error('Billing is not configured')
-      return
-    }
-
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/stripe/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId }),
-        })
-        const data = await res.json()
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          toast.error(data.error ?? 'Failed to start checkout')
-        }
-      } catch {
-        toast.error('Failed to start checkout')
-      }
-    })
+    startCheckout(priceId ?? '')
   }
 
   function handleManage() {
-    startTransition(async () => {
+    startPortalTransition(async () => {
       try {
         const res = await fetch('/api/stripe/portal', { method: 'POST' })
         const data = await res.json()

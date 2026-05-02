@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   FileText,
   FileCode,
@@ -13,10 +11,9 @@ import {
   Pin,
   Star,
 } from 'lucide-react'
-import { toast } from 'sonner'
-import { toggleItemFavorite } from '@/actions/items'
+import { useToggleFavoriteItem } from '@/hooks/useToggleFavoriteItem'
 import type { FileItemMeta } from '@/lib/db/items'
-import { formatFileSize } from '@/lib/utils'
+import { formatDate, formatFileSize } from '@/lib/utils'
 import { useItemDrawer } from './ItemDrawerContext'
 
 const EXT_ICON_MAP: Record<string, typeof File> = {
@@ -69,32 +66,12 @@ function getExtension(fileName: string | null): string {
 
 export function FileRow({ item }: { item: FileItemMeta }) {
   const { openItem } = useItemDrawer()
-  const router = useRouter()
   const ext = getExtension(item.fileName)
   const Icon = EXT_ICON_MAP[ext] ?? File
   const color = item.type.color ?? '#94a3b8'
-  const [isFavorite, setIsFavorite] = useState(item.isFavorite)
-  useEffect(() => setIsFavorite(item.isFavorite), [item.isFavorite])
-  const [, startFavTransition] = useTransition()
+  const { isFavorite, handleToggleFavorite } = useToggleFavoriteItem(item.id, item.isFavorite)
 
-  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    startFavTransition(async () => {
-      const result = await toggleItemFavorite(item.id)
-      if (result.success) {
-        setIsFavorite(result.data.isFavorite)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
+  const date = formatDate(item.createdAt)
 
   return (
     <div

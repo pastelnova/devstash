@@ -1,32 +1,13 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { Pin, Star } from 'lucide-react'
-import { toast } from 'sonner'
-import { toggleItemFavorite } from '@/actions/items'
+import { useToggleFavoriteItem } from '@/hooks/useToggleFavoriteItem'
 import type { ItemWithMeta } from '@/lib/db/items'
 import { useItemDrawer } from './ItemDrawerContext'
 
 export function ImageCard({ item }: { item: ItemWithMeta }) {
   const { openItem } = useItemDrawer()
-  const router = useRouter()
-  const [isFavorite, setIsFavorite] = useState(item.isFavorite)
-  useEffect(() => setIsFavorite(item.isFavorite), [item.isFavorite])
-  const [, startFavTransition] = useTransition()
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    startFavTransition(async () => {
-      const result = await toggleItemFavorite(item.id)
-      if (result.success) {
-        setIsFavorite(result.data.isFavorite)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
+  const { isFavorite, handleToggleFavorite } = useToggleFavoriteItem(item.id, item.isFavorite)
 
   return (
     <div

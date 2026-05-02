@@ -1,12 +1,10 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Pencil, Trash2, Star } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { toggleCollectionFavorite } from '@/actions/collections'
-import { CollectionEditDialog } from './CollectionEditDialog'
+import { useToggleCollectionFavorite } from '@/hooks/useToggleCollectionFavorite'
+import { CollectionFormDialog } from './CollectionFormDialog'
 import { CollectionDeleteDialog } from './CollectionDeleteDialog'
 
 interface CollectionActionsProps {
@@ -15,24 +13,9 @@ interface CollectionActionsProps {
 }
 
 export function CollectionActions({ collection, redirectOnDelete }: CollectionActionsProps) {
-  const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(collection.isFavorite)
-  useEffect(() => setIsFavorite(collection.isFavorite), [collection.isFavorite])
-  const [favPending, startFavTransition] = useTransition()
-
-  const handleToggleFavorite = () => {
-    startFavTransition(async () => {
-      const result = await toggleCollectionFavorite(collection.id)
-      if (result.success) {
-        setIsFavorite(result.data.isFavorite)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
+  const { isFavorite, favPending, handleToggleFavorite } = useToggleCollectionFavorite(collection.id, collection.isFavorite)
 
   return (
     <>
@@ -69,7 +52,7 @@ export function CollectionActions({ collection, redirectOnDelete }: CollectionAc
         </Button>
       </div>
 
-      <CollectionEditDialog
+      <CollectionFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         collection={collection}

@@ -15,3 +15,18 @@ export function formatFileSize(bytes: number | null): string {
 export function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
+
+export function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+export function formatShortDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}

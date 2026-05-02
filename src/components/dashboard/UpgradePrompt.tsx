@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { AlertTriangle, Zap, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
+import { useStripeCheckout } from '@/hooks/useStripeCheckout'
 
 interface UpgradePromptProps {
   type: 'items' | 'collections' | 'files'
@@ -13,7 +13,7 @@ interface UpgradePromptProps {
 
 export function UpgradePrompt({ type, current, limit }: UpgradePromptProps) {
   const [dismissed, setDismissed] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  const { startCheckout, isPending } = useStripeCheckout()
 
   if (dismissed) return null
 
@@ -36,29 +36,7 @@ export function UpgradePrompt({ type, current, limit }: UpgradePromptProps) {
   const { title, description } = messages[type]
 
   function handleUpgrade() {
-    const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY
-    if (!priceId) {
-      toast.error('Billing is not configured')
-      return
-    }
-
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/stripe/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId }),
-        })
-        const data = await res.json()
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          toast.error(data.error ?? 'Failed to start checkout')
-        }
-      } catch {
-        toast.error('Failed to start checkout')
-      }
-    })
+    startCheckout(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY ?? '')
   }
 
   return (

@@ -5,7 +5,8 @@ import type { ItemDetail } from '@/lib/db/items'
 export const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note'])
 export const LANGUAGE_TYPES = new Set(['snippet', 'command'])
 export const URL_TYPES = new Set(['link'])
-export const FILE_VIEW_TYPES = new Set(['file', 'image'])
+export const FILE_TYPES = new Set(['file', 'image'])
+export const FILE_VIEW_TYPES = FILE_TYPES
 
 export function TypeIconBadge({ item }: { item: ItemDetail }) {
   const Icon = item.type.icon ? (typeIconMap[item.type.icon] ?? File) : File

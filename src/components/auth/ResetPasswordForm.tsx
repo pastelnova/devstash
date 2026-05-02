@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AuthCard } from "@/components/auth/AuthCard"
 
 interface ResetPasswordFormProps {
   token: string
@@ -76,15 +77,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 h-8 w-8 rounded bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-          S
-        </div>
-        <CardTitle className="text-xl">Set new password</CardTitle>
-        <CardDescription>Enter your new password below.</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <AuthCard title="Set new password" description="Enter your new password below.">
         <form onSubmit={handleSubmit} className="space-y-3">
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
@@ -117,7 +110,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             {loading ? "Resetting..." : "Reset password"}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+    </AuthCard>
   )
 }

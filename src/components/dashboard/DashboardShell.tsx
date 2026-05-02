@@ -15,7 +15,7 @@ import type { SystemItemType, SearchItem } from '@/lib/db/items'
 import type { SidebarCollection, SearchCollection } from '@/lib/db/collections'
 import { ItemDrawerProvider } from '@/components/items/ItemDrawerContext'
 import { ItemCreateDialog, type CreatableType } from '@/components/items/ItemCreateDialog'
-import { CollectionCreateDialog } from '@/components/dashboard/CollectionCreateDialog'
+import { CollectionFormDialog } from '@/components/dashboard/CollectionFormDialog'
 import { CommandPalette } from '@/components/dashboard/CommandPalette'
 import { EditorPreferencesProvider } from '@/components/settings/EditorPreferencesContext'
 import type { EditorPreferences } from '@/types/editor-preferences'
@@ -156,7 +156,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
           user={user}
         />
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 lg:px-24 xl:px-32">
           <CreateDialogContext.Provider value={() => setCreateOpen(true)}>
             {children}
           </CreateDialogContext.Provider>
@@ -171,7 +171,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, search
         defaultType={defaultCreateType}
         isPro={user?.isPro}
       />
-      <CollectionCreateDialog
+      <CollectionFormDialog
         open={collectionCreateOpen}
         onOpenChange={setCollectionCreateOpen}
       />

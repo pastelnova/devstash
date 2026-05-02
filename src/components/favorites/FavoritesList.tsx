@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { typeIconMap } from '@/lib/item-type-icons'
+import { formatDate } from '@/lib/utils'
 import { useItemDrawer } from '@/components/items/ItemDrawerContext'
 import type { FavoriteItem } from '@/lib/db/items'
 import type { FavoriteCollection } from '@/lib/db/collections'
@@ -60,14 +61,6 @@ function sortCollections(collections: FavoriteCollection[], sort: SortOption): F
     default:
       return sorted
   }
-}
-
-function formatDate(date: Date) {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 function SortControl({ value, onChange, options }: { value: SortOption; onChange: (v: SortOption) => void; options: SortOption[] }) {

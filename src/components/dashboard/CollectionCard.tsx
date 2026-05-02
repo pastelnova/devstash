@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Star, MoreHorizontal, Pencil, Trash2, File } from 'lucide-react'
-import { toast } from 'sonner'
-import { toggleCollectionFavorite } from '@/actions/collections'
+import { useToggleCollectionFavorite } from '@/hooks/useToggleCollectionFavorite'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { typeIconMap } from '@/lib/item-type-icons'
-import { CollectionEditDialog } from './CollectionEditDialog'
+import { CollectionFormDialog } from './CollectionFormDialog'
 import { CollectionDeleteDialog } from './CollectionDeleteDialog'
 import type { CollectionWithMeta } from '@/lib/db/collections'
 
@@ -24,9 +23,7 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
   const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(col.isFavorite)
-  useEffect(() => setIsFavorite(col.isFavorite), [col.isFavorite])
-  const [favPending, startFavTransition] = useTransition()
+  const { isFavorite, favPending, handleToggleFavorite } = useToggleCollectionFavorite(col.id, col.isFavorite)
 
   return (
     <>
@@ -58,17 +55,7 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
               <DropdownMenuItem
                 disabled={favPending}
-                onClick={() => {
-                  startFavTransition(async () => {
-                    const result = await toggleCollectionFavorite(col.id)
-                    if (result.success) {
-                      setIsFavorite(result.data.isFavorite)
-                      router.refresh()
-                    } else {
-                      toast.error(result.error)
-                    }
-                  })
-                }}
+                onClick={() => handleToggleFavorite()}
               >
                 <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : ''}`} />
                 {isFavorite ? 'Unfavorite' : 'Favorite'}
@@ -105,7 +92,7 @@ export function CollectionCard({ collection: col }: CollectionCardProps) {
         </div>
       </div>
 
-      <CollectionEditDialog
+      <CollectionFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         collection={col}

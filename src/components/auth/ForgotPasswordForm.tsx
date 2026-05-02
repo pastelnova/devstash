@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AuthCard } from "@/components/auth/AuthCard"
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
@@ -63,17 +64,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 h-8 w-8 rounded bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-          S
-        </div>
-        <CardTitle className="text-xl">Forgot your password?</CardTitle>
-        <CardDescription>
-          Enter your email and we&apos;ll send you a reset link.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <AuthCard title="Forgot your password?" description="Enter your email and we'll send you a reset link.">
         <form onSubmit={handleSubmit} className="space-y-3">
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
@@ -103,7 +94,6 @@ export function ForgotPasswordForm() {
             Sign in
           </Link>
         </p>
-      </CardContent>
-    </Card>
+    </AuthCard>
   )
 }

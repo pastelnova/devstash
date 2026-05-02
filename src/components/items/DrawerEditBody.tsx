@@ -7,7 +7,7 @@ import { X } from 'lucide-react'
 import { SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { capitalize } from '@/lib/utils'
+import { capitalize, formatDate } from '@/lib/utils'
 import { CodeEditor } from '@/components/items/CodeEditor'
 import { MarkdownEditor } from '@/components/items/MarkdownEditor'
 import { LanguageSelect } from '@/components/items/LanguageSelect'
@@ -103,11 +103,7 @@ export function DrawerEditBody({ item, collections, onCancel, onSaved, onDirtyCh
     })
   }
 
-  const date = new Date(item.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const date = formatDate(item.createdAt)
 
   return (
     <>
