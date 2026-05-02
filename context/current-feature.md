@@ -2,175 +2,17 @@
 
 ## Status
 
-Not Started
+Complete
 
 ## Goals
 
+<!-- Goals for the current feature -->
+
 ## Notes
 
+<!-- Additional context, constraints, or details -->
+
 ## History
-
-### 2026-04-30 — Extract Shared Action Helpers
-
-- Created `src/actions/types.ts` with shared `ActionResult<T>` type — removed 3 duplicate definitions from `items.ts`, `collections.ts`, `editor-preferences.ts` and 4 inline aliases from `ai.ts`
-- Created `src/lib/action-utils.ts` with 5 shared helpers:
-  - `requireAuth()` — discriminated union replacing 15 identical auth+null-check blocks across all 4 action files
-  - `getFirstZodError()` — unified Zod error extraction replacing 10 identical blocks; standardized the inconsistent `?? 'Invalid input'` fallback
-  - `nullableTrimmedString` — shared Zod fragment moved from `items.ts`, removed inline duplicates from `collections.ts`
-  - `checkAiRateLimit()` — replaced 4 identical 9-line rate-limit blocks in `ai.ts`; returns error string or null, fails open
-  - `extractAiStringField()` — replaced 3 identical JSON parse + field extraction blocks in `ai.ts` (`description`, `explanation`, `optimized`)
-- Updated all 4 action files (`items.ts`, `collections.ts`, `editor-preferences.ts`, `ai.ts`) to use shared helpers
-- `generateAutoTags` array extraction left separate (different shape from string field extraction)
-- Net reduction of ~104 lines of duplication
-- 13 new unit tests in `src/lib/action-utils.test.ts` covering all helpers
-- Build and all 139 tests pass
-
-### 2026-04-30 — UI Review Fixes
-
-- Fixed nested interactive elements in `ItemCard.tsx` and `ItemRow.tsx` — replaced `<span role="button">` inside `<button>` with proper non-nested elements
-- Made favorite stars always visible (removed `opacity-0` default) so keyboard/touch users can discover them
-- Added `:focus-visible` rings to all interactive `<span>` elements across card components
-- Added sidebar active link highlighting — current route gets `bg-muted` + `font-medium` styling via `usePathname`
-- Added GitHub OAuth button to Register page, matching sign-in page pattern
-- Added `aria-label="DevStash home"` to mobile logo link in `DashboardShell`
-- Fixed item type selector wrapping on mobile — switched to `flex-wrap` grid in `ItemCreateDialog`
-- Fixed drawer action bar overflow on mobile — icon-only buttons at small widths, labels shown at `sm+`
-- Added `aria-pressed` to pricing toggle buttons in `PricingSection`
-- Added `aria-label="Collection actions"` to `CollectionCard` 3-dot menu
-- Added date display to `ItemCard` below tags
-- Used full "Favorite Collections" label on desktop in `StatsCards` (abbreviation on mobile only)
-- Improved "View all collections" link — better contrast, larger touch target
-- Replaced native `<select>` with styled dropdown in `FavoritesList` sort control
-- Added unsaved changes warning dialog when closing drawer in edit mode (`ItemDrawer`)
-- Standardized all form loading spinners to `Loader2` icon across `RegisterForm`, `SignInForm`, `CollectionCreateDialog`, `CollectionEditDialog`
-- Added hero context label on mobile homepage
-- Updated footer placeholder links with descriptive `href` paths
-- Updated `ProfileStats` layout for better responsive behavior
-- Build and all 126 tests pass
-
-### 2026-04-30 — AI Prompt Optimization
-
-- Added `optimizePrompt` server action to `src/actions/ai.ts` — accepts prompt content; returns an optimized/refined version
-- Uses OpenAI Responses API with `json_object` format; expects `{"optimized": "..."}` response
-- Truncates content to 2000 chars; auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
-- Updated `src/components/items/MarkdownEditor.tsx` — added `showOptimize`, `isPro`, and `onAcceptOptimized` props
-- Optimize button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
-- Loader2 spinner while generating; Original/Optimized tabs appear after optimization is generated
-- "Use this" button accepts optimized content (saves to DB via `updateItem`); "Dismiss" returns to original view
-- Only shown for prompt type items in item drawer read view (not in edit mode or create dialog)
-- Threaded `showOptimize` and `isPro` props through `DrawerViewBody` → `MarkdownEditor`
-- Added `onAcceptOptimized` callback through `DrawerViewBody` → `ItemDrawer` — calls `updateItem` server action to persist optimized content
-- 11 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty content, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
-- Build and all 126 tests pass
-
-### 2026-04-29 — AI Explain Code
-
-- Added `explainCode` server action to `src/actions/ai.ts` — accepts code, language, type (snippet/command); returns markdown explanation (~200-300 words)
-- Uses OpenAI Responses API with `json_object` format; expects `{"explanation": "..."}` response
-- Truncates code to 2000 chars; includes language hint and type context (snippet vs terminal command)
-- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
-- Updated `src/components/items/CodeEditor.tsx` — added `showExplain` and `isPro` props
-- Explain button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
-- Loader2 spinner while generating; Code/Explain tabs appear after explanation is generated
-- Explanation rendered as markdown with `react-markdown` + `remark-gfm` using `prose prose-invert prose-sm`
-- Only shown for snippet/command types in item drawer read view (not in create/edit forms)
-- Threaded `isPro` prop through `ItemDrawer` → `DrawerViewBody` → `CodeEditor`
-- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
-- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty code, invalid type, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
-- Build and all 115 tests pass
-
-### 2026-04-29 — AI Description Generator
-
-- Added `generateDescription` server action to `src/actions/ai.ts` — accepts title, type, content, url, tags, language; returns a concise 1-2 sentence description
-- Uses OpenAI Responses API with `json_object` format; expects `{"description": "..."}` response
-- Builds context string from all available form fields; truncates content to 2000 chars
-- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
-- Created `src/components/items/GenerateDescriptionButton.tsx` — Sparkles icon ghost button matching SuggestTagsButton style; client-side title check before calling action
-- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` below the description textarea; hidden for free users (`isPro` prop gating)
-- Populates the description input field on success — user can edit/accept before saving
-- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty title, empty type, rate limit, happy path, context inclusion, truncation, unexpected format, invalid JSON, API failure, fail-open
-- Build and all 103 tests pass
-
-### 2026-04-29 — AI Auto-Tagging
-
-- Created `src/lib/openai.ts` — OpenAI client singleton with `AI_MODEL` constant (`gpt-5-nano`), lazy init with env guard
-- Created `src/actions/ai.ts` — `generateAutoTags` server action with auth check, Pro gating, Zod validation, AI rate limiting (20 req/hr per user via Upstash)
-- Uses OpenAI Responses API (`client.responses.create`) with `json_object` format; handles both `{"tags": [...]}` and `[...]` response formats
-- Truncates content to 2000 chars before API call; normalizes tags to lowercase; passes existing tags hint to avoid duplicates
-- Added `ai` rate limiter (20 requests/hour sliding window) to `src/lib/rate-limit.ts`
-- Created `src/components/items/SuggestTagsButton.tsx` — Sparkles icon ghost button, badge suggestions with accept (check) / reject (X) controls
-- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` near tags input; hidden for free users (`isPro` prop gating)
-- Threaded `isPro` prop through `DashboardShell` → `ItemDrawerContext` → `ItemDrawer` → `DrawerEditBody` / `ItemCreateDialog`
-- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
-- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, validation, rate limit, both JSON formats, truncation, existing tags hint, invalid JSON, unexpected format, API failure, fail-open
-- Build and all 91 tests pass
-
-### 2026-04-21 — Language Dropdown for Syntax Highlighting
-
-- Added language selection dropdown above content editor in both item creation dialog and edit drawer
-- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages for Monaco editor
-- Built `LanguageSelect` component using existing shadcn Select for consistency
-- Updated `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` to conditionally show language dropdown for code-enabled item types
-- Maintains backward compatibility with existing text inputs for non-code content
-- Enables real-time syntax highlighting in Monaco editor based on selected language
-
-### 2026-04-15 — Auth Pages Nav & Dashboard Logo
-
-- Added homepage `Navbar` component to `/sign-in` and `/register` pages with `pt-16` top padding for fixed navbar offset
-- Replaced dashboard top bar logo (the `S` box div) with `Package` icon from lucide-react (`h-5 w-5`), matching the homepage navbar logo
-- Build and all 61 tests pass
-
-### 2026-04-15 — UI Review Fixes
-
-- Used Playwright to visually inspect homepage and dashboard at mobile (375px), tablet (768px), and desktop (1280px)
-- **FadeIn** (`FadeIn.tsx`): sections no longer start invisible — elements in viewport stay visible, off-screen elements animate on scroll, respects `prefers-reduced-motion`
-- **Mobile nav** (`Navbar.tsx`): added hamburger menu with Features/Pricing links and Sign In/Get Started buttons for mobile (<md)
-- **Mobile hero** (`page.tsx`): hid chaos-icons + arrow on mobile, show only compact dashboard preview; full visual on md+
-- **CTA gradient**: changed endpoint from `slate-300` to `blue-300` across page.tsx, Navbar.tsx, PricingSection.tsx for better white text contrast
-- **Sidebar** (`Sidebar.tsx`): capitalized type names via `capitalize` class; empty "Favorites" heading hidden when no favorited collections
-- **Stats cards** (`StatsCards.tsx`): 4-col grid at `md` breakpoint (was `lg`); shortened "Favorite Collections" to "Fav. Collections"
-- **Collection cards** (`CollectionCard.tsx`): fixed "1 items" → "1 item" grammar; equalized card heights with `h-full flex flex-col` + `mt-auto`; conditional description render
-- **Favorites mobile** (`FavoritesList.tsx`): type badge replaced with small colored icon on mobile to reduce title truncation
-- **Mobile brand** (`DashboardShell.tsx`): show "S" badge on all sizes instead of "DS" text on mobile
-- Build passes
-
-### 2026-04-15 — Mobile Top Bar
-
-- Decluttered dashboard top bar for small screens (< 640px) in `DashboardShell.tsx`
-- Logo: "S" icon + "DevStash" hidden on mobile, replaced with compact "DS" text
-- Search: full search bar hidden on mobile, replaced with Search icon button (opens same ⌘K command palette)
-- Create: "New Collection" and "New Item" buttons hidden on mobile, replaced with single "+" icon button opening a DropdownMenu with both options
-- Favorites star kept in top bar at all sizes
-- Desktop layout (≥ 640px) unchanged
-- Used existing shadcn DropdownMenu (base-ui); `render` prop on trigger (no `asChild` in base-ui)
-- Build and all 61 tests pass
-
-### 2026-04-15 — Homepage
-
-- Converted `prototypes/homepage/` HTML mockup into a real Next.js page at `/` (root route)
-- Created 5 components in `src/components/homepage/`: Navbar (client, scroll-based border), ChaosIcons (client, 8 floating icons with rAF animation, mouse repulsion, wall bounce), DashboardPreview (server, static mockup window), PricingSection (client, monthly/yearly toggle), FadeIn (client, IntersectionObserver wrapper)
-- Hero section with "chaos to order" concept: animated icons → pulsing arrow → dashboard preview
-- Features grid (6 cards with colored icons), AI section with code editor mockup and AI-generated tag pills, pricing with Free/Pro cards
-- CTA section and 4-column footer with Product/Resources/Company links
-- All buttons/links wired: Sign In → `/sign-in`, Get Started → `/register`, nav anchors → `#features`/`#pricing`
-- Responsive: 3-col → 1-col grids, stacked hero visual on mobile, arrow rotates 90°
-- Blue-to-slate gradient theme (`blue-600 → blue-400 → slate-300`) for buttons and gradient text
-- Added `scroll-smooth` to `<html>` in layout.tsx
-- Used `buttonVariants` for Link-based buttons (base-ui Button has no `asChild`)
-- Added feature spec at `context/features/homepage-spec.md`
-- Build and all 61 tests pass
-
-### 2026-04-14 — Homepage Mockup
-
-- Created standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
-- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
-- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview with topbar and content lines (right)
-- Chaos icons animated with requestAnimationFrame: drift, bounce off walls, gentle mouse cursor repulsion
-- Fixed navbar with scroll-based opacity, gradient headline, CTA buttons
-- Features grid (6 cards), AI section with Pro badge and code editor mockup, pricing with monthly/yearly toggle, CTA and footer
-- Scroll-triggered fade-in animations via IntersectionObserver
-- Responsive: vertical stack on mobile, single column grids, arrow rotates 90°
-- Added feature spec at `context/features/homepage-mockup-spec.md`
 
 ### 2026-03-27 — Initial Next.js & Tailwind Setup
 
@@ -541,6 +383,26 @@ Not Started
 - Pure refactor, no behavior changes
 - Build and all 28 tests pass
 
+### 2026-04-10 — Code Scanner Quick Wins 2
+
+- Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
+- Extracted `Field` component to `src/components/items/ItemFormField.tsx`; removed duplicates from `ItemDrawer.tsx` and `ItemCreateDialog.tsx`
+- Moved `capitalize` from `ItemDrawer.tsx` to `src/lib/utils.ts`
+- Replaced `window.location.href = '/profile'` with Next.js `<Link>` in `Sidebar.tsx`
+- Added `.max(50)` on tag strings and `.max(20)` on tag arrays in all 3 Zod schemas in `src/actions/items.ts`
+- Sanitized `Content-Disposition` filename by stripping `"` and `\` in download route
+- Normalized email to `.toLowerCase().trim()` at register and credentials authorize
+- Build and all 28 tests pass
+
+### 2026-04-10 — Collection Create
+
+- Added `createCollection(userId, input)` to `src/lib/db/collections.ts` — Prisma create with select, returns `CollectionBasic`
+- Created `src/actions/collections.ts` with `createCollection` server action — Zod schema (name required, max 100, trimmed; description nullable), auth check, `{ success, data, error }` contract
+- Created `src/components/dashboard/CollectionCreateDialog.tsx` — shadcn Dialog with name + description fields, pending state, toast on success/error, `router.refresh()` after create
+- Wired "New Collection" button in `DashboardShell.tsx` to open the dialog
+- Added 6 Vitest cases to `src/actions/collections.test.ts`: unauthorized, empty name, name too long, trim + null description, happy path with description, query throw
+- Build and all 34 tests pass
+
 ### 2026-04-11 — Item-Collection Assignment
 
 - Migrated schema from single `Item.collectionId` FK to many-to-many `CollectionItem` join table (follows `ItemTag` pattern with `@@id([collectionId, itemId])`)
@@ -567,26 +429,6 @@ Not Started
 - Added `CollectionItemWithMeta` type and `getItemsByCollection(userId, collectionId)` to `src/lib/db/items.ts` — includes `typeName`, `fileName`, `fileSize` for type-aware rendering
 - Updated `CollectionsSection.tsx` — collection cards now wrapped in `<Link>` to `/collections/[id]`
 - Sidebar "View all collections" and individual collection links already pointed to correct routes
-- Build and all 34 tests pass
-
-### 2026-04-10 — Code Scanner Quick Wins 2
-
-- Extracted `formatFileSize` to `src/lib/utils.ts`; removed duplicates from `FileRow.tsx`, `FileUpload.tsx`, `ItemDrawer.tsx`
-- Extracted `Field` component to `src/components/items/ItemFormField.tsx`; removed duplicates from `ItemDrawer.tsx` and `ItemCreateDialog.tsx`
-- Moved `capitalize` from `ItemDrawer.tsx` to `src/lib/utils.ts`
-- Replaced `window.location.href = '/profile'` with Next.js `<Link>` in `Sidebar.tsx`
-- Added `.max(50)` on tag strings and `.max(20)` on tag arrays in all 3 Zod schemas in `src/actions/items.ts`
-- Sanitized `Content-Disposition` filename by stripping `"` and `\` in download route
-- Normalized email to `.toLowerCase().trim()` at register and credentials authorize
-- Build and all 28 tests pass
-
-### 2026-04-10 — Collection Create
-
-- Added `createCollection(userId, input)` to `src/lib/db/collections.ts` — Prisma create with select, returns `CollectionBasic`
-- Created `src/actions/collections.ts` with `createCollection` server action — Zod schema (name required, max 100, trimmed; description nullable), auth check, `{ success, data, error }` contract
-- Created `src/components/dashboard/CollectionCreateDialog.tsx` — shadcn Dialog with name + description fields, pending state, toast on success/error, `router.refresh()` after create
-- Wired "New Collection" button in `DashboardShell.tsx` to open the dialog
-- Added 6 Vitest cases to `src/actions/collections.test.ts`: unauthorized, empty name, name too long, trim + null description, happy path with description, query throw
 - Build and all 34 tests pass
 
 ### 2026-04-13 — Collection Actions (Edit, Delete, Favorite)
@@ -652,6 +494,18 @@ Not Started
 - Installed shadcn `select` and `switch` components
 - Build and all 49 tests pass
 
+### 2026-04-14 — Homepage Mockup
+
+- Created standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
+- Dark theme with accent colors per item type (Snippet blue, Prompt amber, Command cyan, Note green, File slate, Image pink, URL indigo)
+- Hero section with "chaos to order" concept: floating animated icons (left) → pulsing arrow (center) → dashboard preview with topbar and content lines (right)
+- Chaos icons animated with requestAnimationFrame: drift, bounce off walls, gentle mouse cursor repulsion
+- Fixed navbar with scroll-based opacity, gradient headline, CTA buttons
+- Features grid (6 cards), AI section with Pro badge and code editor mockup, pricing with monthly/yearly toggle, CTA and footer
+- Scroll-triggered fade-in animations via IntersectionObserver
+- Responsive: vertical stack on mobile, single column grids, arrow rotates 90°
+- Added feature spec at `context/features/homepage-mockup-spec.md`
+
 ### 2026-04-14 — Favorites Page
 
 - Added `getFavoriteItems(userId)` to `src/lib/db/items.ts` — fetches favorited items with type name/icon/color, sorted by `updatedAt` desc
@@ -706,6 +560,52 @@ Not Started
 - Added 4 Vitest tests for `toggleItemPin`: unauthorized, not found, success, query throw
 - Build and all 61 tests pass
 
+### 2026-04-15 — Mobile Top Bar
+
+- Decluttered dashboard top bar for small screens (< 640px) in `DashboardShell.tsx`
+- Logo: "S" icon + "DevStash" hidden on mobile, replaced with compact "DS" text
+- Search: full search bar hidden on mobile, replaced with Search icon button (opens same ⌘K command palette)
+- Create: "New Collection" and "New Item" buttons hidden on mobile, replaced with single "+" icon button opening a DropdownMenu with both options
+- Favorites star kept in top bar at all sizes
+- Desktop layout (≥ 640px) unchanged
+- Used existing shadcn DropdownMenu (base-ui); `render` prop on trigger (no `asChild` in base-ui)
+- Build and all 61 tests pass
+
+### 2026-04-15 — Homepage
+
+- Converted `prototypes/homepage/` HTML mockup into a real Next.js page at `/` (root route)
+- Created 5 components in `src/components/homepage/`: Navbar (client, scroll-based border), ChaosIcons (client, 8 floating icons with rAF animation, mouse repulsion, wall bounce), DashboardPreview (server, static mockup window), PricingSection (client, monthly/yearly toggle), FadeIn (client, IntersectionObserver wrapper)
+- Hero section with "chaos to order" concept: animated icons → pulsing arrow → dashboard preview
+- Features grid (6 cards with colored icons), AI section with code editor mockup and AI-generated tag pills, pricing with Free/Pro cards
+- CTA section and 4-column footer with Product/Resources/Company links
+- All buttons/links wired: Sign In → `/sign-in`, Get Started → `/register`, nav anchors → `#features`/`#pricing`
+- Responsive: 3-col → 1-col grids, stacked hero visual on mobile, arrow rotates 90°
+- Blue-to-slate gradient theme (`blue-600 → blue-400 → slate-300`) for buttons and gradient text
+- Added `scroll-smooth` to `<html>` in layout.tsx
+- Used `buttonVariants` for Link-based buttons (base-ui Button has no `asChild`)
+- Added feature spec at `context/features/homepage-spec.md`
+- Build and all 61 tests pass
+
+### 2026-04-15 — UI Review Fixes
+
+- Used Playwright to visually inspect homepage and dashboard at mobile (375px), tablet (768px), and desktop (1280px)
+- **FadeIn** (`FadeIn.tsx`): sections no longer start invisible — elements in viewport stay visible, off-screen elements animate on scroll, respects `prefers-reduced-motion`
+- **Mobile nav** (`Navbar.tsx`): added hamburger menu with Features/Pricing links and Sign In/Get Started buttons for mobile (<md)
+- **Mobile hero** (`page.tsx`): hid chaos-icons + arrow on mobile, show only compact dashboard preview; full visual on md+
+- **CTA gradient**: changed endpoint from `slate-300` to `blue-300` across page.tsx, Navbar.tsx, PricingSection.tsx for better white text contrast
+- **Sidebar** (`Sidebar.tsx`): capitalized type names via `capitalize` class; empty "Favorites" heading hidden when no favorited collections
+- **Stats cards** (`StatsCards.tsx`): 4-col grid at `md` breakpoint (was `lg`); shortened "Favorite Collections" to "Fav. Collections"
+- **Collection cards** (`CollectionCard.tsx`): fixed "1 items" → "1 item" grammar; equalized card heights with `h-full flex flex-col` + `mt-auto`; conditional description render
+- **Favorites mobile** (`FavoritesList.tsx`): type badge replaced with small colored icon on mobile to reduce title truncation
+- **Mobile brand** (`DashboardShell.tsx`): show "S" badge on all sizes instead of "DS" text on mobile
+- Build passes
+
+### 2026-04-15 — Auth Pages Nav & Dashboard Logo
+
+- Added homepage `Navbar` component to `/sign-in` and `/register` pages with `pt-16` top padding for fixed navbar offset
+- Replaced dashboard top bar logo (the `S` box div) with `Package` icon from lucide-react (`h-5 w-5`), matching the homepage navbar logo
+- Build and all 61 tests pass
+
 ### 2026-04-16 — Stripe Integration Phase 1 (Core Infrastructure)
 
 - Installed `stripe` package
@@ -734,3 +634,122 @@ Not Started
 - Added `isPro` to `SidebarUser` interface
 - 5 new unit tests: item limit on createItem, file-Pro-only on createFileItem, image-allowed-for-free, item limit on createFileItem, collection limit on createCollection
 - Build and all 79 tests pass
+
+### 2026-04-21 — Language Dropdown for Syntax Highlighting
+
+- Added language selection dropdown above content editor in both item creation dialog and edit drawer
+- Created `PROGRAMMING_LANGUAGES` constant with 40+ supported languages for Monaco editor
+- Built `LanguageSelect` component using existing shadcn Select for consistency
+- Updated `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` to conditionally show language dropdown for code-enabled item types
+- Maintains backward compatibility with existing text inputs for non-code content
+- Enables real-time syntax highlighting in Monaco editor based on selected language
+
+### 2026-04-29 — AI Auto-Tagging
+
+- Created `src/lib/openai.ts` — OpenAI client singleton with `AI_MODEL` constant (`gpt-5-nano`), lazy init with env guard
+- Created `src/actions/ai.ts` — `generateAutoTags` server action with auth check, Pro gating, Zod validation, AI rate limiting (20 req/hr per user via Upstash)
+- Uses OpenAI Responses API (`client.responses.create`) with `json_object` format; handles both `{"tags": [...]}` and `[...]` response formats
+- Truncates content to 2000 chars before API call; normalizes tags to lowercase; passes existing tags hint to avoid duplicates
+- Added `ai` rate limiter (20 requests/hour sliding window) to `src/lib/rate-limit.ts`
+- Created `src/components/items/SuggestTagsButton.tsx` — Sparkles icon ghost button, badge suggestions with accept (check) / reject (X) controls
+- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` near tags input; hidden for free users (`isPro` prop gating)
+- Threaded `isPro` prop through `DashboardShell` → `ItemDrawerContext` → `ItemDrawer` → `DrawerEditBody` / `ItemCreateDialog`
+- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, validation, rate limit, both JSON formats, truncation, existing tags hint, invalid JSON, unexpected format, API failure, fail-open
+- Build and all 91 tests pass
+
+### 2026-04-29 — AI Description Generator
+
+- Added `generateDescription` server action to `src/actions/ai.ts` — accepts title, type, content, url, tags, language; returns a concise 1-2 sentence description
+- Uses OpenAI Responses API with `json_object` format; expects `{"description": "..."}` response
+- Builds context string from all available form fields; truncates content to 2000 chars
+- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Created `src/components/items/GenerateDescriptionButton.tsx` — Sparkles icon ghost button matching SuggestTagsButton style; client-side title check before calling action
+- Integrated into `ItemCreateDialog.tsx` and `DrawerEditBody.tsx` below the description textarea; hidden for free users (`isPro` prop gating)
+- Populates the description input field on success — user can edit/accept before saving
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty title, empty type, rate limit, happy path, context inclusion, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 103 tests pass
+
+### 2026-04-29 — AI Explain Code
+
+- Added `explainCode` server action to `src/actions/ai.ts` — accepts code, language, type (snippet/command); returns markdown explanation (~200-300 words)
+- Uses OpenAI Responses API with `json_object` format; expects `{"explanation": "..."}` response
+- Truncates code to 2000 chars; includes language hint and type context (snippet vs terminal command)
+- Auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Updated `src/components/items/CodeEditor.tsx` — added `showExplain` and `isPro` props
+- Explain button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
+- Loader2 spinner while generating; Code/Explain tabs appear after explanation is generated
+- Explanation rendered as markdown with `react-markdown` + `remark-gfm` using `prose prose-invert prose-sm`
+- Only shown for snippet/command types in item drawer read view (not in create/edit forms)
+- Threaded `isPro` prop through `ItemDrawer` → `DrawerViewBody` → `CodeEditor`
+- Error handling via sonner toast for Pro gating, rate limits, and AI service errors
+- 12 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty code, invalid type, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 115 tests pass
+
+### 2026-04-30 — AI Prompt Optimization
+
+- Added `optimizePrompt` server action to `src/actions/ai.ts` — accepts prompt content; returns an optimized/refined version
+- Uses OpenAI Responses API with `json_object` format; expects `{"optimized": "..."}` response
+- Truncates content to 2000 chars; auth check, Pro gating, AI rate limiting (shared `ai` limiter at 20 req/hr per user)
+- Updated `src/components/items/MarkdownEditor.tsx` — added `showOptimize`, `isPro`, and `onAcceptOptimized` props
+- Optimize button in editor header: Sparkles icon for Pro users, Crown icon + tooltip for free users
+- Loader2 spinner while generating; Original/Optimized tabs appear after optimization is generated
+- "Use this" button accepts optimized content (saves to DB via `updateItem`); "Dismiss" returns to original view
+- Only shown for prompt type items in item drawer read view (not in edit mode or create dialog)
+- Threaded `showOptimize` and `isPro` props through `DrawerViewBody` → `MarkdownEditor`
+- Added `onAcceptOptimized` callback through `DrawerViewBody` → `ItemDrawer` — calls `updateItem` server action to persist optimized content
+- 11 unit tests in `src/actions/ai.test.ts` covering auth, Pro gate, empty content, rate limit, happy path, prompt context, truncation, unexpected format, invalid JSON, API failure, fail-open
+- Build and all 126 tests pass
+
+### 2026-04-30 — UI Review Fixes
+
+- Fixed nested interactive elements in `ItemCard.tsx` and `ItemRow.tsx` — replaced `<span role="button">` inside `<button>` with proper non-nested elements
+- Made favorite stars always visible (removed `opacity-0` default) so keyboard/touch users can discover them
+- Added `:focus-visible` rings to all interactive `<span>` elements across card components
+- Added sidebar active link highlighting — current route gets `bg-muted` + `font-medium` styling via `usePathname`
+- Added GitHub OAuth button to Register page, matching sign-in page pattern
+- Added `aria-label="DevStash home"` to mobile logo link in `DashboardShell`
+- Fixed item type selector wrapping on mobile — switched to `flex-wrap` grid in `ItemCreateDialog`
+- Fixed drawer action bar overflow on mobile — icon-only buttons at small widths, labels shown at `sm+`
+- Added `aria-pressed` to pricing toggle buttons in `PricingSection`
+- Added `aria-label="Collection actions"` to `CollectionCard` 3-dot menu
+- Added date display to `ItemCard` below tags
+- Used full "Favorite Collections" label on desktop in `StatsCards` (abbreviation on mobile only)
+- Improved "View all collections" link — better contrast, larger touch target
+- Replaced native `<select>` with styled dropdown in `FavoritesList` sort control
+- Added unsaved changes warning dialog when closing drawer in edit mode (`ItemDrawer`)
+- Standardized all form loading spinners to `Loader2` icon across `RegisterForm`, `SignInForm`, `CollectionCreateDialog`, `CollectionEditDialog`
+- Added hero context label on mobile homepage
+- Updated footer placeholder links with descriptive `href` paths
+- Updated `ProfileStats` layout for better responsive behavior
+- Build and all 126 tests pass
+
+### 2026-04-30 — Extract Shared Action Helpers
+
+- Created `src/actions/types.ts` with shared `ActionResult<T>` type — removed 3 duplicate definitions from `items.ts`, `collections.ts`, `editor-preferences.ts` and 4 inline aliases from `ai.ts`
+- Created `src/lib/action-utils.ts` with 5 shared helpers:
+  - `requireAuth()` — discriminated union replacing 15 identical auth+null-check blocks across all 4 action files
+  - `getFirstZodError()` — unified Zod error extraction replacing 10 identical blocks; standardized the inconsistent `?? 'Invalid input'` fallback
+  - `nullableTrimmedString` — shared Zod fragment moved from `items.ts`, removed inline duplicates from `collections.ts`
+  - `checkAiRateLimit()` — replaced 4 identical 9-line rate-limit blocks in `ai.ts`; returns error string or null, fails open
+  - `extractAiStringField()` — replaced 3 identical JSON parse + field extraction blocks in `ai.ts` (`description`, `explanation`, `optimized`)
+- Updated all 4 action files (`items.ts`, `collections.ts`, `editor-preferences.ts`, `ai.ts`) to use shared helpers
+- `generateAutoTags` array extraction left separate (different shape from string field extraction)
+- Net reduction of ~104 lines of duplication
+- 13 new unit tests in `src/lib/action-utils.test.ts` covering all helpers
+- Build and all 139 tests pass
+
+### 2026-05-02 — Extract Duplicated Component Patterns
+
+- Created `src/hooks/useToggleFavoriteItem.ts` — extracted identical state + `useEffect` sync + `useTransition` + `toggleItemFavorite` call from `ItemCard`, `ItemRow`, `ImageCard`, `FileRow`
+- Created `src/hooks/useToggleCollectionFavorite.ts` — same pattern extracted from `CollectionCard` and `CollectionActions`
+- Created `src/hooks/useStripeCheckout.ts` — extracted identical `fetch('/api/stripe/checkout')` + redirect + error handling from `BillingSection`, `UpgradePrompt`, `UpgradeContent`
+- Created `src/components/dashboard/CollectionFormDialog.tsx` — consolidated `CollectionCreateDialog` (110 lines) and `CollectionEditDialog` (114 lines) into one component with `initialName`/`initialDescription`/`onSubmit` props; deleted both originals
+- Created `src/components/auth/AuthCard.tsx` — shared card header with logo badge, title, description used by all 4 auth forms
+- Created `src/components/auth/AuthDivider.tsx` — shared "or" divider from `SignInForm` and `RegisterForm`
+- Created `src/components/auth/GitHubIcon.tsx` — shared GitHub SVG icon from `SignInForm` and `RegisterForm`
+- Added `formatDate` and `formatShortDate` to `src/lib/utils.ts` — extracted from `FavoritesList`, `DrawerViewBody`, `DrawerEditBody`, `ItemCard`, `ItemRow`, `FileRow`
+- Imported type-set constants (`CONTENT_TYPES`, `LANGUAGE_TYPES`, `URL_TYPES`, `FILE_TYPES`) from `drawer-shared.tsx` in `ItemCreateDialog` — removed local duplicates; renamed `FILE_VIEW_TYPES` → `FILE_TYPES`
+- Added wider horizontal padding to dashboard main content area (`lg:px-24 xl:px-32`)
+- Net reduction of ~196 lines across 28 files
+- Build and all 139 tests pass
