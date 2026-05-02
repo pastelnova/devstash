@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevStash
+
+A developer knowledge hub for snippets, commands, prompts, notes, files, images, links and custom types.
+
+**Live Demo:** https://devstash.giorgiana.li
+
+![Dashboard](context/screenshots/dashboard-ui-main.png)
+
+## Features
+
+- **7 item types** — Snippets, Prompts, Commands, Notes, Files, Images, URLs
+- **Collections** — group any mix of items into named collections
+- **Full-text search** — command palette (`Cmd+K`) across all content
+- **Monaco code editor** — syntax highlighting, customizable preferences
+- **Markdown editor** — write/preview with GFM support
+- **File & image uploads** — drag-and-drop with Cloudflare R2 storage
+- **Favorites, pins, tags** — organize and surface what matters
+- **AI features (Pro)** — auto-tagging, descriptions, code explanations, prompt optimization
+- **Stripe billing** — free tier (50 items, 3 collections) and Pro plan
+
+![Item Drawer](context/screenshots/dashboard-ui-drawer.png)
+
+## Tech Stack
+
+| Category | Choice |
+|----------|--------|
+| Framework | Next.js 15 (App Router, React 19) |
+| Language | TypeScript (strict) |
+| Database | Neon PostgreSQL + Prisma ORM |
+| Auth | NextAuth v5 (email/password + GitHub OAuth) |
+| Storage | Cloudflare R2 |
+| UI | Tailwind CSS v4 + shadcn/ui |
+| AI | OpenAI API |
+| Payments | Stripe |
+| Testing | Vitest |
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+
+# Run database migrations
+npm run db:migrate
+
+# Seed demo data
+npm run db:seed
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev            # Start dev server
+npm run build          # Production build
+npm run lint           # ESLint
+npm run test:run       # Run tests
+npm run test:coverage  # Tests with coverage
+npm run db:migrate     # Run Prisma migrations
+npm run db:seed        # Seed demo data
+npm run db:studio      # Open Prisma Studio
+```
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
