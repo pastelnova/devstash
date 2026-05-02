@@ -34,7 +34,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
   await resend.emails.send({
-    from: "DevStash <onboarding@resend.dev>",
+    from: "DevStash <noreply@devstash.giorgiana.li>",
     to: email,
     subject: "Reset your DevStash password",
     html: `

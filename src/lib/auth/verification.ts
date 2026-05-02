@@ -33,7 +33,7 @@ export async function sendVerificationEmail(email: string, token: string) {
   const verifyUrl = `${baseUrl}/verify-email?token=${token}`
 
   await resend.emails.send({
-    from: "DevStash <onboarding@resend.dev>",
+    from: "DevStash <noreply@devstash.giorgiana.li>",
     to: email,
     subject: "Verify your DevStash account",
     html: `
